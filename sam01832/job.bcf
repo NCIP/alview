@@ -1,0 +1,20 @@
+
+function f
+{
+echo "\"c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\cl.exe\" -c -I. -D_CURSES_LIB=2 -D_MSC_VER -I. -Iwin32 -o $1.obj  bcftools/$1.c "
+
+}
+
+f bcf
+f bcf2qcall
+f bcfutils
+f call1
+f em
+f fet
+f index
+f kfunc
+f kmin
+f main
+f mut
+f prob1
+f vcf

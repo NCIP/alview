@@ -1,0 +1,16 @@
+
+Technical notes ...
+
+Windows ...
+You might want to use windbtp spy++ and procexplored to debug on windows
+
+windbg is command line debugger, it's in windows kit directory , example 
+"c:/Program Files (x86)/Windows Kits/8.0/Debuggers/x64/windbg.exe"  alview.exe 
+
+"winwacky" stuff is wraps from winapi (win32)  to posix forms 
+
+
+Linux ..
+valgrind and gdb are tools used to debug alview
+
+

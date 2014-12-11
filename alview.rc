@@ -1,0 +1,116 @@
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "afxres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+// English (U.S.) resources
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+BMP_LOGO          BITMAP                 "logo.bmp"
+// logo.bmp: PC bitmap, Windows 98/2000 and newer format, 257 x 167 x 32
+
+ID_Menu MENU DISCARDABLE 
+{ 
+    POPUP "File" 
+    { 
+        MENUITEM "Open", ID_Open 
+        MENUITEM "Exit", ID_Exit 
+    } 
+//     POPUP "Color" { MENUITEM "Red", ID_Red MENUITEM "Green", ID_Green MENUITEM "Blue", ID_Blue } 
+}
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+END
+
+// Dialog
+// rpf original IDD_DIALOG1 DIALOGEX 0, 0, 316, 185
+IDD_DIALOG1 DIALOGEX 0, 0, 616, 485
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_VSCROLL | WS_HSCROLL | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Alview - bam file alignment viewer. "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Click to Open Bam File",IDC_BUTTON15,7,5,110,16
+    LTEXT           "Alview - bam file read alignments viewer.  Use File to select a bam file to view.",IDC_STATIC1,124,8,408,8
+
+    LTEXT           "Position:",IDC_STATIC2, 7  ,26,100,8
+    EDITTEXT        IDC_EDIT1,               38 ,23,140,16,ES_AUTOHSCROLL
+    PUSHBUTTON      "Submit",IDC_BUTTON1,    180,23,40,16
+    LTEXT           "Height:",IDC_STATIC3,   230,26,40,16
+    EDITTEXT        IDC_EDIT2,               258,23,34,16,ES_AUTOHSCROLL
+    LTEXT           "Width:",IDC_STATIC4,    310,26,40,16
+    EDITTEXT        IDC_EDIT3,               338,23,34,16,ES_AUTOHSCROLL
+
+    PUSHBUTTON      "<page",IDC_BUTTON2,7,40,40,16
+    PUSHBUTTON      "page>",IDC_BUTTON3,50,40,40,16
+    PUSHBUTTON      "<10",IDC_BUTTON4,93,40,40,16
+    PUSHBUTTON      "10>",IDC_BUTTON5,133,40,40,16
+    PUSHBUTTON      "<100",IDC_BUTTON6,176,40,40,16
+    PUSHBUTTON      "100>",IDC_BUTTON7,219,40,40,16
+    PUSHBUTTON      "<1000",IDC_BUTTON8,262,40,40,16
+    PUSHBUTTON      "1000>",IDC_BUTTON9,305,40,40,16
+    PUSHBUTTON      "<10000",IDC_BUTTON10,348,40,40,16
+    PUSHBUTTON      "10000>",IDC_BUTTON11,391,40,40,16
+    PUSHBUTTON      "zoom in",IDC_BUTTON12,7,60,40,16
+    PUSHBUTTON      "ZOOM OUT",IDC_BUTTON13,50,60,54,16
+    PUSHBUTTON      "base",IDC_BUTTON14,108,60,40,16
+
+    CONTROL "Owner Draw",STC_BMP,"Button",BS_OWNERDRAW | WS_TABSTOP, 7,80,257,167
+
+END
+
+
+// DESIGNINFO
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 598
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 468
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef APSTUDIO_INVOKED
+// Generated from the TEXTINCLUDE 3 resource.
+#endif    // not APSTUDIO_INVOKED
+

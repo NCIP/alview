@@ -1,0 +1,136 @@
+CC=			"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\amd64\cl.exe"
+AR=			"c:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\lib.exe"
+LIBEXE=			"c:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\lib.exe"
+LINKEXE=		"c:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe"
+
+#  c:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/bin/x86_amd64/link.exe
+#lib /out:my.lib file1.obj
+
+CFLAGS=		-I. /MD
+
+#DFLAGS=		-D_USE_KNETFILE -D_CURSES_LIB=2 -D_MSC_VER 
+#DFLAGS=		-D_USE_KNETFILE -D_CURSES_LIB=2 -D_MSC_VER  -D_WIN32
+# rpf knet does not work
+
+DFLAGS=		 -D_CURSES_LIB=2 -D_MSC_VER  -D_WIN32
+ 
+#KNETFILE_O=	knetfile.obj
+KNETFILE_O=	
+
+LOBJS=		bgzf.obj kstring.obj bam_aux.obj bam.obj bam_import.obj sam.obj bam_index.obj	\
+			bam_pileup.obj bam_lpileup.obj bam_md.obj razf.obj faidx.obj \
+			$(KNETFILE_O) bam_sort.obj sam_header.obj bam_reheader.obj kprobaln.obj bedidx.obj rpfwin.obj 
+
+AOBJS=		bam_tview.obj bam_plcmd.obj sam_view.obj \
+			bam_rmdup.obj bam_rmdupse.obj bam_mate.obj bam_stat.obj bam_color.obj	\
+			bamtk.obj kaln.obj bam2bcf.obj bam2bcf_indel.obj errmod.obj sample.obj \
+			cut_target.obj phase.obj bam_cat.obj bam2depth.obj
+
+BCFOBJS=	./bcf.obj ./fet.obj ./bcf2qcall.obj ./bcfutils.obj \
+			./call1.obj ./index.obj ./kfunc.obj ./em.obj \
+			./kmin.obj ./prob1.obj ./vcf.obj ./mut.obj
+
+PROG=		samtools.exe bcftools.exe
+INCLUDES=	-I. -Iwin32
+SUBDIRS=	.
+LIBPATH=
+
+.SUFFIXES:.c .obj
+
+.c.obj:
+		$(CC) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $< -o $@
+
+all:$(PROG)
+
+.PHONY:all lib clean cleanlocal
+.PHONY:all-recur lib-recur clean-recur cleanlocal-recur install-recur
+
+lib:libbam.a
+
+#finneyr@NCI-01874532 /cygdrive/c/rich/pdcurses64/PDCurses-3.4/win64
+
+samtools.exe:$(AOBJS) libbam.a $(BCFOBJS)
+		$(CC) -o samtools.exe $(AOBJS) $(BCFOBJS) $(LIBPATH) ../src/zlib/zlib.lib \
+ ../pdcurses64/PDCurses-3.4/win64/panel.lib  \
+ ../pdcurses64/PDCurses-3.4/win64/pdcurses.lib  \
+ ../samtools-0.1.18/my.lib \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/User32.Lib" \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/Gdi32.Lib" \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/AdvAPI32.Lib" \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/shell32.lib" \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/ComDlg32.Lib" \
+ "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/WS2_32.Lib"
+
+
+
+#./Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/ComDlg32.Lib
+
+
+#/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib
+# "c:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/lib/comsupp.lib" "c:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/lib/oldnames.lib" 
+#"c:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/lib/msvcrt.lib"
+
+
+
+#"c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/WS2_32.Lib" "c:/wxWidgets-3.0.0/lib/vc_lib/wxmsw30ud_core.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/arm/mbnapi_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/arm/mfuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/gpmuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/mbnapi_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/mciole32.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/mfuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/vds_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/vss_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/wbemuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/wmcodecdspuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/gpmuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/mbnapi_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/mciole32.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/mfuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/vds_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/vss_uuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/wbemuuid.lib" "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/wmcodecdspuuid.lib" 
+
+#		$(LIBEXE) $(CFLAGS) -o $@ $(AOBJS) $(BCFOBJS) $(LIBPATH) -lm -L. -lbam -Lwin32 -lz -lcurses -lws2_32
+
+
+#bcftools.exe:$(BCFOBJS) bcftools/main.obj kstring.obj bgzf.obj knetfile.obj bedidx.obj
+#   echo "skip bcftools"
+#-lm -Lwin32 -lz -lws2_32
+
+bcftools.exe:$(BCFOBJS) bcftools/main.obj kstring.obj bgzf.obj knetfile.obj bedidx.obj
+		$(CC) $(CFLAGS) -o $@ $(BCFOBJS) bcftools/main.obj kstring.obj bgzf.obj knetfile.obj bedidx.obj 
+
+libbam.a:$(LOBJS)
+		$(AR) /out:my.lib $(LOBJS) $(BCFOBJS)
+# rpf linux		$(AR) -cru $@ $(LOBJS)
+
+razip.obj:razf.h
+bam.obj:bam.h razf.h bam_endian.h kstring.h sam_header.h
+sam.obj:sam.h bam.h
+bam_import.obj:bam.h kseq.h khash.h razf.h
+bam_pileup.obj:bam.h razf.h ksort.h
+bam_plcmd.obj:bam.h faidx.h bcftools/bcf.h bam2bcf.h
+bam_index.obj:bam.h khash.h ksort.h razf.h bam_endian.h
+bam_lpileup.obj:bam.h ksort.h
+bam_tview.obj:bam.h faidx.h
+bam_sort.obj:bam.h ksort.h razf.h
+bam_md.obj:bam.h faidx.h
+sam_header.obj:sam_header.h khash.h
+bcf.obj:bcftools/bcf.h
+bam2bcf.obj:bam2bcf.h errmod.h bcftools/bcf.h
+bam2bcf_indel.obj:bam2bcf.h
+errmod.obj:errmod.h
+
+faidx.obj:faidx.h razf.h khash.h
+faidx_main.obj:faidx.h razf.h
+
+clean:
+		del -fr gmon.out *.obj a.out *.exe *.dSYM razip bgzip $(PROG) *~ *.a *.so.* *.so *.dylib
+
+
+#../gdbuild/bin/libgd_a.lib
+#../samtools-0.1.18/my.lib
+#../wincurses/win32a/panel.lib
+#../wincurses/win32a/pdcurses.lib
+
+#c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/WS2_32.Lib
+#c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64/WS2_32.Lib
+#c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x64/WS2_32.Lib
+#c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86/WS2_32.Lib
+#c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64/WS2_32.Lib
+#c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/WS2_32.Lib
+
+#-rw-r--r-- 1 finneyr Domain Users   320262 Aug 21  2013 WS2_32.Lib
+#-rw-r--r-- 1 finneyr Domain Users   429406 Aug 21  2013 workspaceax.lib
+#-rw-r--r-- 1 finneyr Domain Users   121314 Aug 21  2013 wuguid.lib
+#drwxr-xr-x 1 finneyr Domain Users        0 Feb 10 12:42 ..
+#drwxr-xr-x 1 finneyr Domain Users        0 Feb 10 12:42 .
+#
+#finneyr@NCI-01874532 /cygdrive/c/rich/samtools-0.1.18
+#$ ls -ltra "c:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86/" | grep
+
+

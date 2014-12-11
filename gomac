@@ -1,0 +1,17 @@
+export SAMD=/Users/finneyr/samtools-0.1.18/
+clang -framework Cocoa -mmacosx-version-min=10.5 -x objective-c -DMAC=1 -DUNIX=1 -UGTK -DNATIVE=1 -I${SAMD} -o alvmac alvmac.m  -L${SAMD} -lbam -lm -lz 
+#-lobjc 
+
+#ld -framework Cocoa  -o alvmac alvmac.o alviewcore.o misc.o -L${SAMD} -lbam -lm -lz -lobjc 
+#works gcc -framework Cocoa -x objective-c -o MinimalistCocoaApp  MinimalistCocoaApp.m  
+#clang -x c -c -DUNIX=1 -UGTK -DNATIVE=1 -I${SAMD} -o alviewcore.o alviewcore.cpp
+#ld -framework Cocoa  -o alvmac alvmac.o alviewcore.o misc.o -L${SAMD} -lbam -lm -lz -lobjc 
+#ld -v -o alvmac alvmac.o misc.o alviewcore.o -L/usr/lib 
+# -framework Cocoa 
+#link
+#-mmacosx-version-min=10.5 
+#works gcc -framework Cocoa -x objective-c -o MinimalistCocoaApp  MinimalistCocoaApp.m  
+#clang -mmacosx-version-min=10.5 -o alvmac alvmac.o misc.o alviewcore.o -L/usr/lib -L${SAMD} -lbam -lm -lz 
+#-lobjc
+#clang -framework Cocoa -x objective-c -mmacosx-version-min=10.5 -o alvmac alvmac.m  
+

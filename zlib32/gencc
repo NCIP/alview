@@ -1,0 +1,21 @@
+
+function f
+{
+echo "\"c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\cl.exe\" -c -I. -D_USE_KNETFILE -D_CURSES_LIB=2 -D_MSC_VER -I. -Iwin32  $1.c $1.obj"
+}
+
+f adler32
+f compress
+f crc32
+f deflate
+f gzclose
+f gzlib
+f gzread
+f gzwrite
+f infback
+f inffast
+f inflate
+f inftrees
+f trees
+f uncompr
+f zutil
