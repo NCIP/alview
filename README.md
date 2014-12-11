@@ -25,17 +25,18 @@ FOr now must also download the large genome data support files targzipped in the
 alview_hg18hg19_genomedata.tar.bz2 from my dropbox account at <a href="https://www.dropbox.com/sh/ymszmksj6v83rmt/OCLsYTjgSu">https://www.dropbox.com/sh/ymszmksj6v83rmt/OCLsYTjgSu</a> .  This is large (&gt;1GB) file and takes a while to 
 decompress and "untar".  
 
-Grab your exectuable BINARIES directory hereabouts on Github.  
+Grab your executable BINARIES directory hereabouts on Github.  
 Set up the "alview.conf" file.
  
 
-<p>The TWO command lines to prepare this file (on LINUX, Mac command line or cygwin [ or cmd.exe with unix utilites ] ) ... 
+<p>The TWO command lines to prepare this file (on LINUX, Mac command line or cygwin [ or cmd.exe with unix utilities ] ) ... 
 
 <p>bzip2 -d alview_hg18hg19_genomedata.tar.bz2</p>
 
 <p>tar xvf alview_hg18hg19_genomedata.tar </p>
 
 <p>Read the instructions for installing for your particular operating system (Linux, Mac or Windows).
-Instructions are vailable in ALVIEW_USERS_MANAUAL.txt file in the list of "root" level alview files.</p>
+Instructions are available in ALVIEW_USERS_MANUAL.txt file in the list of "root" level alview files.</p>
 
- You are welcome to customize and re-brand this as you see fit.    NCI and NIH retain the many trademarks associated with the  National Institutes of Health and the National Cancer Institute.</p>
+You are welcome to customize and re-brand this as you see fit.    NCI and NIH retain the many trademarks associated with the  National Institutes of Health and the National Cancer Institute.</p>
+
