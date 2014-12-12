@@ -2,11 +2,6 @@
 Alview User's Manual
 December 11, 2014 
 
-XXXXXXXXXXXX This is being updated for new version on December 11, 2014 .
-This should be ready by December 15th 2014.
-
-XXXXXXXXXXXXXXXXXX
-
 Contents.
 I.   Introduction.
 II.  Power User Fast Start
@@ -17,108 +12,95 @@ VI.  General Operation
 VII. alview.conf file
 
 I. Introduction.
-Alview is available via github at https://github.com/NCIP/alview
-It currently supports hg18 and hg19 and large genome support files are
-required.
 Alview is a fast computer program for viewing BAM files.  The most powerful
-way 
-to use the program is to use the command line and batch requests for 
+way to use the program is to use the command line and batch requests for 
 very rapid viewing using a slide show.  This takes some user engagement.  
-
 Otherwise, it is useful for browsing bam files and checking interesting 
 locations as a GUI desktop or webserver.
+It currently supports hg18 and hg19 and large genome support files are required.
+More builds are forthcoming (mouse, GrCh38, etc).
 
-As just mentioned, it comes in three forms: 
+Alview is available via github at https://github.com/NCIP/alview
 
-#1 as a real standalone desktop GUI application.
-#2 as a command line utility.  
+Alview can take three forms: 
+
+#1 as a real standalone desktop GUI application. (Cocoa, GTK or WIN32).
+#2 as a command line utility. 
 #3 as a CGI web server.
 
 It is supported on three Operating Systems:
 
 #1 Windows 32 bit
-#2 Linux 64 bit 
+#2 Linux (current release is 64 bit, recompilation on other target UNIX is easy) 
 #3 Apple MAC 64 bit
 
-This is newly released, we'd appreciate feedback. Contact me at 
+This is newly released, I'd appreciate feedback. Contact me at 
 my email address : finneyr@mail.nih.gov
 
 
 II.  Power User Fast Start
 Alview is a webserver or command line utility or a real GUI application.  For 
-GUI, download the package for your operating system.  For this GUI desktop 
-application, Qt is the GUI toolkit.   The different OS versions of Alview QT
-GUI 
-all require the QT shared libraries for that particular system.  Apple MAC and
-MS Windows packages 
-with EXES and libraries and support data are download-able.  Check "alview" 
-github page for latest locations of Alview OS specific packages.  
+GUI, download the package for your operating system.  
 
-Alview Apple MAC can be downloaded and run via a DMG file.
+Pick a directory to put alview in.   You should make a new one dedicated to Alview and support files.
 
-Alview Windows package is a tarball.  This is an easy way of distributing
-Alview 
-that bypasses your local systems security team's frequent "You don't have 
-permission to install this on Windows!" message.  Download, untar the tarball.
-IMPORTANT: run the Windows C run time setup program from Microsoft (the other 
-.exe file provided: the program "VS2012.4.exe" ).  You can also download 
-VS2112.4.exe program from Microsoft and run it.  Finally make sure you have 
-permissions to the files in the resulting untarred directory where the 
-alview.exe file is.  You must have read permissions and execute permissions on 
-the dlls and exe files.
+Next download the binary for your OS: alview.exe for Windows, alvmac for Apple or alvgtk for Linux from 
+the "BINARIES" directory.
 
-Linux users must download the contents of BINARIES/LINUX directory (at alview
-github)
-and set LD_LIBRARY_PATH properly and set values in the configuration text file
-called 
-"alview.conf" is correct.  In all cases, make sure the file "alview.conf" is 
-correct for your system. This file is editable and fixable via a text editor.
+Check the README.md file on the github page.  This will contain the location of the support files.
+(Currenlty they are in my drop box account).  Carefully decompress and untar them.
+Yes, this is a hassle. It make take a few minutes on your home DSL.
+
+Make sure you have permissions to the files in the resulting untarred directory where the 
+alview file is: alview.exe, alvmac or alvgtk need execute permissions.  The GEONMEDATA directory 
+(the big download you did) must have read permission for all files.  You may need to use chmod on Apple
+or Mac or icacls on Windows.
+
+Set up "alview.conf". This must be is correct. The file "alview.conf" is 
+is a text editable configuration file.  Check it carefully.
 
 For command line or webserver, you have to compile it yourself. It's pretty 
 straightforward for Linux and Apple MAC ...  
 
-Install 1) GD graphics library 2) samtools, 3) curses and 4)zlib if they are
-not already there.  
+Make and/or install  1) samtools and 2)zlib if they are not already there.  
+You'll need access to ".a" library files for samtools and zlib.
+
+Typically you have to make samtools yourself.
+
+Currently the samtools 1.1 is a bit hard to get right.
+The samtools 0.1.18 is what is currently supported and works with old compilers.
+
 Apple users may have to do the "configure/make/install" routine for some
-packages as there is limited 
-official support from Apple for many software solutions.  Linux users should
-have packages easily 
-install-able via apt-get or yum or your GUI installer.  Know in what
-directories the libraries 
-are as you'll need to provide them to the linker.  
+packages as there is limited official support from Apple for many software solutions.  Linux users should
+have packages easily install-able via apt-get or yum or your GUI installer.  Know in what
+directories the libraries are as you'll need to provide them to the linker.  
 
 Sources for Windows versions of the required support libraries are provided at
-Alview github.  
-These support libraries for windows have been edited to force them to compile
-using Visual C++.
-The verion of Visual Studio used to compile alview is Microsoft Visual Studio
-11.0 (aka VS2012.x86 ).
-A free command line version is avaliable.
+Alview github (zlib and samtools).  These are hacked to work with (Visual Studio's) cl.exe C/C++ compiler
+
+A free command line version is avaliable. Soon. I'll try and get this by December 15.
+
 Set the appropriate IFDEF flags.  These flags are APPLE, UNIX, WINDOWS,
-WEB_SERVER, 
-CMD_LINE, QT_GUI.  Set UNIX=1 for Linux. You can't set them as compiler flags
-or 
-just hard wire them near the top of the "alviewcore.cpp" file.  Compile 
-alview.cpp with proper flags and pointing to the proper libraries.   
+WEB_SERVER, CMD_LINE  Set UNIX=1 for Linux. Set them as compiler flags.
+Compile alview.cpp with proper flags and pointing to the proper libraries.   
 You can compile webserver and command line statically rather than requiring 
 shared libraries if you wish.
 
 Windows users may just want the linux version; just compile linux version and 
-under CYGWIN and just use CYGWIN.  Otherwise, read the windows make file 
-carefully and adjust to your system. 
+under CYGWIN and just use CYGWIN. 
 
-For the webserver, copy alview to the cgi-bin directory and check permissions.
-Then, set up the genome data directory.  
+You will have to setup the genome data directory for command line version.  Set alview.conf properly.
 
-You will have to setup the genome data directory for command line version,
-also.
+For the webserver, copy the resulting alview to the cgi-bin directory and check permissions.
+Then, set up the genome data directory and edit alview.conf properly.
 
 Setting up the genome data directory involves this ... 
-Download the large genome data support files targzipped in the file named
+Download the large genome data support files n the tarbzip2 file named
 alview_hg18hg19_genomedata.tar.bz2 
 from my dropbox account at
 https://www.dropbox.com/sh/ymszmksj6v83rmt/OCLsYTjgSu . 
 This is large (>1GB) file and takes a while to decompress and "untar".
+
 Use these commands
 
 bzip2 -d alview_hg18hg19_genomedata.tar.bz2
@@ -128,39 +110,25 @@ tar xvf alview_hg18hg19_genomedata.tar
 Edit alview.conf file to point to the correct genome data location that you
 just created, make sure cgi programs can access this.
 If in doubt, just set it up off the executable (cgi-bin) directory and default
-locaiton will get detected.
-
+location will get detected.
 
 III. Installation and/or Compilation.
 At the Alview github page, check README.md file for the latest versions with 
 and current instructions.  You can just install GUIs on your desktop, 
 but must compile for webserver or command line.
 
-Windows GUI: Download tar file.  Untar. Run the provided VS2012.4.exe program. 
-This is Microsoft's C run time library update.  Note the file "alview.conf".   
-Typical reason for alview failure is that data in this file is wrong.  The 
-default alview.conf for windows should work fine, though, unless you move
-files.   
+Windows GUI: 
+Download alview.exe, download GENOMEDATADIR data, edit alview.conf, check permission, run alview.exe .
 
 APPLE MAC GUI: Download DMG files, click on it.  If there is a complaint about
-multiple 
-copies of a library, you have to fix it by setting your library path.
-(working on exact method to do so that it works every time for everyone).
+Download alvmac, download GENOMEDATADIR data, edit alview.conf, check permission, run alvmac.
 
-LINUX GUI: Download all binaries in BINARIES/LINUX directory for Alview
-github.  
-Set permissions for read+execute for shared objects (*.so) and alview
-executable file.  Set 
-LD_LIBRARY_PATH to location of the shared libraries (*.so) files supplied in 
-the directory.  This is easy and a carefully googling of LD_LIBRARY_PATH
-should 
-give you the answer on how to do this.   Ask a knowledgeable 
-UNIX/LINUX/MACcommand line person if you need help.  You must also download
-the 
-genome support files.  Please make sure the configuration file "alview.conf"
-is 
+LINUX GUI: Download all binaries in BINARIES directory, file is "alvmac".
+Download GENOMEDATADIR data, edit alview.conf, check permission, run alvmac.
+Please make sure the configuration file "alview.conf" is 
 set correctly to point to these large files.  This is a text file and
 editable.
+
 You must also download the large genome data support files targzipped in the
 file 
 named alview_hg18hg19_genomedata.tar.bz2 from my dropbox account at 
@@ -178,33 +146,24 @@ tar xvf alview_hg18hg19_genomedata.tar
 
 Linux version is 64bit specific. Set up the "alview.conf" file .
 
-Compilation for command line and webserver is straightforward and controlled
-by ifdefs detailed near the top of the "alviewcore.cpp" file.  
-
-Example compilation for WEBSERVER on Linux ..
-
-g++ -DUNIX -DWEB_SERVER=1 -Wall -o alview alviewcore.cpp  -lpthread -lz -Wall
--I/h1/finneyr/samtools-0.1.18/ /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz
--lgd /h1/finneyr/zlib-1.2.3/libz.a
-
-Note that you will have edit the "-I" include path argument and location of
-the libraries (*.a files) arguments for you system.
-g++ is the C++ gnu compiler.
-
+Linux compilation is done vi the "gogtk" batch file.
+Edit to point to your samtools.
 
 IV.  Operation as Command Line Utility.
+
 You must compile for standalone.  It's pretty easy.
+(I'll try and get some downloadable command line binaries for you guys real soon)
 
 Install 1 samtools, 2) curses and 3)zlib if they are 
 not already there.  Set the appropriate IFDEF flags.  These flags are 
-APPLE, UNIX, WINDOWS, WEB_SERVER, CMD_LINE, QT_GUI.  You can set them via 
+APPLE, UNIX, WINDOWS, WEB_SERVER, CMD_LINE.  You can set them via 
 the command line program options as you invoke the compiler.
 
 Example compilation on Linux for command line ...
 
 gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I.
 -I/data/nextgen/finneyr/samtools-0.1.18/
--L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz -lgd  -lstdc++
+-L/data/nextgen/finneyr/samtools-0.1.18/ -lbam -lm -lz -lgd  -lstdc++
 
 
 Running alview command line ...
@@ -220,15 +179,14 @@ type positions
 So, create a batch file of BAMS and , for instance, SNP call regions to
 examine.
 You can view the output in a slideshow, the file "slideshowtemplate.html" is a
-template file
-we provide for assisting in this.
+template file we provide for assisting in this.
+
 Set the "IMGSHERE" and "ANOSHERE" lines with image files and annotation.  This
-is a little work, but
-makes viewing your massive 40,000 SNP calls easy to review !!!!
+is a little work, but makes viewing your massive 40,000 SNP calls easy to review !!!!
 This is probably the true power user's tool for reviewing his lab results and
 prioritizing further work.
-This can identify those "Illumina Chemistry Problems" areas and save you a lot
-of grief.
+
+Actually reviewing your snp calls for anomalies can save you a lot of grief.
 
 
 V.   Operation as Web Server
@@ -243,7 +201,6 @@ You can select a region to zoom in.
 You can use the navigation buttons to move around.
 You can use the quality flag to view a grayscale graphic of the quality
 values.
-
 
 VII. alview.conf file
 
