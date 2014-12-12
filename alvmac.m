@@ -7,18 +7,22 @@
 
 #include "alview.h"
 
+void get_params_and_draw(int arg);
 void calc_and_draw_new_img(void);
 void drawclip(void);
+void alview_load_config(void);
 int end_select_x = 0;
 int start_select_x = 0;
-void alview_load_config(void);
-extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status) ;
 int xoron = 0;
 void freedom_for_memory(void);
 void alview_init(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
+
+extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
 extern struct image_type *im;
+extern char GENOMEDATADIR[512];
+
 unsigned char *img;
 unsigned char *img2;
 int diw;     // "darea" pixbuff width 
@@ -97,6 +101,7 @@ NSRect superframe;
         NSString *userinput = [self stringValue];
         char *sptr = (char *)[userinput UTF8String];
 printf("got [%s]\n",sptr);
+        get_params_and_draw(1);
 // printf("keydown , event keycode is [%d]  \n",[event keyCode]);
     }
     [super keyUp:event];
@@ -240,6 +245,7 @@ void get_params_and_draw(int arg)
 {
     int status;
     char *sptr;
+
     NSString *userinput = [texts[0].object stringValue];
     sptr = (char *)[userinput UTF8String];
 printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr); 
@@ -250,8 +256,8 @@ printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr);
     NSString *userinput3 = [texts[2].object stringValue];
     sptr = (char *)[userinput3 UTF8String];
     dih = atoi(sptr);
-    sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
 
+printf("xxx in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
     status = parse_position(pos,khr,&khrstart,&khrend); 
 printf("xxx in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
 
@@ -279,7 +285,7 @@ void calc_and_draw_new_img(void)
     tmp = khrstart;
     khrstart = (int)(khrstart + (double)((start_select_x * ((khrend - khrstart)) / (double)diw)));
     khrend =   (int)(tmp + (double)((end_select_x   * ((khrend - tmp)) / (double)diw)));             
-fprintf(stderr,"in release , END %d %d \n",khrstart,khrend); fflush(stderr);  
+// fprintf(stderr,"in release , END %d %d \n",khrstart,khrend); fflush(stderr);  
 
     if (khrstart < 1) khrstart = 1;
     if (khrend < 2) khrend = 2;
@@ -339,14 +345,12 @@ printf("in on_button_moveSTART movek=%d , khrstart = %d khrend = %d diw=%d dih=%
     sanity_khr();
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
 
-#if 1
 // set pos field - wtheck? done in get_params_and_draw
     NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
     [texts[0].object setStringValue:defval];
-#endif
 
 // xxx
-printf("before get_params,, pos = [%s]",pos); fflush(stdout);  
+printf("onmove before get_params,, pos = [%s]\n",pos); fflush(stdout);  
     get_params_and_draw(1);
     return 0;
 }
@@ -491,6 +495,9 @@ printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%
         khrend = mid;
         sanity_khr();
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
+// put pos back 
+        NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+        [texts[0].object setStringValue:defval];
         get_params_and_draw(1);
     }
     else if (self->myid == 6) // { 6  ,  250 ,110,  60, 30, "righthalf" } ,
@@ -499,12 +506,14 @@ printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%
         khrstart = mid;
         sanity_khr();
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
+// put pos back 
+        NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+        [texts[0].object setStringValue:defval];
         get_params_and_draw(1);
     }
     else if (self->myid == 7) // { 7  ,  310 ,110,  60, 30, "ZoomIN" } ,
     {
         status = on_button_move(1);
-        int size;
         int third;
 
         size = khrend-khrstart;
@@ -513,19 +522,27 @@ printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%
         khrstart = khrstart + third;
         sanity_khr();
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
+// put pos back 
+        NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+        [texts[0].object setStringValue:defval];
         get_params_and_draw(1);
     }
     else if (self->myid == 8) // { 8  ,  370 ,110,  60, 30, "ZoomOut" } ,
     {
-        int size;
         int half;
 
         size = khrend-khrstart;
-        half=size/2;
+printf("Zoomout %s %d %d, size=%d\n",khr,khrstart,khrend,size); 
+        half= size/2;
         khrend = khrend + half;
         khrstart = khrstart - half;
         sanity_khr();
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
+// put pos back 
+        NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+        [texts[0].object setStringValue:defval];
+
+printf("Zoomout end %s %d %d pos=[%s]\n",khr,khrstart,khrend,pos); 
         get_params_and_draw(1);
     }
     else if (self->myid == 9) // { 9  ,   10 ,140,  60, 30, "<10 " } ,
@@ -596,7 +613,7 @@ printf("File name is %s\n",s);
 if (i == 0) 
 {
 strcpy(fn_bam,s); 
-printf("before get_params_and_draw [%s] ",fn_bam);
+printf("openfiledialog before get_params_and_draw [%s] ",fn_bam);
 get_params_and_draw(1);
 }
             // Do something with the filename.
@@ -650,6 +667,30 @@ NSTextField* create_label(char *label,float x, float y, float w, float h)
 }
 @end
 
+#include <sys/stat.h>
+
+void check_genomedatadir(void)
+{
+    int bad = 0;
+    struct stat sb;
+
+    if (GENOMEDATADIR[0] == (char)0) 
+        bad = 1;
+    else
+    {
+        if (stat(GENOMEDATADIR, &sb) == 0 && S_ISDIR(sb.st_mode))
+            bad = 0;
+        else
+            bad = 2;
+    }
+    if (bad)
+    {
+NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+[alert setMessageText:@"ERROR: no genome data directory.\nYou must set up the GENOMEDATADIR in text file alview.conf."];
+[alert runModal];
+    }
+}
+
 
 int main ()
 {
@@ -660,6 +701,7 @@ int main ()
 
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]; 
     alview_load_config();
+    check_genomedatadir();
 
     id menubar = [[NSMenu new] autorelease];
     id appMenuItem = [[NSMenuItem new] autorelease];
@@ -671,7 +713,7 @@ int main ()
 // file menu item
     id fileTitle = [@"File " stringByAppendingString:appName];
     id fileMenuItem = [[[NSMenuItem alloc] 
-                 initWithTitle:fileTitle action:@selector(filestuff:) keyEquivalent:@"f"] autorelease];
+             initWithTitle:fileTitle action:@selector(filestuff:) keyEquivalent:@"f"] autorelease];
     id MyObject = [MyDelegate alloc];
     [fileMenuItem setTarget: MyObject]; 
     [appMenu addItem:fileMenuItem];
@@ -755,6 +797,6 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
 }
 
 // -- explain why this below is here ... ?
-#include "misc.c"
+#include "alvmisc.c"
 #include "alviewcore.cpp"
 

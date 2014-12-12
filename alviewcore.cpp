@@ -1,5 +1,5 @@
 
-#define USE_GD 0 // getting rid of this 
+#define USE_GD 0 // getting rid of this  - this was the GD (boutel)graphics library.
 
 /* 
 Written by Richard Finney, National Cancer Institute, National Institutes of Health 2014
@@ -13,7 +13,7 @@ Otherwise, do whatever you want!  NIH assumes no liabilities or responsibilities
 g++ -DUNIX -DWEB_SERVER=1 -Wall -O3  -m64 -minline-all-stringops -mno-align-stringops -momit-leaf-frame-pointer -finline-functions -o alview alviewcore.cpp  -lpthread -lz -Wall  -I/h1/finneyr/samtools-0.1.18/ /usr/lib/libguide.a /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz -lgd /h1/finneyr/zlib-1.2.3/libz.a
 
 compile for command line 
-Using NEW samtools 1.0 ( after august 2014) 
+Using NEW samtools 1.0 ( after august 2014)  -
 
 gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
 -I/h1/finneyr/samtools-1.0/ \
@@ -159,7 +159,7 @@ void free_filez(void);
 
 // FFF0E0
 
-size_t strlcpy(char *dst, char *src, size_t siz)
+size_t my_strlcpy(char *dst, char *src, size_t siz)
 {
 	register char *d = dst;
 	register const char *s = src;
@@ -368,8 +368,10 @@ struct disease_type
 };
 
 #if WIN32
-// this is in alvwin32
+
+// this is in alvwin32.cpp
 void jdebug(const char *s);
+
 #else
 void jdebug(const char *s) // for use in debuging on internet
 {
