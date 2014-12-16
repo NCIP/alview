@@ -12721,7 +12721,6 @@ char pixelfont[] =
 
 void ImageString(struct image_type *im, int x, int y, unsigned char *s, int color)
 {
-    int xx;
     int kolor;
     int maxx;
     unsigned char *img;
