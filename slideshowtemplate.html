@@ -2,16 +2,21 @@
 
 <script language="JavaScript1.1">
 <!--
-// xxx 
-var Image_slide = [
-IMGSHERE 
+// xxx  USER MUST HACK Image_slied and Anno_slide
+var Image_slide = 
+[
+// put list of images  HERE  !!!
+// like this ..
+//   "X/0.hg19.chr4_106155098-106155299.145760cc35328158f23e40dbcc0a05b6.bam.png" , 
 ];
 
-// xxx 
-
-var Anno_slide = [
-ANOSHERE 
+var Anno_slide = 
+[
+// put EXACT matchin annot ation HERE  !!!
+// like this ..
+//   "rs111948941 0 + C C C/T genomic single by-cluster,by-frequency,by-1000genomes 0.010051 0.070175 missense exact 1 NonIntegerChromCount 6 1000GENOMES,CLINSEQ_SNP,COMPLETE_GENOMICS,EXOME_CHIP,ILLUMINA,NHLBI-ESP, 2 C,T, 7932.939941,121.057999, 0.984969,0.015031, " , 
 ];
+;
 // xxx 
 
 
@@ -41,9 +46,9 @@ function parse_chr_loc_fn(s)
 }
 
 function update_screen() {
-   ifile="out/" + Image_slide[Img_current];
+   ifile=Image_slide[Img_current];
    parse_chr_loc_fn(ifile);
-   anno = " "+ Anno_slide[Img_current];
+   anno = Anno_slide[Img_current];
    document.slideshow.src =  ifile;
    document.getElementById("info").innerHTML=ifile;
    document.getElementById("xstatus").innerHTML="speed = "+speed + " imageno:" +Img_current;
@@ -138,10 +143,17 @@ function skip(skipcount) {
 
 function move(skipcount){
    skip(skipcount);
-   ifile="out/" + Image_slide[Img_current];
+   ifile=Image_slide[Img_current];
    update_screen();
 }
-     
+
+document.onkeydown = function(e) {
+                e = e || event; // "real browsers" || IE6/7.
+                switch (e.keyCode) {
+                    case 37: move(-1); break;
+                    case 39: move(1); break;
+                }
+}
 
 window.onload = auto;
 // cat files | awk '{printf "%c%s%c , \n",34,$1,34}' > junk

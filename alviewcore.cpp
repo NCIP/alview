@@ -2241,69 +2241,13 @@ HANDLE WINAPI CreateFile(
 #endif
 
 
-#if USE_GD 
-int savefile(char *outfn, gdImagePtr im, int image_type)
-#else
 int savefile(char *outfn, struct image_type *im, int image_type)
-#endif
 {
-    size_t size = (size_t)0;
-    int sz = 0;
 
-#if USE_GD
-    char *data = (char *)0;
-    char m[2048];
-  if (image_type == GIF_IMAGE)
-  {
-sprintf(m,"in savefile before gdImageGifPtr"); jdebug(m); 
-      data = (char *) gdImageGifPtr(im, &sz);
-sprintf(m,"in savefile(), GIF data=%p , size = %d GIF ",data,sz); jdebug(m); 
-  }
-  if (!data) 
-  {
-#if QT_GUI
-sprintf(m,"ERROR: INVALID IMAGE"); jdebug(m); 
-#else
-printf("ERROR: INVALID IMAGE<br>\n");
-#endif
-    /* Error */
-  }
-#else
-    int hacksize; 
-    hacksize = (3 * width * height); 
-    im->data = (unsigned char *)malloc(hacksize);
-    if (!im->data) return -1;
-    memset(im->data,0,hacksize); 
-#endif
+unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
 
-  size = (size_t)sz;
-
-#if USE_GD
-#if 0 // ifdef WIN32
-//   outfp = fopen(outfn, "wb");
-    write_windows_binary(outfn,data,size);
-#else
-  FILE *outfp = (FILE *)0;
-  outfp = fopen(outfn, "wb");
-
-  if (!outfp) 
-  {          /* Error */
-      fprintf(stderr,"ERROR: in savefile , Can not open output file \"%s\"\n",outfn);
-      return -1;
-  }
-  if (fwrite(data, (size_t)1, size, outfp) != size) { } // error
-  if (fclose(outfp) != 0) { } // error
-#endif
-
-  gdFree(data);  
-  if (im) gdImageDestroy(im);
-  im = (gdImagePtr)0;
-#else
-  if (im) free(im);
-  im = (struct image_type *)0;
-#endif
-
-  return 0;
+    lodepng_encode24_file(outfn, im->data, (unsigned) im->width, (unsigned) im->height);
+    return 0;
 }
 
 
@@ -2337,7 +2281,7 @@ char m[512];
 // sprintf(m,"in spitfile after gdImagePngPtr() data = %p",data); jdebug(m); 
 sprintf(m,"in spitfile data = %p , size = %d ,before outputing ",data,size); jdebug(m);
 
-  for (i=0;i<size;i++)
+  for (i=0 ; i<size ; i++)
   {
 sprintf(m,"in spitfile data writing %d of %d ",i,size); jdebug(m);
       putchar(*(data+i));
@@ -2438,6 +2382,7 @@ strcpy(dna_D_s,"ffb000");  // yellow  delete
         grays[2] = gdImageColorAllocate(im, 0xc0,0xc0,0xc0);
         grays[3] = gdImageColorAllocate(im, 0xa0,0xa0,0xa0);
         grays[4] = gdImageColorAllocate(im, 0x80,0x80,0x80);
+
         grays[5] = gdImageColorAllocate(im, 0x60,0x60,0x60);
         grays[6] = gdImageColorAllocate(im, 0x40,0x40,0x40);
         grays[7] = gdImageColorAllocate(im, 0x20,0x20,0x20);
@@ -6577,7 +6522,6 @@ sprintf(m,"in imgen() in imgen() after gdImageFilledRectangle");  jdebug(m);
 #endif
 #endif
 
-// sprintf(m,"GUI: in imgen before savefile() fn = [%s] ",fn); jdebug(m);
 
 #if WEB_SERVER
 #ifdef WIN32
@@ -8276,7 +8220,7 @@ void badhost()
 
 void initialize_ttf(void)
 {
-    if (FULL_PATH_TO_TTF[0]) return; // already set, possibly by config file
+    if (FULL_PATH_TO_TTF[0]) return;     // already set, possibly by config file
 
 #ifdef WIN32
     strcpy(FULL_PATH_TO_TTF,ced);
@@ -8748,7 +8692,6 @@ printf("\n");
         printf("<font size=\"3\" color=\"red\"><a href=\"../cgi-bin/alview?pickmenu=1\">For ALVIEW PICK Page, click here.</a></font><br>\n"); 
 #endif
 printf("<br>\n");
-
 fflush(stdout);  // why not ?
 
 sprintf(m,"before do_gotgenes");  jdebug(m); 
@@ -8791,10 +8734,10 @@ int command_line_main(int argc,char *argv[])
     char outimg[MAXBUFF];
     char m[MAXBUFF];
     char hostname[512];
+
+
     hostname[0] = (char)0;
-
-
-    if (argc < 5) { fprintf(stderr,"ERROR: usage inbam outgif position build [imageheight] [ imagewidth ] \n"); exit(0); }
+    if (argc < 5) { fprintf(stderr,"ERROR: usage inbam outpng position build [imageheight] [ imagewidth ]\n"); exit(0); }
     strcpy(fn_bam,argv[1]);
     strcpy(outimg,argv[2]);
     strcpy(position,argv[3]);
@@ -8814,6 +8757,7 @@ int command_line_main(int argc,char *argv[])
 
     tds_val = 0;
     alview_load_config();
+
 #ifdef CMD_LINE
     if ( GENOMEDATADIR[0]  == (char)0 )
     {
@@ -10369,7 +10313,8 @@ void freedom_for_memory(void)
     ppp = (unsigned char *)0;
 }
 
-/*
+
+/* ---
 =HYPERLINK("https://cgwb-test.nci.nih.gov:8443/cgi-bin/alview?position="&D1&":"&E1-100&"-"&E1+100&"&iw=1000&ih=400&file="&A1,"n")
-*/
+--- */
 

@@ -13,3 +13,7 @@ struct image_type
 void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,int color);
 void ImageString(struct image_type *im, int x, int y, unsigned char *s, int color);
 unsigned ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
+// horor  - can't get it to eat unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
+
+
+
