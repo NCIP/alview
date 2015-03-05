@@ -37,6 +37,9 @@ fix these messages
 [bam_parse_region] fail to determine the sequence name.
 [bam_parse_region] fail to determine the sequence name.
 ERROR: in savefile , Can not open output file "C:\rich\ALWIN\tmp.gif" --  put in errno
+
+example web usage in Excel ...
+=HYPERLINK("https://cgwb-test.nci.nih.gov:8443/cgi-bin/alview?position="&D1&":"&E1-100&"-"&E1+100&"&iw=1000&ih=400&file="&A1,"n")
 */
 
 /*
@@ -129,6 +132,25 @@ gd is removed
 gdImagePtr im;
 #else
 
+#endif
+
+#define MAXBUFF 20000
+#define MAXSMALLBUFF 2000
+
+#ifdef CMD_LINE
+int snp_call_flag = 0;
+int snp_call_spot = 0; // genomic location 
+int snp_call_dnaat = 0;
+char snp_call_referece = ' ';
+char snp_call_chr[MAXBUFF];
+int snp_call_A_cnt = 0;
+int snp_call_C_cnt = 0;
+int snp_call_G_cnt = 0;
+int snp_call_T_cnt = 0;
+int snp_call_Ins_cnt = 0;
+int snp_call_Del_cnt = 0;
+#else
+int snp_call_flag = 0;
 #endif
 
 int width,height;
@@ -374,7 +396,6 @@ void jdebug(const char *s);
 void jdebug(const char *s) // for use in debuging on internet
 {
 #if 1
-// xxx 
 // TURNED OFF IF SET TO ONE 
 // fprintf(stderr,"%s\n",s); fflush(stderr);
 #else
@@ -999,8 +1020,6 @@ char global_lpgcookie[2048];
 #define OPERATION_COMPARE 0
 #define OPERATION_GENES 1
 
-#define MAXBUFF 20000
-#define MAXSMALLBUFF 2000
 
 
 char REQUEST_METHOD[512];
@@ -1143,8 +1162,8 @@ static char *do_2bit_dna(FILE *fp, unsigned int fragStart, unsigned int fragEnd,
     unsigned int val2bit;
     unsigned int spot;
     int modder = 0;
-    int size = 0;
-    int i,j,k;
+    unsigned int size = 0;
+    unsigned int i,j,k;
     int fsm1 = fragStart - 1; // Frag Start Minus 1
 
 
@@ -2244,7 +2263,8 @@ HANDLE WINAPI CreateFile(
 int savefile(char *outfn, struct image_type *im, int image_type)
 {
 
-unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
+// prototype next line ...
+unsigned lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
 
     lodepng_encode24_file(outfn, im->data, (unsigned) im->width, (unsigned) im->height);
     return 0;
@@ -2553,6 +2573,33 @@ void ui2genomiccoords(unsigned int ui, char puthere[])
 #endif
 
 
+int get_chr_spot(char chr[],int *spot_ptr,int *end_ptr,int *chrom_index_ptr)
+{
+    int k = -1;
+
+    *chrom_index_ptr = k;
+    if (strcmp("X",chr) == 0) k = 22;
+    else if (strcmp("Y",chr) == 0) k = 23;
+    else if (strcmp("M",chr) == 0) k = 24;
+    else if (strcmp("chrX",chr) == 0) k = 22;
+    else if (strcmp("chrY",chr) == 0) k = 23;
+    else if (strcmp("chrM",chr) == 0) k = 24;
+    else
+    {
+        if (strncmp(chr,"chr",3) == 0) k = atoi(&chr[3]); 
+        else k = atoi(&chr[0]); 
+        k = k - 1;
+    }
+    if (k>=0) 
+    {
+        *chrom_index_ptr = k;
+        return 0;
+    }
+fprintf(stderr,"in get_chr_spot for [%s]chr is %d\n",chr,-1);  fflush(stderr);  
+    return -1;
+}
+
+
 int get_chr_lo_hi(char chr[],int *start_ptr,int *end_ptr,int *chrom_index_ptr)
 {
     int k = -1;
@@ -2753,6 +2800,8 @@ static void aldetails(int diff, int offset, int len,
     int keepgoing = 1;
 
 
+// fprintf(stderr,"xxx in aldetails(), snp_call_flag = %d %s offset=%d\n", snp_call_flag,chr,offset); fflush(stderr); 
+
 // char m[512];
 // sprintf(m, "in aldetails"); jdebug(m); 
     if (!dnaspace) return;
@@ -2779,7 +2828,7 @@ static void aldetails(int diff, int offset, int len,
     frcolor = purple;
 
 
-// sprintf(m,"in aldetails pxw=%f offset=%d",pxwidth,offset); jdebug(m);  
+// fprintf(stderr,"xxx in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
 
 #ifdef QT_GUI
  if ((++time_out_every_once_a_while % 50000) == 0)
@@ -2868,11 +2917,7 @@ static void aldetails(int diff, int offset, int len,
             if (splice_source == 1)  kkolor = black;  // refseq
             else if (splice_source == 2)  kkolor = red; // novel altsplice
             else if (splice_source == 3)  kkolor = green; // est
-#if USE_GD
-            gdImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
-#else
             ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
-#endif
             coff += cig_ops[j].len; 
             dnaat += cig_ops[j].len; 
             continue; 
@@ -2955,8 +3000,10 @@ static void aldetails(int diff, int offset, int len,
             /* SO it's draw nucleotide "matches" = 'M' ------------------*/
         for (k=0 ; k<cig_ops[j].len ; k++)
         {
+// fprintf(stderr,"xxx in aldetails(), dnaat=%d\n", dnaat); fflush(stderr); 
             if (dnaat >= dnasize) break;
             ch = seq[i];
+// fprintf(stderr,"xxx in aldetails(), ch=%c\n", ch); fflush(stderr); 
             if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
             if ((dnaat >= 0) && (dnaat < dnasize))
             {
@@ -3049,6 +3096,306 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
 #endif
     }
 #endif
+    return;
+}
+
+static void snp_call_aldetails(int diff, int offset, int len,  
+        int fwdflag, int optical_dupe_flag ,char seq[], char *quality, int seqlen, char cigar[], int splice_source)
+{
+    char ch;
+    int oset;
+    int j,k,coff;
+    int dnaat = 0;
+    int kkolor;
+    int gotn;
+    double d;
+    int x,xx;
+    int jump = 1;
+    int xcolor;
+    int frcolor;
+    int i;
+    int x1,x2,y1,y2;
+    int keepgoing = 1;
+
+
+// debug fprintf(stderr,"xxx in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
+fflush(stderr); 
+
+    if (!dnaspace) return;
+    if (offset < 0) return;
+
+    if (spliceonly_flag == 1)
+    {
+        for (gotn=i=0 ; cigar[i] ; i++)
+        {
+           if (cigar[i] == 'N')
+           {
+               gotn = 1;
+               break;
+           }
+        }
+       if (gotn == 0) return; 
+    }
+
+
+    dnaat = offset;
+
+    setup_cigar_stuff(cigar);
+    x1 = x2 = y1 = y2 = 0;
+    frcolor = purple;
+
+
+// fprintf(stderr,"xxx in snp_call_aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
+
+#ifdef QT_GUI
+ if ((++time_out_every_once_a_while % 50000) == 0)
+ {
+ // might need to cal this QCoreApplication::processEvents()QCoreApplication::processEvents()
+ hack_timeout_to_process_events();
+ time_out_every_once_a_while = 1; // reset count
+ }
+#endif
+
+    if (ppp_firsttime == 1) 
+    {
+        if (ppp) {free(ppp); ppp = (unsigned char *)0; }
+        ppp = (unsigned char *)malloc((iw*ih) * sizeof(unsigned char)); // ppp 
+        if (ppp == (void *)0) 
+        {
+            fprintf(stderr,"ERROR- can't malloc space for image.  (bad news, we're out of memory) in snp_call_aldetails()\n"); 
+            fflush(stderr);
+            exit(0); 
+        }
+        memset(ppp,0,(iw*ih) * sizeof(unsigned char));
+        ppp_firsttime = 0;
+    }
+
+// FIND A PLACE TO PUT THE READ(alignment)
+    if (cig_ops[0].cmd == 'S')
+    {
+        offset  = offset - cig_ops[0].len;
+    }
+    jump = 1;
+    while (jump < (ih-60) ) 
+    {
+        x1 = (int)(pxwidth * (double)offset); 
+        x2 = x1 + (int)(pxwidth * (double)len); 
+        x2 = (int)(x2 + extra_splice_space() * pxwidth); 
+        if ( x2 > iw) x2=iw; 
+
+        y1 = ih - 50 - jump;
+        y2 = y1 - 3;
+        if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
+        if (x1 < 0) x1 = 0;
+        if (x2 < 0) x2 = 0;
+        if (y1 < 0) y1 = 0;
+        if (y2 < 0) y2 = 0;
+        for (keepgoing = 0, i=x1 ; i<=(x2+1) ; i++) 
+        {
+             oset = (y2*iw)+i;
+             if (oset < (iw*ih))
+             {
+                 if (*(ppp+oset) == 1) //  if (*(ppp[i][y2] == 1)
+                 {   
+                     jump += 5;
+                     keepgoing = 1;
+                     break;
+                 }
+             }
+        }
+        if (keepgoing == 0) break;
+    }
+  
+    for (i=x1;i<=(x2+1);i++) 
+    {
+        oset = (y2*iw)+i;
+        if (oset < (iw*ih))
+        {
+            *(ppp+oset) = (char)1;        // ppp[i][y2] = 1;
+            // *(ppp+(y2*iw)+i) = (char)1;        // ppp[i][y2] = 1;
+        }
+    }
+
+    if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
+    for (i=k=coff=j=0 ; j<num_cig_ops ; j++) 
+    {
+        if (i>= seqlen) break; // done
+        if (cig_ops[j].cmd == 'N')  // skip 
+        {
+            d = x1 + (pxwidth * (i+coff));
+            x = (int)d;
+            d = x1 + (pxwidth * (i+1+coff));
+            x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+            x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
+            x = x1;
+            xx = x2;
+            kkolor = yellow;
+            if (splice_source == 1)  kkolor = black;  // refseq
+            else if (splice_source == 2)  kkolor = red; // novel altsplice
+            else if (splice_source == 3)  kkolor = green; // est
+//             ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
+            coff += cig_ops[j].len; 
+            dnaat += cig_ops[j].len; 
+            continue; 
+        }
+        else if (cig_ops[j].cmd == 'D')  // deletion 
+        {
+            dcnt++; // "d)elete count 
+            d = x1 + (pxwidth * (i+coff));
+            x = (int)d;
+            d = x1 + (pxwidth * (i+1+coff));
+            x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+            x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
+            x = x1;
+            xx = x2;
+            kkolor = yellow;
+//             ImageFilledRectangle(im,x,y2-1,xx,y1+2,kkolor);
+            coff += cig_ops[j].len; 
+            dnaat += cig_ops[j].len; 
+#if CMD_LINE
+            if (snp_call_flag == 1) if (dnaat == snp_call_dnaat) snp_call_Del_cnt++;
+#endif
+            continue;
+        }
+        else if (cig_ops[j].cmd == 'I') // insert  
+        {
+            icnt++; // "i)nsert count 
+            d = x1 + (pxwidth * (i+coff));
+            x = (int)d;
+            d = x1 + (pxwidth * (i+1+coff));
+            x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+            x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
+            x = x1;
+            xx = x2;
+            xcolor = cyan; // mark insert here
+//             ImageFilledRectangle(im,x,y2-2,xx,y1+2,xcolor);
+            coff -= cig_ops[j].len; 
+
+            if ((dnaat>=0)&&(dnaat<dnasize))
+            {
+// potential integer overflow  - fix ?
+#if CMD_LINE
+                if (snp_call_flag == 1) if (dnaat == snp_call_dnaat) snp_call_Ins_cnt++;
+#endif
+
+                *(dnacnts+dnaat) += 1;
+                *(dnamms+dnaat) += 1;
+            }
+            dnaat -= cig_ops[j].len; 
+            continue;
+        }
+        else if (cig_ops[j].cmd == 'S')
+        {
+            for (k=0 ; k<cig_ops[j].len ; k++)
+            {
+                xcolor = black;
+                d = x1 + (pxwidth * (i+coff));
+                x = (int)d;
+                d = x1 + (pxwidth * (i+1+coff));
+                x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+                x2 = (int)(x1 + pxwidth);
+                x = x1;
+                xx = x2;
+                i++;
+                xcolor = black;
+            //     ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
+            }
+            // dnaat += cig_ops[j].len; 
+            continue;
+        }
+        else if (cig_ops[j].cmd == 'H') // ignore !
+        {
+// ignore
+        }
+
+            /* SO it's draw nucleotide "matches" = 'M' ------------------*/
+        for (k=0 ; k<cig_ops[j].len ; k++)
+        {
+            if (dnaat >= dnasize) break;
+            ch = seq[i];
+// fprintf(stderr,"xxx in snp_call_aldetails(), dnaat=%d snd=%d '%c'\n", dnaat,snp_call_dnaat,ch); fflush(stderr); 
+            if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
+            if ((dnaat >= 0) && (dnaat < dnasize))
+            {
+                if ((basecolors_flag == 1) || ( (toupper(ch)) != toupper(*(dnaspace+dnaat)) ))
+                {
+                    if      (ch == 'A') xcolor = dna_a; else if (ch == 'C') xcolor = dna_c;
+                    else if (ch == 'G') xcolor = dna_g; else if (ch == 'T') xcolor = dna_t;
+                }
+                d = x1 + (pxwidth * (i+coff));
+                x = (int)d;
+                d = x1 + (pxwidth * (i+1+coff));
+                x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+                x2 = (int)(x1 + pxwidth);
+                x = x1;
+                xx = x2;
+                if (
+                     (x>=0)  && (x  < iw) &&
+                     (xx>=0) && (xx < iw) &&
+                     (y2>=0) && (y2 < ih) &&
+                     (y1>=0) && (y1 < ih) 
+                   )
+                {
+#if 1
+           if (qual_flag == 1)
+           {                // override if qual flag on
+// quality values co-incident with sequence 
+               char qch;
+                if (quality) qch = *(quality+i);
+                else         qch = 0;
+#if 0
+/*
+The character '!' represents the lowest quality while '~' is the highest. Here are the quality value characters in left-to-right increasing order of quality (ASCII):
+  Vdoublequote
+ !.#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz
+ 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+ 0         1         2         3         4         5         6         7         8         9
+*/
+#endif
+            int idx = qch;
+// sprintf(m,"idx = %d from %c",idx,qch); jdebug(m);
+// grays[0] = white
+// grays[9] = black
+
+            if (idx > 65)      xcolor = grays[1];
+            else if (idx > 61) xcolor = grays[2];
+            else if (idx > 57) xcolor = grays[3];
+            else if (idx > 53) xcolor = grays[4];
+            else if (idx > 49) xcolor = grays[5];
+            else if (idx > 45) xcolor = grays[6];
+            else if (idx > 41) xcolor = grays[7];
+            else if (idx > 37) xcolor = grays[8];
+            else               xcolor = grays[9];
+            }
+#endif
+// fprintf(stderr,"in snp_call_aldetails pxw=%f offset=%d, before ImagFillRectangle %d %d %d %d",pxwidth,offset, x,y2,xx,y1); fflush(stderr);
+                //     ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
+                }
+
+                if (dnacnts) *(dnacnts+dnaat) += 1;
+                if ((dnaspace) && (dnamms))
+                {
+                    if ( (toupper(ch)) != toupper(*(dnaspace+dnaat)) ) { *(dnamms+dnaat) += 1; }
+                }
+#if CMD_LINE
+            if ((snp_call_flag == 1) && (dnaat == snp_call_dnaat))
+            {
+                switch (toupper(ch) ) {
+                    case 'A': snp_call_A_cnt++; break;
+                    case 'C': snp_call_C_cnt++; break;
+                    case 'G': snp_call_G_cnt++; break;
+                    case 'T': snp_call_T_cnt++; break;
+                    case 'N':                   break;
+                    default: fprintf(stderr, "ERROR, invalid toupper in snp_call_aldetail for snp_call\n"); 
+                }
+                if (dnaspace) snp_call_referece = toupper(*(dnaspace+dnaat));
+            }
+#endif
+            }
+            i++;
+            dnaat += 1;
+        }
+    }
     return;
 }
 
@@ -3241,7 +3588,7 @@ int gotten_genes_index;
 char gotgenes[MAXGOTGENES][50];
 int firstgene_flag  = 1;
 
-static void paint_gene_annot(char khr[], int s, int e) 
+static void paint_gene_annot(char khr[], unsigned int s, unsigned int e) 
 {
 char m[512];
     size_t read_status = 0;
@@ -3258,7 +3605,7 @@ char m[512];
     int x1,x2,y1,y2;
     struct flattype *z;
     struct flattype f;
-    int jj;
+    unsigned int jj;
 
     if (firstgene_flag == 1)
     {
@@ -3420,7 +3767,7 @@ sprintf(m,"after twobit() fn=%s %s %d %d ptr=%p, status=%d ",fn,khr,s,e,ptr,stat
 
 
    /* draw reference geneome region as colorful "rainbow" on bottom of image */
-static void paint_dna_rainbow(char khr[], int s, int e)
+static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
 {
     double local_pxwidth;
     int yoffset = 18;
@@ -3437,9 +3784,10 @@ char m[512];
     dnaspace = twobit(khr, s , e+1,blds); // free return if return != 0
     if (!dnaspace) 
     {
-sprintf(m,"ERROR: in paint_dna_rainbow() dnaspace from twobit() is null "); jdebug(m);
+sprintf(m,"ERROR: in setup_reference_dna() dnaspace from twobit() is null "); jdebug(m);
         return;
     }
+    if (paint_it_flag == 0) return;
  
     slice_len_in_bases = e - s;
     local_pxwidth = (double)iw/(double)(slice_len_in_bases);
@@ -3469,11 +3817,7 @@ sprintf(m,"in rainbow(), got dnaspace  %p len=%d y1=%d y2=%d ih=%d off=%d",dnasp
             case 'T': xcolor = dna_t; break;
             default : xcolor = pink;
         }
-#if USE_GD
-        gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#else
         ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#endif
         lastx1 = x1;
         lastx2 = x2;
     }
@@ -4601,7 +4945,7 @@ jdebug("faile to get XR tag");
 
 
 int kknt = 0;
-static char *rpf_bam_nt16_rev_table = "=ACMGRSVTWYHKDBN"; // a local copy, samtools library on windows is not exporting data for some reason
+const char *rpf_bam_nt16_rev_table = "=ACMGRSVTWYHKDBN"; // a local copy, samtools library on windows is not exporting data for some reason
 
 static char *rpf_format2(const bam_header_t *header, const bam1_t *b)
 {
@@ -4762,9 +5106,18 @@ for (i = 0; i < c->n_cigar; ++i)
                     }
                 }
 #endif
-                  aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
-                                /*fwd*/bam1_strand(b),
-                                bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
+
+#ifdef CMD_LINE
+                if (snp_call_flag == 1) 
+                    snp_call_aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
+                                /*fwd*/bam1_strand(b), bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
+                else
+                    aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
+                                /*fwd*/bam1_strand(b), bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
+#else
+                    aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
+                                /*fwd*/bam1_strand(b), bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
+#endif
 // sprintf(m, "in VF3"); jdebug(m); 
                 }
             }
@@ -4779,7 +5132,7 @@ for (i = 0; i < c->n_cigar; ++i)
 // p_haspair,P_mappedproperpair, u_unmapped, U_mateunmapped, r_strand, R_matestrand, 1_pair1st, 2_pair2nd,s_notprime,
 // f_failvendor,d_pcrdupe
 // extern char *bam_flag2char_table;  windows samtools library not exporting data 
-char *rpf_bam_flag2char_table = "pPuUrR12sfd\0\0\0\0\0";
+const char *rpf_bam_flag2char_table = "pPuUrR12sfd\0\0\0\0\0";
 
 
 char *rpf_format_sam(const bam_header_t *header, const bam1_t *b, int of)
@@ -6041,8 +6394,7 @@ int dobam(char fn[],int khroffset,int s, int e,char chr[])
     char bai_fn[1280];  // BAM Index ".bai" file
     char *fn_out = 0;
 
-sprintf(m,"in dobam begin func");  jdebug(m); 
-sprintf(m,"in dobam(file=%s) %s %d %d",fn,chr,s,e);  jdebug(m); 
+// debug fprintf(stderr,"xxx in dobam(file=%s) %s %d %d",fn,chr,s,e);  fflush(stderr); 
 
     numrecs = searcht = 0;
     globalreadscount = 0;
@@ -6134,6 +6486,7 @@ sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region)
             goto view_end;
         }
 
+// fprintf(stderr,"xxx in do_bam before bam-fetch viewfunc \n");   fflush(stderr);  
 sprintf(m, "in dobam() before bamfetch tid=%d beg=%d end=%d out=%p vf=%p VFxxx",tid,beg,end,out,view_func); jdebug(m); 
         bam_fetch(in->x.bam, idx, tid, beg, end, out, view_func); // fetch alignments - "view_func" is callback 
 sprintf(m, "in dobam() after view_func() globalreadscount=%d",globalreadscount); jdebug(m); 
@@ -6483,7 +6836,7 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
     ImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
 #endif
 
-    paint_dna_rainbow(chrchr,gs,ge); // importantly, get 2 bit data 
+    setup_reference_dna(chrchr,gs,ge,1); // importantly, get 2 bit data 
     setup_dnacnts_and_dnamms(ge-gs+1);
     dobam(fn_bam,chrom_index,gs,ge,chr);
 
@@ -6540,6 +6893,7 @@ sprintf(m,"in imgen before savefile fn = [%s] ",fn); jdebug(m);
 sprintf(m,"in imgen() end imgen (fn=%s), returning status = 0 ",fn);  jdebug(m); 
     return 0;
 }
+
 
 int find_build(char fn_bam_arg[])
 {
@@ -6717,7 +7071,7 @@ jdebug(m);
     ImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
 #endif
 
-    paint_dna_rainbow(chrchr,gs,ge); // importantly, get 2 bit data 
+    setup_reference_dna(chrchr,gs,ge,1); // importantly, get 2 bit data 
     setup_dnacnts_and_dnamms(ge-gs+1);
     dobam(fn_bam,chrom_index,gs,ge,chr);
 
@@ -8727,6 +9081,112 @@ sprintf(m,"end web program");  jdebug(m);
 
 
 #if CMD_LINE
+
+int fast_snp_call( char fnbam[], char chr[],int khrstart, int khrend)
+{
+    int s,e;
+    int len;
+    int chrom_index;
+    int status;
+    char chrchr[1024];  
+    char fn[1024];
+    char m[2048];
+
+
+// debug fprintf(stderr,"in fast_snp_call  0 khrstart=%d khrend=%d chr=[%s] - bam=[%s]\n",khrstart,khrend,chr,fnbam);  fflush(stderr);  
+
+    strcpy(chrchr,chr);
+    fix_num_to_chrstyle(chr,chrchr); 
+
+    strcpy(fn,fnbam);
+
+    s = e = len = status = 0;
+    totalcnt = 0;
+    len = khrstart - khrend;
+    if (len > MAX_CHROMSIZE)
+    {
+        sprintf(m,"ERROR: in fast_snp_call() size is too big "); jdebug(m);
+        return -1;
+    }
+
+    pxwidth = (double)iw /(double)(len);
+    gs = khrstart;
+    ge = khrend;
+    gdiff = ge - gs;
+    ppp_firsttime = 1; 
+
+    status = get_chr_spot(chr,&s,&e,&chrom_index); // not really using this right - fix 
+    if (status < 0)
+    {
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d %s ",chr,gs,ge,blds); 
+        jdebug(m);
+        return -2;
+    }
+    snp_call_flag = 1; 
+    strcpy(snp_call_chr,chr); 
+    snp_call_spot = gs; 
+    gs = snp_call_spot - 5000 ;
+    ge = snp_call_spot + 200 ;
+    snp_call_dnaat = snp_call_spot - gs;
+    setup_reference_dna(chrchr,gs,ge,0); // 0 in arg4 means don't paint 
+    setup_dnacnts_and_dnamms(ge-gs+1);
+    dobam(fn_bam,chrom_index,gs,ge,chr);
+    return 0;
+}
+
+
+int setup_and_do_fast_snp_caller(char fnbam[])
+{
+    double d;
+    int cov,mx;
+    int s,e;
+    int status;
+
+// debug fprintf(stderr,"in setup_and_do_fast_snp_caller(%s) \n",fnbam); fflush(stderr); 
+    if ( GENOMEDATADIR[0]  == (char)0 )
+    {
+        fprintf(stderr,"ERROR, must set up GENOMEDATADIR in configure file \"alview.conf\"\n");
+        exit(0);
+    }
+    status = parse_position(position,chr,&s,&e);
+
+
+    status = fast_snp_call(fnbam,chr,s,e);
+    if ((status) || (global_bamerr > 0) )
+    {
+        fprintf(stderr,"Error- in setup_and_do_fast_snp_caller() after fast_snp_call() status=%d ",status);
+        fprintf(stderr,"status code = %d , global_bamerr code = %d \n",status,global_bamerr);
+        return -1;
+    }
+
+ cov = ( snp_call_A_cnt  + snp_call_C_cnt  + snp_call_G_cnt  + 
+                     snp_call_T_cnt  + snp_call_Ins_cnt  + snp_call_Del_cnt);
+ d = 0.0;
+ mx = 0;
+ if (snp_call_A_cnt  > mx) mx = snp_call_A_cnt;
+ if (snp_call_C_cnt  > mx) mx = snp_call_C_cnt;
+ if (snp_call_G_cnt  > mx) mx = snp_call_G_cnt;
+ if (snp_call_T_cnt  > mx) mx = snp_call_T_cnt;
+ if (snp_call_Ins_cnt  > mx) mx = snp_call_Ins_cnt;
+ if (snp_call_Del_cnt  > mx) mx = snp_call_Del_cnt;
+ if (cov) d = (double)mx / (double) cov;
+
+printf("A: %d ", snp_call_A_cnt ); 
+printf("C: %d ", snp_call_C_cnt ); 
+printf("G: %d ", snp_call_G_cnt ); 
+printf("T: %d ", snp_call_T_cnt ); 
+printf("Ins: %d ", snp_call_Ins_cnt ); 
+printf("Del: %d ", snp_call_Del_cnt ); 
+printf("cov: %d ", cov ); 
+printf("max: %d ", mx ); 
+printf("readcount: %d ", globalreadscount); 
+printf("percmac: %10.7f ", d ); 
+printf("ref: %c ", snp_call_referece ); 
+printf("\n");
+    return 0;
+}
+
+
 int command_line_main(int argc,char *argv[])
 {
     int s,e;
@@ -8737,7 +9197,23 @@ int command_line_main(int argc,char *argv[])
 
 
     hostname[0] = (char)0;
-    if (argc < 5) { fprintf(stderr,"ERROR: usage inbam outpng position build [imageheight] [ imagewidth ]\n"); exit(0); }
+    if (argc < 3) 
+    { 
+        fprintf(stderr,"ERROR: usage inbam outpng position build [imageheight] [ imagewidth ]\n"); 
+        fprintf(stderr,"or usage2 :  CALL inbam position build \n"); 
+        exit(0); 
+    }
+    if (argc == 4) 
+    {
+        alview_load_config();
+        strcpy(fn_bam,argv[1]);
+        strcpy(position,argv[2]);
+        strcpy(blds,argv[3]);
+        setup_and_do_fast_snp_caller(fn_bam);
+        return 0;
+// xxx 
+    }
+
     strcpy(fn_bam,argv[1]);
     strcpy(outimg,argv[2]);
     strcpy(position,argv[3]);
@@ -8758,14 +9234,11 @@ int command_line_main(int argc,char *argv[])
     tds_val = 0;
     alview_load_config();
 
-#ifdef CMD_LINE
     if ( GENOMEDATADIR[0]  == (char)0 )
     {
         fprintf(stderr,"ERROR, must set up GENOMEDATADIR in configure file \"alview.conf\"\n");
         exit(0);
     }
-#endif
-
     status = parse_position(position,chr,&s,&e);
 
 fprintf(stderr,"command_line_main() chr=[%s] start=%d end=%d position=[%s] \n",chr,s,e,position); 
@@ -10313,8 +10786,4 @@ void freedom_for_memory(void)
     ppp = (unsigned char *)0;
 }
 
-
-/* ---
-=HYPERLINK("https://cgwb-test.nci.nih.gov:8443/cgi-bin/alview?position="&D1&":"&E1-100&"-"&E1+100&"&iw=1000&ih=400&file="&A1,"n")
---- */
 
