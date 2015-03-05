@@ -1,0 +1,21 @@
+git commands ...
+git status
+git commit -m "Decription of my change"
+git push origin master
+git push origin master --force
+git remote add origin
+git push origin master https://github.com/NCIP/alview.git
+git pull https://github.com/NCIP/alview.git
+git commit -m "latest changes"
+git push https://github.com/NCIP/alview.git
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/NCIP/alview.git
+git push -u origin master
+git fetch --all
+git reset --hard origin/master
+git push https://github.com/NCIP/alview.git
+git push origin master --force
+git push https://github.com/NCIP/alview.git --force
+
