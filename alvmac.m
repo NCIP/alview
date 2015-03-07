@@ -100,7 +100,7 @@ NSRect superframe;
     {
         NSString *userinput = [self stringValue];
         char *sptr = (char *)[userinput UTF8String];
-printf("got [%s]\n",sptr);
+// printf("mac: got [%s]\n",sptr);
         get_params_and_draw(1);
 // printf("keydown , event keycode is [%d]  \n",[event keyCode]);
     }
@@ -204,8 +204,8 @@ void do_img_and_draw(char *fn, char khr[], int s, int e, int arg)
 {
     int status;
 
-#if 1
-printf("in do_img_and_draw() file name = %p \n", fn);  fflush(stdout); 
+#if 0
+// printf("mac: in do_img_and_draw() file name = %p \n", fn);  fflush(stdout); 
 #endif
     if (fn) strcpy(fn_bam,(char *)fn); 
 // sanity 
@@ -218,12 +218,14 @@ printf("in do_img_and_draw() file name = %p \n", fn);  fflush(stdout);
          khrend = 15849;
     }
     if (img) { free(img); }
-#if 1
-printf("in do_img_and_draw() before imgen_mem %s %d %d %d %d\n",khr,khrstart,khrend,dih,diw);  fflush(stdout); 
+#if 0
+printf("mac: in do_img_and_draw() before imgen_mem %s %d %d %d %d\n",khr,khrstart,khrend,dih,diw);  fflush(stdout); 
 #endif
 
     img = (void *)imgen_mem(fn_bam,khr,khrstart,khrend,dih, diw,&status);
-printf("in do_img_and_draw after imgen_mem() img =%p, status=%d \n",img,status); fflush(stdout); 
+#if 0
+printf("mac: in do_img_and_draw after imgen_mem() img =%p, status=%d \n",img,status); fflush(stdout); 
+#endif
     if (img)
     {
         darea_on = 1;
@@ -248,7 +250,7 @@ void get_params_and_draw(int arg)
 
     NSString *userinput = [texts[0].object stringValue];
     sptr = (char *)[userinput UTF8String];
-printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr); 
+// printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr); 
     strcpy(pos,sptr);
     NSString *userinput2 = [texts[1].object stringValue];
     sptr = (char *)[userinput2 UTF8String];
@@ -257,9 +259,9 @@ printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr);
     sptr = (char *)[userinput3 UTF8String];
     dih = atoi(sptr);
 
-printf("xxx in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
+// printf("xxx in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
     status = parse_position(pos,khr,&khrstart,&khrend); 
-printf("xxx in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
+// printf("xxx in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
 
 // put pos back to screen
     NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
@@ -325,7 +327,9 @@ int on_button_move(int movek)
         return -1;
     }
 
-printf("in on_button_moveSTART movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,fn_bam); fflush(stdout);  
+#if 0
+printf("mac: in on_button_moveSTART movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,fn_bam); fflush(stdout);  
+#endif
     page_nts = khrend - khrstart;
     if (movek == 1)   // page right special code 
     {
@@ -350,7 +354,7 @@ printf("in on_button_moveSTART movek=%d , khrstart = %d khrend = %d diw=%d dih=%
     [texts[0].object setStringValue:defval];
 
 // xxx
-printf("onmove before get_params,, pos = [%s]\n",pos); fflush(stdout);  
+// printf("mac: onmove before get_params,, pos = [%s]\n",pos); fflush(stdout);  
     get_params_and_draw(1);
     return 0;
 }
@@ -464,7 +468,7 @@ int myid;
     int mid;
     int status; 
 
-printf("start mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
+// printf("mac: start mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
 
     if (self->myid == 1) // submit button 
     {
@@ -585,7 +589,7 @@ printf("Zoomout end %s %d %d pos=[%s]\n",khr,khrstart,khrend,pos);
     {
         status = on_button_move(100000);
     }
-printf("end mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
+// printf("mac: end mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
     [super mouseDown:theEvent];
 }
 @end
@@ -594,7 +598,8 @@ printf("end mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,
 void open_file_dialog() // swiped from Rick's world
 {
     int i; // Loop counter.
-printf("in open_file_dialog\n"); 
+
+// printf("mac: in open_file_dialog\n"); 
     NSOpenPanel* openDlg = [NSOpenPanel openPanel]; // Create the File Open Dialog class.
     [openDlg setCanChooseFiles:YES]; // Enable the selection of files in the dialog.
     [openDlg setCanChooseDirectories:YES]; // Enable the selection of directories in the dialog.
@@ -609,11 +614,11 @@ printf("in open_file_dialog\n");
         {
             NSString* fileName = [files objectAtIndex:i];
 char *s = (char *)[fileName UTF8String];
-printf("File name is %s\n",s);
+// printf("Mac: File name is %s\n",s);
 if (i == 0) 
 {
 strcpy(fn_bam,s); 
-printf("openfiledialog before get_params_and_draw [%s] ",fn_bam);
+// printf("mac: openfiledialog before get_params_and_draw [%s] ",fn_bam);
 get_params_and_draw(1);
 }
             // Do something with the filename.
@@ -799,4 +804,5 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
 // -- explain why this below is here ... ?
 #include "alvmisc.c"
 #include "alviewcore.cpp"
+
 

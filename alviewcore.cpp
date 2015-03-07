@@ -99,7 +99,7 @@ example web usage in Excel ...
 #include <unistd.h>
 #endif
 
-#if APPLE
+#if MAC
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
@@ -179,8 +179,9 @@ char GENOMEDATADIR[512];  // eample /home/rfinney/MD/ALV/release/GENOMEDATA  wil
 void freedom_for_memory(void);
 void free_filez(void);
 
-// FFF0E0
-
+#ifdef MAC
+//strlcpy already defined
+#else
 size_t strlcpy(char *dst, char *src, size_t siz)
 {
 	register char *d = dst;
@@ -205,6 +206,7 @@ size_t strlcpy(char *dst, char *src, size_t siz)
 
 	return(s - src - 1);	/* count does not include NUL */
 }
+#endif
 
 #define NCI_RED "A90101"
    // nice red color associated with NCI brand
@@ -1163,11 +1165,13 @@ static char *do_2bit_dna(FILE *fp, unsigned int fragStart, unsigned int fragEnd,
     unsigned int spot;
     int modder = 0;
     unsigned int size = 0;
-    unsigned int i,j,k;
+    unsigned int i,j;
+    int k;
     int fsm1 = fragStart - 1; // Frag Start Minus 1
 
 
-    i = j = k = 0;
+    i = j = 0;
+    k = 0;
     if (fp == (FILE *)0) return (char *)0;
 
 /* Skip to bits we need and read them in. */
