@@ -124,6 +124,7 @@ typedef enum LodePNGColorType
   LCT_RGBA = 6 /*RGB with alpha: 8,16 bit*/
 } LodePNGColorType;
 
+
 #ifdef LODEPNG_COMPILE_DECODER
 /*
 Converts PNG data in memory to raw pixel data.
@@ -7970,14 +7971,19 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     int height;
     unsigned char *img;
 
+    if ((x<0) || (y<0))
+    {
+        fprintf(stderr,"NOTE - invalid x or y passed to ImageFilledRectangle()  x=%d y=%d \n",x,y); 
+        return;
+    }
     if (im == (struct image_type *)0) 
     {
-        fprintf(stderr,"ERROR - null passed to ImageFileedRectangle() "); 
+        fprintf(stderr,"ERROR - null passed to ImageFileedRectangle()  \n"); 
         return;
     }
     if (im->data == (void *)0) 
     {
-        fprintf(stderr,"ERROR - null image data passed to ImageFileedRectangle() "); 
+        fprintf(stderr,"ERROR - null image data passed to ImageFileedRectangle()  \n"); 
         return;
     }
     img = im->data;

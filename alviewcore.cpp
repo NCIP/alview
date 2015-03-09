@@ -10,7 +10,15 @@ To deal with this : just keep keep #define GOTOH=0 to disable it OR re-engineer 
 Otherwise, do whatever you want!  NIH assumes no liabilities or responsibilities.  Use at your own risk.
 
 #Compile for Webserver on Linux ...
-g++ -DUNIX -DWEB_SERVER=1 -Wall -O3  -m64 -minline-all-stringops -mno-align-stringops -momit-leaf-frame-pointer -finline-functions -o alview alviewcore.cpp  -lpthread -lz -Wall  -I/h1/finneyr/samtools-0.1.18/ /usr/lib/libguide.a /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz -lgd /h1/finneyr/zlib-1.2.3/libz.a
+g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -O3 -m64 -minline-all-stringops -mno-align-stringops -momit-leaf-frame-pointer -finline-functions -o alview alviewcore.cpp alvmisc.cpp -lpthread -lz -Wall -I/h1/finneyr/samtools-0.1.18/ /usr/lib/libguide.a /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz  /h1/finneyr/zlib-1.2.3/libz.a
+
+# notes ...
+#Target specific options:
+#  -m64                      Generate 64bit x86-64 code
+#  -minline-all-stringops    Inline all known string operations
+#  -mno-align-stringops      Do not align destination of the string operations
+#  -momit-leaf-frame-pointer Omit the frame pointer in leaf functions
+
 
 compile for command line 
 Using NEW samtools 1.0 ( after august 2014) 
@@ -29,14 +37,12 @@ gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. -I/data/nextgen/fi
 
 todo: (soon !) 
 Prev Next
-fix gdImageStringFT fallback
 guard against too big mallocs
 multi image operations
 divorce from hg18, hg19
+
 fix these messages 
 [bam_parse_region] fail to determine the sequence name.
-[bam_parse_region] fail to determine the sequence name.
-ERROR: in savefile , Can not open output file "C:\rich\ALWIN\tmp.gif" --  put in errno
 
 example web usage in Excel ...
 =HYPERLINK("https://cgwb-test.nci.nih.gov:8443/cgi-bin/alview?position="&D1&":"&E1-100&"-"&E1+100&"&iw=1000&ih=400&file="&A1,"n")
@@ -173,7 +179,7 @@ char CONFIGFILE[] = "alview.conf";
 char URL[512];
 char HTDOCSDIR[512];
 char CGIDIRIFNECESSARY[512];
-char FULL_PATH_TO_TTF[512]; //   "/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf" ?
+// old char FULL_PATH_TO_TTF[512]; //   "/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf" ?
 char GENOMEDATADIR[512];  // eample /home/rfinney/MD/ALV/release/GENOMEDATA  will append blds (build) string 
 
 void freedom_for_memory(void);
@@ -392,13 +398,15 @@ struct disease_type
 };
 
 #if WIN32
-// this is in alvwin32
+// jdebug is in alvwin32.cpp file
 void jdebug(const char *s);
 #else
+
 void jdebug(const char *s) // for use in debuging on internet
 {
-#if 1
-// TURNED OFF IF SET TO ONE 
+#if 0
+// ^^^^ TO TURN OFF IF SET THIS TO ONE 
+
 // fprintf(stderr,"%s\n",s); fflush(stderr);
 #else
     register int i;
@@ -409,11 +417,10 @@ void jdebug(const char *s) // for use in debuging on internet
 
 /* printf("DEBUG: in jdebug %s <br>\n",s); printf("%s\n",s); */
 
-#if QT_GUI
-    strcpy(fn,"x");
+#ifdef WEB_SERVER
+    strcpy(fn,"/tmp/x");
 #else
     strcpy(fn,"x");
-    //strcpy(fn,"/tmp/x");
 #endif
 
     fp = fopen(fn,"a");
@@ -658,9 +665,6 @@ sprintf(m,"in fix_up_support_file_paths fns = %s %s",refflat_d_fn,refflat_o_fn);
     sprintf(refflat_d_fn,"%s\\GENOMEDATA\\%s.dat",hacked_ced_for_sprintf,binary_refflat_prefix);
     sprintf(refflat_o_fn,"%s\\GENOMEDATA\\%s.dao",hacked_ced_for_sprintf,binary_refflat_prefix);
 
-//sprintf(m,"in paint_gene_annot hacked_ced = %s",hacked_ced);  jdebug(m); 
-//sprintf(m,"in paint_gene_annot hacked_ced_for_sprintf = %s",hacked_ced_for_sprintf);  jdebug(m); 
-//sprintf(m,"WIN32 still in paint_gene_annot() blds = %s %s %s",blds ,refflat_d_fn,refflat_o_fn);  jdebug(m); 
 #else
     sprintf(binary_refflat_prefix,"%s/%s.refflat",blds,blds);
     sprintf(refflat_d_fn,"%s/GENOMEDATA/%s.dat",ced,binary_refflat_prefix);
@@ -1129,7 +1133,7 @@ char m[1024];
         if (strcmp(t1,"URL") == 0)                    strcpy(URL,t2);        // URL=lpgws501.nci.nih.gov
         else if (strcmp(t1,"HTDOCSDIR") == 0)         strcpy(HTDOCSDIR,t2);
         else if (strcmp(t1,"CGIDIRIFNECESSARY") == 0) strcpy(CGIDIRIFNECESSARY,t2); 
-        else if (strcmp(t1,"FULL_PATH_TO_TTF") == 0) strcpy(FULL_PATH_TO_TTF,t2); 
+// old        else if (strcmp(t1,"FULL_PATH_TO_TTF") == 0) strcpy(FULL_PATH_TO_TTF,t2); 
         else if (strcmp(t1,"GENOMEDATADIR") == 0) 
         {
              strcpy(GENOMEDATADIR,t2); 
@@ -1653,7 +1657,7 @@ void bark()
     printf("<html>\n");
     printf("quit trying to hack this site.<br>\n");
     printf("no blind strcpy's here<br>\n");
-    printf("hack here: <a href=\"http://www.iwillnothackthissite.com\">http://www.iwillnothackthissite.com</a><br>\n");
+    printf("plese hack here instead : <a href=\"http://www.iwillnothackthissite.com\">http://www.iwillnothackthissite.com</a><br>\n");
     printf("<br>\n");
     printf("happy hacking!!!<br>\n");
     printf("</html>");
@@ -1680,7 +1684,7 @@ void debug1(char *s)
     printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN>\n");
     printf("<html>\n");
     printf("<h1>NOTE: %s</H1><br>\n",s);
-    printf("hack here: <a href=\"http://www.iamanevilhacker.com\">http://www.iamanevilhacker.com</a><br>\n");
+    printf("hack here instead : <a href=\"http://www.iamanevilhacker.com\">http://www.iamanevilhacker.com</a><br>\n");
     printf("<br>\n");
     printf("happy hacking!!!<br>\n");
     printf("</html>");
@@ -2067,9 +2071,9 @@ char hei[MAXBUFF]; // height
 char wid[MAXBUFF]; // width
 char fl1[MAXBUFF]; // file 1
 char fl2[MAXBUFF]; // file 2
-char typ[MAXBUFF]; // type "jpg" or "png" or "gif"
 char los[MAXBUFF];
 char his[MAXBUFF];
+// OLD char typ[MAXBUFF]; // type "jpg" or "png" or "gif"
 
 
 static const char *progname = "alview";
@@ -2149,7 +2153,7 @@ void zap_old_okay2_files(void)
 #endif
 
 
-static void zap_old_gif_files(void)
+static void zap_tmpalview_files(void)
 {
     DIR *d;
     struct dirent *e;
@@ -2226,7 +2230,7 @@ static void zap_old_gif_files(void)
 #if 0 // dont need it after all
 void write_windows_binary(char fn[], char *data, int datalen)
 {
-    HANDLE hFile = 0;
+   HANDLE hFile = 0;
     DWORD dBytesWritten;
 
 #if 0
@@ -2804,7 +2808,7 @@ static void aldetails(int diff, int offset, int len,
     int keepgoing = 1;
 
 
-// fprintf(stderr,"xxx in aldetails(), snp_call_flag = %d %s offset=%d\n", snp_call_flag,chr,offset); fflush(stderr); 
+// fprintf(stderr,"in aldetails(), snp_call_flag = %d %s offset=%d\n", snp_call_flag,chr,offset); fflush(stderr); 
 
 // char m[512];
 // sprintf(m, "in aldetails"); jdebug(m); 
@@ -2832,7 +2836,7 @@ static void aldetails(int diff, int offset, int len,
     frcolor = purple;
 
 
-// fprintf(stderr,"xxx in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
+// fprintf(stderr,"in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
 
 #ifdef QT_GUI
  if ((++time_out_every_once_a_while % 50000) == 0)
@@ -3004,10 +3008,10 @@ static void aldetails(int diff, int offset, int len,
             /* SO it's draw nucleotide "matches" = 'M' ------------------*/
         for (k=0 ; k<cig_ops[j].len ; k++)
         {
-// fprintf(stderr,"xxx in aldetails(), dnaat=%d\n", dnaat); fflush(stderr); 
+// fprintf(stderr,"in aldetails(), dnaat=%d\n", dnaat); fflush(stderr); 
             if (dnaat >= dnasize) break;
             ch = seq[i];
-// fprintf(stderr,"xxx in aldetails(), ch=%c\n", ch); fflush(stderr); 
+// fprintf(stderr,"in aldetails(), ch=%c\n", ch); fflush(stderr); 
             if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
             if ((dnaat >= 0) && (dnaat < dnasize))
             {
@@ -3103,7 +3107,7 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
     return;
 }
 
-static void snp_call_aldetails(int diff, int offset, int len,  
+void snp_call_aldetails(int diff, int offset, int len,  
         int fwdflag, int optical_dupe_flag ,char seq[], char *quality, int seqlen, char cigar[], int splice_source)
 {
     char ch;
@@ -3122,7 +3126,7 @@ static void snp_call_aldetails(int diff, int offset, int len,
     int keepgoing = 1;
 
 
-// debug fprintf(stderr,"xxx in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
+// debug fprintf(stderr,"in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
 fflush(stderr); 
 
     if (!dnaspace) return;
@@ -3149,7 +3153,7 @@ fflush(stderr);
     frcolor = purple;
 
 
-// fprintf(stderr,"xxx in snp_call_aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
+// fprintf(stderr,"in snp_call_aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
 
 #ifdef QT_GUI
  if ((++time_out_every_once_a_while % 50000) == 0)
@@ -3317,7 +3321,7 @@ fflush(stderr);
         {
             if (dnaat >= dnasize) break;
             ch = seq[i];
-// fprintf(stderr,"xxx in snp_call_aldetails(), dnaat=%d snd=%d '%c'\n", dnaat,snp_call_dnaat,ch); fflush(stderr); 
+// fprintf(stderr,"in snp_call_aldetails(), dnaat=%d snd=%d '%c'\n", dnaat,snp_call_dnaat,ch); fflush(stderr); 
             if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
             if ((dnaat >= 0) && (dnaat < dnasize))
             {
@@ -3681,11 +3685,12 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
     j,s,e,temp_refflat_space.txStart,temp_refflat_space.txEnd,temp_refflat_space.exonCount); jdebug(m);
 */
 
-// sprintf(m,"fseek %u \n",temp_refflat_space.exonStarts); jdebug(m);
+// sprintf(m,"in paint_gene_annot() -- fseek %u ",temp_refflat_space.exonStarts); jdebug(m);
 
             fseek(fp_refflat_o, (long int)(temp_refflat_space.exonStarts), SEEK_SET);    // really an offset into an "overflow" file
             for (jj=0 ; ((jj<temp_refflat_space.exonCount) && (jj < 2000)) ; jj++)  // kickout after 2000 to prevent lock up if read data is corrupted
             {
+// sprintf(m,"in paint_gene_annot() -- looping %d ",jj);  jdebug(m);
                 end = start = (unsigned int) 0;
                 read_status = fread(&start,sizeof(unsigned int),1,fp_refflat_o); if (read_status != 1) break;
                 read_status = fread(&end,sizeof(unsigned int),1,fp_refflat_o); if (read_status != 1) break;
@@ -3693,6 +3698,7 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                 x1 = (int)(local_pxwidth * (double)(start -s)); 
                 x2 = (int)(local_pxwidth * (double)(end -s)); 
                 if (x2==x1) x2 = x1 + 1;
+// sprintf(m,"in paint_gene_annot() -- looping %d , x1 = %d , x2 = %d ,iw = %d ",jj,x1,x2,iw);  jdebug(m);
                 if ((x1<0) && (x2 < 0)) continue;
                 if ((x1>=iw) && (x2 >= iw)) continue;
                 if (x1 < 0) x1 = 0;
@@ -3707,15 +3713,19 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
 #endif
                 if (strcmp(prev,temp_refflat_space.geneName))
                 {
+// sprintf(m,"in paint_gene_annot() -- still here 4 [%s]",temp_refflat_space.geneName);  jdebug(m);
                     unsigned char *ucptr = (unsigned char *)&temp_refflat_space.geneName[0];
 #if USE_GD
     int brect[8];
 #ifdef WIN32
                     gdImageString(im,gdFontGetLarge(),x1,22,ucptr,blue);
 #else
-                    gdImageStringFT (im, brect, blue, FULL_PATH_TO_TTF , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
+// old                     gdImageStringFT (im, brect, blue, FULL_PATH_TO_TTF , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
+                    gdImageStringFT (im, brect, blue, "" , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
 #endif
 #else
+sprintf(m,"hack xxx -- in paint_gene_annot() before ImageStringFT p=%p",ucptr);  jdebug(m); 
+sprintf(m,"hack xxx -- in paint_gene_annot() before ImageStringFT [%s]",ucptr);  jdebug(m); 
                     ImageString(im,x1,22,ucptr,blue);
 #endif
 
@@ -3744,6 +3754,9 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
         }
         j++;
     }
+
+sprintf(m,"in paint_gene_annot() END "); jdebug(m);
+
     return;
 }
 
@@ -4404,8 +4417,7 @@ void do_filez_form(void)
     int i;
     char m[512];
 
-sprintf(m,"in do_filez_form() 0");  jdebug(m); 
-sprintf(m,"in do_filez_form() 1 , num_filez = %d",num_filez);  jdebug(m); 
+sprintf(m,"in do_filez_form() 0 , num_filez = %d",num_filez);  jdebug(m); 
     printf("<br>\n");
     for (i=0 ; i<num_filez ; i++) 
     {
@@ -4413,10 +4425,8 @@ sprintf(m,"in do_filez_form() 1 , num_filez = %d",num_filez);  jdebug(m);
            printf("<a href=\"../cgi-bin/alview?position=chr1:100-500&iw=1000&ih=350&filenum=%d\">%s</a>", filez[i].file_id,filez[i].fullpath);
        else
            printf("%s", filez[i].info); // comment or information line from file
-/*
-    char fn[512];
-       if (has_cov_file(filez[i].fullpath,fn) ) printf("&nbsp;&nbsp <small>*** %s</small>\n",fn);
-*/
+/* char fn[512]; if (has_cov_file(filez[i].fullpath,fn) ) printf("&nbsp;&nbsp <small>*** %s</small>\n",fn); */
+
        printf("<br>\n"); 
     }
 sprintf(m,"in do_filez_form() 999");  jdebug(m); 
@@ -4634,7 +4644,8 @@ void get_out_of_this_mess(char msg[])
 #if PICK
         printf("<font size=\"3\" color=\"red\"><a href=\"../cgi-bin/alview?pickmenu=1\">For ALVIEW Pick Page, click here.</a></font><br>\n"); 
 #endif
-        zap_old_gif_files();
+
+        zap_tmpalview_files();
         printf("</body>\n"); 
         printf("</html>\n"); 
         return;
@@ -6491,9 +6502,9 @@ sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region)
         }
 
 // fprintf(stderr,"xxx in do_bam before bam-fetch viewfunc \n");   fflush(stderr);  
-sprintf(m, "in dobam() before bamfetch tid=%d beg=%d end=%d out=%p vf=%p VFxxx",tid,beg,end,out,view_func); jdebug(m); 
+// sprintf(m, "in dobam() before bamfetch tid=%d beg=%d end=%d out=%p vf=%p VFxxx",tid,beg,end,out,view_func); jdebug(m); 
         bam_fetch(in->x.bam, idx, tid, beg, end, out, view_func); // fetch alignments - "view_func" is callback 
-sprintf(m, "in dobam() after view_func() globalreadscount=%d",globalreadscount); jdebug(m); 
+// sprintf(m, "in dobam() after view_func() globalreadscount=%d",globalreadscount); jdebug(m); 
 
         bam_index_destroy(idx); // destroy the BAM index
 
@@ -6868,8 +6879,8 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
 #endif
 sprintf(m,"in imgen() in imgen() after gdImageFilledRectangle");  jdebug(m); 
 
-#if QT_GUI
-    strcpy(shortfilename,"tmp.gif");
+#if 0 // QT_GUI
+    strcpy(shortfilename,"tmp.png");
 #ifdef WIN32
     sprintf(fn,"%s\\%s",cwd,shortfilename);   // NOTE NOT URL STYLE, DOS STYLE
     _unlink(fn);
@@ -6877,15 +6888,17 @@ sprintf(m,"in imgen() in imgen() after gdImageFilledRectangle");  jdebug(m);
     sprintf(fn,"%s/%s",cwd,shortfilename);
     unlink(fn);
 #endif
+
 #endif
 
 
 #if WEB_SERVER
 #ifdef WIN32
-    sprintf(shortfilename,"tmpalview.%d.gif",rand());
+    sprintf(shortfilename,"tmpalview.%d.png",rand());
 #else
-    sprintf(shortfilename,"tmpalview.%d.%d.gif",getpid(),rand());
+    sprintf(shortfilename,"tmpalview.%d.%d.png",getpid(),rand());
 #endif
+
     sprintf(fn,"%s/%s",HTDOCSDIR,shortfilename); // must put in place apache/nginx can see it
 sprintf(m,"WEB_SERVER: in imgen before savefile fn = [%s] ",fn); jdebug(m);
 sprintf(m,"WEB_SERVER: HTDOCSDIR = [%s] ",HTDOCSDIR); jdebug(m);
@@ -7470,9 +7483,8 @@ sprintf(m,"ERROR in do_describe_based_on_filename , invalid filez_id"); jdebug(m
 sprintf(m,"ERROR in do_describe_based_on_filename , invalid fzidx"); jdebug(m);
         return;
     }
-jdebug("in do_describe_based_on_filename here 3"); 
-sprintf(m,"in do_describe_based_on_filename, filez_id=%d",filez_id);  jdebug(m); 
-sprintf(m,"%s",fn);  jdebug(m); 
+// sprintf(m,"in do_describe_based_on_filename, filez_id=%d",filez_id);  jdebug(m); 
+// sprintf(m,"%s",fn);  jdebug(m); 
 
     printf("<small>");
     printf("%s",filez[fzidx].fullpath);
@@ -7507,7 +7519,6 @@ sprintf(m,"rpf in do_describe_based_on_filename(), z=%s",z);  jdebug(m);
             if (gettissue(z,msg)) printf(" %s ",msg); 
             }
         }
-jdebug("in do_describe_based_on_filename here 6"); 
     }
 
     printf("</small>");
@@ -8482,7 +8493,7 @@ void do_pick_form()
     did_content_type = 1;
     printf("<head>\n"); 
     printf("<meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\">\n"); 
-    printf("<title>CBIIT ALVIEW</title>\n"); 
+    printf("<title>CBIIT ALVIEW - Pick BAM File</title>\n"); 
     print_some_css();
     printf("</head>\n"); 
     printf("<body style=\"margin:10px;padding:0px;\">\n"); 
@@ -8578,6 +8589,10 @@ void badhost()
 
 void initialize_ttf(void)
 {
+    return; 
+#if 0
+// this is OLD - it was used with gd library. gd is obsoleted to make more portable 
+
     if (FULL_PATH_TO_TTF[0]) return;     // already set, possibly by config file
 
 #ifdef WIN32
@@ -8587,6 +8602,7 @@ void initialize_ttf(void)
     strcpy(FULL_PATH_TO_TTF,"/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf");
 #endif
     return;
+#endif
 }
 
 #if WEB_SERVER
@@ -9001,17 +9017,15 @@ printf("<script type=\"text/javascript\" src=\"../js/alview.jquery.imgareaselect
 // sprintf(m,"fullpath = %s ",filez[filez_id].fullpath);  jdebug(m); 
 
     do_describe_based_on_filename(filez[filez_id].fullpath);
-jdebug("here 6"); 
 
     printf("<br>"); 
     printf("<img id=\"bamimg\" WIDTH=%d HEIGHT=%d src=\"../%s\">\n",iw,ih,short_image_filename);
 
-jdebug("here 7"); 
     print_some_javascript_for_popups();
 sprintf(m,"after print_some_javascript_for_popups");  jdebug(m); 
 
     do_form(chr,alv_start,alv_end,s,e);
-sprintf(m,"after do_form");  jdebug(m); 
+// sprintf(m,"after do_form");  jdebug(m); 
 
 printf("Using Dataset:%d Position : %s %d %d <br>\n",tds_val,chr,alv_start,alv_end);
 
@@ -9038,7 +9052,6 @@ printf("<a href=\"../cgi-bin/alview?position=%s:%d-%d&filenum=%d&job=fastq\" tar
 printf("<a href=\"../cgi-bin/alview?position=%s:%d-%d&filenum=%d&job=align\" target=\"_blank\">align</a> | \n",tmp_chr,alv_start,alv_end,filez_id);
 printf("<a href=\"http://genome.ucsc.edu/cgi-bin/hgBlat\" target=\"_blank\">blat</a> | \n");
 
-sprintf(m,"after do_form");  jdebug(m); 
  printf("<a href=\"../cgi-bin/alview?position=%s:%d-%d&filenum=%d&geneannot=on\" >P</a> | \n",tmp_chr,alv_start,alv_end,filez_id-1);
  printf("<a href=\"../cgi-bin/alview?position=%s:%d-%d&filenum=%d&geneannot=on\" >N</a> | \n",tmp_chr,alv_start,alv_end,filez_id+1);
  printf("<a href=\"../cgi-bin/alview?position=%s:%d-%d&filenum=%d&geneannot=on\" target=\"_blank\">Pl</a> | \n",tmp_chr,alv_start,alv_end,filez_id-1);
@@ -9054,9 +9067,8 @@ fflush(stdout);  // why not ?
 
 sprintf(m,"before do_gotgenes");  jdebug(m); 
     do_gotgenes();
-    do_gotgenes_trawler();
-
 sprintf(m,"after  do_gotgenes");  jdebug(m); 
+    do_gotgenes_trawler();
 
     end_javascript(chr,alv_start,alv_end);
 sprintf(m,"after  end_javascript");  jdebug(m); 
@@ -9073,8 +9085,7 @@ printf("</html>\n");
 fflush(stdout); 
 
 sprintf(m,"before zaps ");  jdebug(m); 
-    zap_old_gif_files(); // *************************************************
-                     // no longer used     zap_old_okay2_files(); // *************************************************
+    zap_tmpalview_files();                                        // *************************************************
 sprintf(m,"before freedom_for_memory ");  jdebug(m); 
     freedom_for_memory();
     
@@ -9215,7 +9226,6 @@ int command_line_main(int argc,char *argv[])
         strcpy(blds,argv[3]);
         setup_and_do_fast_snp_caller(fn_bam);
         return 0;
-// xxx 
     }
 
     strcpy(fn_bam,argv[1]);
