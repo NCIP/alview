@@ -1,21 +1,21 @@
 
-December 11, 2014 MAJOR UPDATES: WORKABLE BINARIES READY <b>NOW</b> FOR WINDOWS, MAC and LINUX.
+March 9, 2015    WORKABLE BINARIES READY <b>NOW</b> FOR WINDOWS, MAC and LINUX.
 
 ALVIEW NOW USES NATIVE GUIS ... GTK for Linux, Win32 for Windows and Cocoa for Mac !!!
-Faster, trimmer, zero licensing hassles.  (Alview, still also can run as a web server or command line batch.)
+Faster, trimmer, zero licensing hassles.   Alview also can run as a web server or command line batch. 
 
 <p>The WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
 
 Check BINARIES directory for useable binaries.  Linux may require recompile from source; not a big deal though.
 
-PCs and Unix boxes are typicaly locked down these days.  This distrubution is intended to bypass the
-sanbox movement.  The downside is you have to a ~little~ bit of hassle work.  Not a big deal for 
-wizards; but maybe a some careful work by novices.  You do have to download some big reference genome infomation.
+PCs and Unix boxes are typicaly locked down these days.  This distribution is intended to bypass the
+sandbox movement.  The downside is you have to a ~little~ bit of hassle work.  Not a big deal for 
+wizards; but maybe a some careful work by novices.  You do have to download some big reference genome information.
 
 Alview Runtime binaries only rely on old, standard runtime libraries.   No system updates necessary.
 Just download the binary, some support files, edit alview.conf check permissions .... and GO VIEW YOUR BAMS.
 Is that SNP real?   Maybe it's that elusive "Illumina Chemistry" craziness?   Check and make sure 
-before you schedule a costly verification !!!   Make sure your "statistal significance" is not really noise.
+before you schedule a costly verification.  Make sure your snp call is not really noise.
 
 If you wish to compile, please follow instructions in the ALVIEW_USERS_MANUAL.txt file.  
 Aside from samtools, Compilation uses fairly standard libraries (zlib and run time libraries) .
