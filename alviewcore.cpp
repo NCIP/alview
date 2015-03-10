@@ -10,7 +10,8 @@ To deal with this : just keep keep #define GOTOH=0 to disable it OR re-engineer 
 Otherwise, do whatever you want!  NIH assumes no liabilities or responsibilities.  Use at your own risk.
 
 #Compile for Webserver on Linux ...
-g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -O3 -m64 -minline-all-stringops -mno-align-stringops -momit-leaf-frame-pointer -finline-functions -o alview alviewcore.cpp alvmisc.cpp -lpthread -lz -Wall -I/h1/finneyr/samtools-0.1.18/ /usr/lib/libguide.a /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz  /h1/finneyr/zlib-1.2.3/libz.a
+
+g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -o alview alviewcore.cpp alvmisc.cpp -lz -Wall -I/h1/finneyr/samtools-0.1.18/ /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz
 
 # notes ...
 #Target specific options:
@@ -10799,5 +10800,6 @@ void freedom_for_memory(void)
     if (ppp) free(ppp);
     ppp = (unsigned char *)0;
 }
+
 
 

@@ -1,0 +1,26 @@
+if [ $# -eq 1 ]
+then
+    vi +${1} alviewcore.cpp
+else
+    vi +18067 alviewcore.cpp
+fi
+
+SAMTOOLSDIR=/h1/finneyr/samtools-0.1.18/
+
+g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -o alview alviewcore.cpp alvmisc.cpp -lz -Wall -I${SAMTOOLSDIR} ${SAMTOOLSDIR}/libbam.a -lm -lz  
+
+#more sophsisticated example : g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -O3 -m64 -minline-all-stringops -mno-align-stringops -momit-leaf-frame-pointer -finline-functions -o alview alviewcore.cpp alvmisc.cpp -lpthread -lz -Wall -I/h1/finneyr/samtools-0.1.18/ /usr/lib/libguide.a /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz  /h1/finneyr/zlib-1.2.3/libz.a
+
+strip alview
+ls -l alview
+cp alview /local/content/gbrowser/cgi-bin/
+echo listing "/local/content/gbrowser/cgi-bin/alview" 
+ls -l         /local/content/gbrowser/cgi-bin/alview
+
+# notes ...
+#Target specific options:
+#  -m64                      Generate 64bit x86-64 code
+#  -minline-all-stringops    Inline all known string operations
+#  -mno-align-stringops      Do not align destination of the string operations
+#  -momit-leaf-frame-pointer Omit the frame pointer in leaf functions
+
