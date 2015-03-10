@@ -1,6 +1,6 @@
 
 Alview User's Manual
-December 11, 2014 
+Latest revision March 10, 2015 
 
 Contents.
 I.   Introduction.
@@ -24,7 +24,7 @@ Alview is available via github at https://github.com/NCIP/alview
 
 Alview can take three forms: 
 
-#1 as a real standalone desktop GUI application. (Cocoa, GTK or WIN32).
+#1 as a native standalone desktop GUI application. (Cocoa, GTK or WIN32).
 #2 as a command line utility. 
 #3 as a CGI web server.
 
@@ -34,12 +34,11 @@ It is supported on three Operating Systems:
 #2 Linux (current release is 64 bit, recompilation on other target UNIX is easy) 
 #3 Apple MAC 64 bit
 
-This is newly released, I'd appreciate feedback. Contact me at 
-my email address : finneyr@mail.nih.gov
+This is relatively new, I'd appreciate feedback. Contact me at my email address : [finneyr AT mail nih gov](add @ and dots)
 
 
 II.  Power User Fast Start
-Alview is a webserver or command line utility or a real GUI application.  For 
+Alview is a webserver or command line utility or a native stanalone GUI application.  For 
 GUI, download the package for your operating system.  
 
 Pick a directory to put alview in.   You should make a new one dedicated to Alview and support files.
@@ -193,7 +192,19 @@ V.   Operation as Web Server
 Compile the file alviewcore.cpp with appropriate OS flag and define 
 WEBSERVER to 1.  Install binary in cgi-bin directory and run as web
 application.
-Edit the list of files to list the full paths to your bamfiles.
+Example compilation:
+ 
+g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -o alview alviewcore.cpp alvmisc.cpp -lz -Wall -I${SAMTOOLSDIR} ${SAMTOOLSDIR}/libbam.a -lm -lz
+
+Edit the list of files called "list.public" to list the full paths to your bamfiles.  Place this in the cgi-bin directory.
+Example "list.public" file is ...
+
+#This is list for PUBLIC ALVEW for NCI - public datasets - comments begine with #
+/tcga_next_gen_a/bam_tier_2/GASTRIC/AGP1_RNA.bam AGP1_RNA T Asian_Gastric_RNA
+/tcga_next_gen_a/bam_tier_2/GASTRIC/AGP2_RNA.bam AGP2_RNA T Asian_Gastric_RNA
+/tcga_next_gen_a/bam_tier_2/GASTRIC/AGP3_RNA.bam AGP3_RNA T Asian_Gastric_RNA
+/tcga_next_gen_a/bam_tier_2/GASTRIC/AGP4_RNA.bam AGP4_RNA T Asian_Gastric_RNA
+
 
 VI.  Running Alview as a GUI 
 Enter the genomic coordinates in the position box or a HUGO gene name.
