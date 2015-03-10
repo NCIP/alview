@@ -38,7 +38,7 @@ This is relatively new, I'd appreciate feedback. Contact me at my email address 
 
 
 II.  Power User Fast Start
-Alview is a webserver or command line utility or a native stanalone GUI application.  For 
+Alview is a webserver or command line utility or a native standalone GUI application.  For 
 GUI, download the package for your operating system.  
 
 Pick a directory to put alview in.   You should make a new one dedicated to Alview and support files.
@@ -47,7 +47,7 @@ Next download the binary for your OS: alview.exe for Windows, alvmac for Apple o
 the "BINARIES" directory.
 
 Check the README.md file on the github page.  This will contain the location of the support files.
-(Currenlty they are in my drop box account).  Carefully decompress and untar them.
+(Currently they are in my drop box account).  Carefully decompress and untar them.
 Yes, this is a hassle. It make take a few minutes on your home DSL.
 
 Make sure you have permissions to the files in the resulting untarred directory where the 
@@ -77,7 +77,7 @@ directories the libraries are as you'll need to provide them to the linker.
 Sources for Windows versions of the required support libraries are provided at
 Alview github (zlib and samtools).  These are hacked to work with (Visual Studio's) cl.exe C/C++ compiler
 
-A free command line version is avaliable. Soon. I'll try and get this by December 15.
+A free command line version is availible. Soon. I'll try and get this by December 15.
 
 Set the appropriate IFDEF flags.  These flags are APPLE, UNIX, WINDOWS,
 WEB_SERVER, CMD_LINE  Set UNIX=1 for Linux. Set them as compiler flags.
@@ -231,6 +231,5 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 #end
 
 #01234567890123456789012345678901234567890123456789012345678901234567890123456789
-
 
 
