@@ -404,7 +404,7 @@ void jdebug(const char *s);
 
 void jdebug(const char *s) // for use in debuging on internet
 {
-#if 0
+#if 1
 // ^^^^ TO TURN OFF IF SET THIS TO ONE 
 
 // fprintf(stderr,"%s\n",s); fflush(stderr);
