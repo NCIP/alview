@@ -7973,7 +7973,9 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
 
     if ((x<0) || (y<0))
     {
+#if 0
         fprintf(stderr,"NOTE - invalid x or y passed to ImageFilledRectangle()  x=%d y=%d \n",x,y); 
+#endif
         return;
     }
     if (im == (struct image_type *)0) 

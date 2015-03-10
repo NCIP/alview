@@ -44,7 +44,9 @@ NSPoint startDragLocation;
 @end
 @implementation MyImageViewClass
 - (void)mouseUp:(NSEvent *)event {
-printf("mouse up"); fflush(stdout); 
+
+// debug printf("mouse up"); fflush(stdout); 
+
 NSPoint newDragLocation = [event locationInWindow];
 end_select_x = newDragLocation.x;
 // printf("drag location %f %f\n",newDragLocation.x, newDragLocation.y);
@@ -536,7 +538,7 @@ printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%
         int half;
 
         size = khrend-khrstart;
-printf("Zoomout %s %d %d, size=%d\n",khr,khrstart,khrend,size); 
+// printf("Zoomout %s %d %d, size=%d\n",khr,khrstart,khrend,size); 
         half= size/2;
         khrend = khrend + half;
         khrstart = khrstart - half;
@@ -546,7 +548,7 @@ printf("Zoomout %s %d %d, size=%d\n",khr,khrstart,khrend,size);
         NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
         [texts[0].object setStringValue:defval];
 
-printf("Zoomout end %s %d %d pos=[%s]\n",khr,khrstart,khrend,pos); 
+// printf("Zoomout end %s %d %d pos=[%s]\n",khr,khrstart,khrend,pos); 
         get_params_and_draw(1);
     }
     else if (self->myid == 9) // { 9  ,   10 ,140,  60, 30, "<10 " } ,
