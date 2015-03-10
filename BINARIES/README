@@ -2,8 +2,8 @@
 Installation Quick Start.
 
 1) Decide where to put your alview executable and support data, support data is about 1 GB per build (example hg18, hg19 )
-   The default location for the  GENOMEDATADIR specified in alview.conf file is in a directory called GENOMEDATAIDR off the aliview exectruable's 
-   dicretory. Easeist wayy is to pick a directory for alview, and create GENOMEDATADIR.
+   The default location for the  GENOMEDATADIR specified in alview.conf file is in a directory called GENOMEDATADIR off the  
+   alview executeable's directory. Easiest way is to pick a directory for alview, and create GENOMEDATADIR there.
 
 2) Download the executable for your system
 
@@ -15,7 +15,7 @@ alvmace              MAC
 
 4) edit alview.conf
 
-An example  ... notice that the windows line is uncommendted.  This is an example 
+An example  ... notice that the windows line is uncommented.  This is an example 
 # comments stat with #
 # USE / at end of directories
 # windows  ...
