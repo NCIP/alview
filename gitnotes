@@ -1,3 +1,6 @@
+Use next line on headless linux boxes ...
+unset SSH_ASKPASS
+
 git commands ...
 git status
 git commit -m "Decription of my change"
