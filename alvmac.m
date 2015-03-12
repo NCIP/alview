@@ -18,6 +18,10 @@ int xoron = 0;
 void freedom_for_memory(void);
 void alview_init(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
+int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end);
+
+// horror  !!!  - can't get it to eat unsigned this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
+
 
 extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
 extern struct image_type *im;
@@ -241,7 +245,7 @@ printf("after lodepng w=%d h=%d\n",diw,dih); fflush(stdout);
 #endif
         return;
     }
-printf("ERROR: imgdata is null , no lode\n"); fflush(stdout); 
+printf("ERROR: imgdata is null , no lodepng\n"); fflush(stdout); 
     return;
 }
 
@@ -262,7 +266,19 @@ void get_params_and_draw(int arg)
     dih = atoi(sptr);
 
 // printf("xxx in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
+#if 0
     status = parse_position(pos,khr,&khrstart,&khrend); 
+#endif
+     if (strncmp(pos,"chr",3) == 0)
+     {
+         parse_position(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
+     }
+     else
+     {
+// fprintf(stderr,"in gettextentry() before do_by_gene_name_from_refflat() entry_text is [%s]\n",entry_text); fflush(stderr); 
+         do_by_gene_name_from_refflat(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
+// fprintf(stderr,"in gettextentry() after do_by_gene_name_from_refflat(): %s %d %d\n",khr,khrstart,khrend); fflush(stderr); 
+     }
 // printf("xxx in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
 
 // put pos back to screen
@@ -476,7 +492,7 @@ int myid;
     {
 // xxx
         get_params_and_draw(1);
-printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
+// debug printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
     }
     else if (self->myid == 2) // { 2  ,   10 ,110,  60, 30, "base" } ,
     {
@@ -806,5 +822,4 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
 // -- explain why this below is here ... ?
 #include "alvmisc.c"
 #include "alviewcore.cpp"
-
 
