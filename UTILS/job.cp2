@@ -1,0 +1,4 @@
+cp hg18.refflat.dao /home/rfinney/GENOMEDATA/hg18/hg18.refflat.dao
+cp hg19.refflat.dao /home/rfinney/GENOMEDATA/hg19/hg19.refflat.dao
+cp hg18.refflat.dat /home/rfinney/GENOMEDATA/hg18/hg18.refflat.dat
+cp hg19.refflat.dat /home/rfinney/GENOMEDATA/hg19/hg19.refflat.dat
