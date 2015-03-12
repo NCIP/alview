@@ -398,6 +398,7 @@ struct disease_type
     {(char *)0, (char *)0 } 
 };
 
+
 #if WIN32
 // jdebug is in alvwin32.cpp file
 void jdebug(const char *s);
@@ -407,7 +408,6 @@ void jdebug(const char *s) // for use in debuging on internet
 {
 #if 1
 // ^^^^ TO TURN OFF IF SET THIS TO ONE 
-
 // fprintf(stderr,"%s\n",s); fflush(stderr);
 #else
     register int i;
@@ -467,7 +467,6 @@ int get_filez_index_for_id(int file_id_arg)
     for (i=0;i<num_filez;i++)
        if (filez[i].file_id == file_id_arg) return i;
     return -1;
-
 }
 
 
@@ -484,8 +483,12 @@ void load_filez() // only called by webserver
 
     s[0] = t[0] = junque[0] = (char)0;
 
-    fp = fopen("list.public","r");
-    if (!fp) return;
+    fp = fopen("list.public","r"); // this file is a list of full path names to bam files
+    if (!fp) 
+    {
+        jdebug("ERROR: can't open list.public in cgi-bin directory to read bam files to present in the front menu."); 
+        return;
+    }
     num_filez = 0;
     while ( fgets(s,1024,fp) )
        num_filez++;
@@ -496,25 +499,31 @@ void load_filez() // only called by webserver
     bamcnt = 0;
     while ( fgets(s,1024,fp) )
     {
+// sprintf(m,"in load_filez s=%s ",s);jdebug(m);  
         filez[i].fullpath = filez[i].info = (char *)0;
         for (j=0;s[j];j++) { if ((s[j] == '\n') || (s[j] == '\r')) {s[j] = (char)0; break; }}
         if (s[0] == '#') 
         {
+// sprintf(m,"in load_filez --- comment ");  jdebug(m); 
             filez[i].fullpath = (char *)0;
             filez[i].info = strdup(s);
             filez[i].file_id = -1;
         }
         else
         {
-            sscanf(s,"%s %s",t,junque);    // path in "t"
+            sscanf(s,"%s %s",t,junque);    // put path in "t"
+// sprintf(m,"in load_filez --- t is %s ",t);  jdebug(m); 
             len = strlen(t);
+            if (len) filez[i].fullpath = strdup(t);
+            else     filez[i].fullpath = (char *)0;
             if ((s[len+1])&&(s[len+2]))   // does have whitespace and (maybe) something beyond a "white" char
-            filez[i].fullpath = strdup(t);
-            filez[i].info = strdup(&s[len+1]);
+                filez[i].info = strdup(&s[len+1]);
+            else 
+                filez[i].info = (char *)0;
             filez[i].file_id = bamcnt+1;
             bamcnt++;
         }
-        memset(s,0,2000);
+        memset(s,0,sizeof(s));
         i++;
     }
     num_ids = bamcnt;
@@ -599,7 +608,7 @@ int chrsizes_hg19[] =
 };
 
 
-FILE *fp_refflat_d; // fixed size data
+FILE *fp_refflat_d; // refflat fixed size data
 FILE *fp_refflat_o; // data pointed to in fp_refflat_d   _o is for "overflow" 
 
 
@@ -702,21 +711,32 @@ long int last_refflat_fseek_place;
 
 int setup_refflat(char *input_flat_file_name_d, char *input_flat_file_name_o)
 {
+    int error;
+    int status;
     char m[1024];
 
-sprintf(m,"in setup_refflat() %s %s",input_flat_file_name_d, input_flat_file_name_o);  jdebug(m); 
-    if (fp_refflat_d == (FILE *)0) 
+sprintf(m,"in setup_refflat() d=%s o=%s",input_flat_file_name_d, input_flat_file_name_o);  jdebug(m); 
+    if (fp_refflat_d == (FILE *)0)
     {
         fp_refflat_d = fopen(input_flat_file_name_d,"rb");
-        if (fp_refflat_d == (void *)0) 
-        { 
-             sprintf(m,"ERROR: cant open reflatbinaryname=[%s] in setup_refflat() ",input_flat_file_name_d); jdebug(m); 
+        if (fp_refflat_d == (FILE *)0)
+        {
+             sprintf(m,"ERROR: cant open reflatbinaryname=[%s] in setup_refflat() ",input_flat_file_name_d); jdebug(m);
              return -1;
         }
     }
 
 sprintf(m,"in setup_refflat FILE=%p ",fp_refflat_d);  jdebug(m);
-    fseek(fp_refflat_d,(size_t) 0 , SEEK_END);
+    status = fseek(fp_refflat_d,(size_t) 0 , SEEK_END);
+    error = errno;
+    if (status != 0) 
+    {
+       sprintf(m,"ERROR: can't fseek to end in file \"%s\" -- in setup in setup_refflat() ] - errno=%d",input_flat_file_name_d,errno); jdebug(m);
+       fclose(fp_refflat_d);
+       fp_refflat_d = (FILE *)0;
+       return -2;
+    }
+/// --- SETUP the starting max for a binary search 
     refflat_fixed_hi = ftell(fp_refflat_d) / SIZE_REFFLAT_REC;
 sprintf(m,"in setup_refflat refflat_fixed_hi=%ld ",refflat_fixed_hi); jdebug(m);
 
@@ -728,7 +748,7 @@ sprintf(m,"in setup_refflat refflat_fixed_hi=%ld ",refflat_fixed_hi); jdebug(m);
             sprintf(m,"ERROR: can't open file named \"%s\" in order setup in setup_refflat() ] \n",input_flat_file_name_o); jdebug(m);
             fclose(fp_refflat_d);
             fp_refflat_d = (FILE *)0;
-            return -2;
+            return -3;
         }
     }
 sprintf(m,"end  setup_refflat refflat_fixed_hi=%ld , returning 0(==good)",refflat_fixed_hi);  jdebug(m);
@@ -740,32 +760,40 @@ int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end)
 {
     char m[5120];
     struct flattype f;
+    int rec_cnt = 0;
 
 
 // -- just blitz through flat file, not using index (cuz not sorted by name) to find match on "gene" parameter
-sprintf(m,"in do_by_gene_name_from_refflat - start\n");  jdebug(m); 
+sprintf(m,"in do_by_gene_name_from_refflat - START gene=[%s]\n",gene);  jdebug(m); 
     fix_up_support_file_paths();
     if (setup_refflat(refflat_d_fn,refflat_o_fn) < 0)  // 0 == good
     {
-sprintf(m,"ERROR: after setup_refflat() - in do_by_gene_name_from_refflat ");  jdebug(m); 
+sprintf(m,"ERROR: after setup_refflat() - in do_by_gene_name_from_refflat");  jdebug(m);
         return -1;
     }
-sprintf(m,"in do_by_gene_name_from_refflat %s\n",refflat_d_fn);  jdebug(m); 
+sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",refflat_d_fn,fp_refflat_d);  jdebug(m); 
     if (fp_refflat_d == (FILE *)0)
     {
+// try and open it 
         fp_refflat_d = fopen(refflat_d_fn,"rb");
         if (!fp_refflat_d) 
         { 
            strcpy(chr,"chr1");
            *start = 1 ; 
            *end = 4042;
-           sprintf(m,"cant open refflat_d_fn = %s ",refflat_d_fn); jdebug(m); 
+           sprintf(m,"ERROR: can not open refflat_d_fn = %s ",refflat_d_fn); jdebug(m); 
            return -1;
         }
     }
+ 
+    fseek(fp_refflat_d, 0, SEEK_SET); // rewind 
+// xxx rpf 
+sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",refflat_d_fn);  jdebug(m); 
 
+    rec_cnt = 0;
     while (1)
     {
+// sprintf(m,"do_by_gene_name_from_refflat here 2");  jdebug(m); 
         if (fread (&f.geneName,MAX_GENENAME,1,fp_refflat_d) != 1) break;
         if (fread (&f.name,MAX_GENENAME,1,fp_refflat_d) != 1 ) break;
         if (fread (&f.chrom,MAX_GENENAME,1,fp_refflat_d) != 1 ) break;
@@ -778,17 +806,26 @@ sprintf(m,"in do_by_gene_name_from_refflat %s\n",refflat_d_fn);  jdebug(m);
         if (fread (&f.exonEnds,4,1,fp_refflat_d) != 1 ) break;
         if (fread (&f.strand,4,1,fp_refflat_d) != 1 ) break;
 
+// sprintf(m,"do_by_gene_name_from_refflat CHECK :  %s %s\n",f.geneName,gene);  jdebug(m); 
         if (strcmp(f.geneName,gene) == 0) 
         {
 // sprintf(m,"matched in do_by_gene_name_from_refflat() %s %s\n",f.geneName,gene);  jdebug(m); 
             *start = (int)f.txStart;
             *end = (int)f.txEnd;
             strcpy(chr,f.chrom); 
+/*
+---- NO !!!  keep it open
             fclose(fp_refflat_d);
+            fp_refflat_d = (FILE *)0;
+*/
             return 0;
         }
+        rec_cnt++;
     }
-/* keep it open
+sprintf(m,"do_by_gene_name_from_refflat here 999 , rec_cnt = %d",rec_cnt);  jdebug(m); 
+
+/* 
+---- NO !!!  keep it open
     fclose(fp_refflat_d);
     fp_refflat_d = (FILE *)0;
 */
@@ -1055,9 +1092,9 @@ static char FEBASEDIR[256];
 
 
 
+int gs; // global start genomic cooordinate 
+int ge; // global end genomic cooordinate 
 int gdiff;   // start - end  = gs - ge
-int gs; // global start
-int ge; // global end
 int menu; // main menu
 int pickmenu;
 char pickmenustring[MAXBUFF];
@@ -1171,8 +1208,8 @@ static char *do_2bit_dna(FILE *fp, unsigned int fragStart, unsigned int fragEnd,
     int modder = 0;
     unsigned int size = 0;
     unsigned int i,j;
-    int k;
-    int fsm1 = fragStart - 1; // Frag Start Minus 1
+    unsigned int k;
+    unsigned int fsm1 = fragStart - 1; // Frag Start Minus 1
 
 
     i = j = 0;
@@ -3725,8 +3762,7 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                     gdImageStringFT (im, brect, blue, "" , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
 #endif
 #else
-sprintf(m,"hack xxx -- in paint_gene_annot() before ImageStringFT p=%p",ucptr);  jdebug(m); 
-sprintf(m,"hack xxx -- in paint_gene_annot() before ImageStringFT [%s]",ucptr);  jdebug(m); 
+// sprintf(m,"in paint_gene_annot() before ImageStringFT [%s]",ucptr);  jdebug(m); 
                     ImageString(im,x1,22,ucptr,blue);
 #endif
 
@@ -4418,19 +4454,22 @@ void do_filez_form(void)
     int i;
     char m[512];
 
-sprintf(m,"in do_filez_form() 0 , num_filez = %d",num_filez);  jdebug(m); 
+sprintf(m,"in do_filez_form() start , num_filez = %d",num_filez);  jdebug(m); 
     printf("<br>\n");
     for (i=0 ; i<num_filez ; i++) 
     {
+#if 0
+sprintf(m,"in do_filez_form() i=%d , num_filez = %d",i,num_filez);  jdebug(m); 
+sprintf(m,"in do_filez_form() i=%d , num_filez = %d, name=[%s] ",i,num_filez,filez[i].fullpath);  jdebug(m); 
+#endif
        if (filez[i].fullpath) 
            printf("<a href=\"../cgi-bin/alview?position=chr1:100-500&iw=1000&ih=350&filenum=%d\">%s</a>", filez[i].file_id,filez[i].fullpath);
        else
            printf("%s", filez[i].info); // comment or information line from file
 /* char fn[512]; if (has_cov_file(filez[i].fullpath,fn) ) printf("&nbsp;&nbsp <small>*** %s</small>\n",fn); */
-
        printf("<br>\n"); 
     }
-sprintf(m,"in do_filez_form() 999");  jdebug(m); 
+sprintf(m,"in do_filez_form() end , i = %d of %d ",i,num_filez);  jdebug(m); 
 
     return;
 
@@ -6167,6 +6206,7 @@ sprintf(m,"in dobam_fasta() START func, region=%s",region); jdebug(m);
     fn_out = &junkfile[0];
 
     bai_fn[0] = (char)0;
+
              /* parse command-line options */
     strcpy(in_mode, "rb"); strcpy(out_mode, "wb");
 
@@ -6410,7 +6450,7 @@ int dobam(char fn[],int khroffset,int s, int e,char chr[])
     char bai_fn[1280];  // BAM Index ".bai" file
     char *fn_out = 0;
 
-// debug fprintf(stderr,"xxx in dobam(file=%s) %s %d %d",fn,chr,s,e);  fflush(stderr); 
+// debug fprintf(stderr,"in dobam(file=%s) %s %d %d",fn,chr,s,e);  fflush(stderr); 
 
     numrecs = searcht = 0;
     globalreadscount = 0;
@@ -6502,8 +6542,8 @@ sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region)
             goto view_end;
         }
 
-// fprintf(stderr,"xxx in do_bam before bam-fetch viewfunc \n");   fflush(stderr);  
-// sprintf(m, "in dobam() before bamfetch tid=%d beg=%d end=%d out=%p vf=%p VFxxx",tid,beg,end,out,view_func); jdebug(m); 
+// fprintf(stderr,"in do_bam before bam-fetch viewfunc \n");   fflush(stderr);  
+// sprintf(m, "in dobam() before bamfetch tid=%d beg=%d end=%d out=%p vf=%p VF",tid,beg,end,out,view_func); jdebug(m); 
         bam_fetch(in->x.bam, idx, tid, beg, end, out, view_func); // fetch alignments - "view_func" is callback 
 // sprintf(m, "in dobam() after view_func() globalreadscount=%d",globalreadscount); jdebug(m); 
 
@@ -7470,7 +7510,7 @@ void do_describe_based_on_filename(char fn[])
     char msg[500];
     char m[500];
 
-jdebug("in do_describe_based_on_filename here 1"); 
+jdebug("in do_describe_based_on_filename start"); 
 jdebug(fn); 
     if (filez_id < 0) 
     {
@@ -8635,9 +8675,8 @@ int web_server_main(int argc,char *argv[])
      status =  gethostname(hostname,500);
      if (strcmp("lpgws511.nci.nih.gov",hostname))
      {
-// checking for what machine thisis runningon . 511 is my test server, so I can disable any secuirty   
-// I hack this to see private BAM files 
-// you can do your own hacks on your server
+// checking for what machine thisis running on . "lpgws511" is a test server, so I can disable any secuirty   
+// I hack this to see private BAM files  ***** you can do your own hacks on your server
      }
 
      initialize_ttf();
@@ -8647,6 +8686,7 @@ int web_server_main(int argc,char *argv[])
      tcga[0] = (char)0;
      spliceonly_s[0] = (char)0;
 //     altonly_s[0] = (char)0;
+
     mmspot_s[0] = exp_s[0] = nso_s[0] = tds_s[0] = (char)0;
 sprintf(m," ");  jdebug(m); 
 sprintf(m,"-------------- in web_server_main alview -------------");  jdebug(m); 
@@ -8763,13 +8803,13 @@ jdebug("after getting params ");
     iw = iw;
 
     load_filez();
-sprintf(m,"ater load_filez() , filez = %p ",(void *)filez); jdebug(m);
+
 
     if (bamname[0])
-    {
-       char *zz;
-       zz = strstr(bamname,"bamFirefoxHTML");  //  \Shell\Open\CommandFirefoxHTML\Shell\Open\Command
-       if (zz) *(zz+3) = (char)0 ;
+    {      // HACK !!!! , this fixes calls from microsoft spreadheet "Excel" url to Mozilla/Firefox browser
+       char *tmptr;
+       tmptr = strstr(bamname,"bamFirefoxHTML");  //  \Shell\Open\CommandFirefoxHTML\Shell\Open\Command
+       if (tmptr) *(tmptr+3) = (char)0 ;
        filez_id = find_fileid_for_bamname(bamname); 
     }
      
@@ -8785,6 +8825,7 @@ sprintf(m,"ater load_filez() , filez = %p ",(void *)filez); jdebug(m);
          if (filez_id >= 0) forcefilecgiarg[0] = (char)0;
     }
 
+sprintf(m,"after load_filez() , filez = %p , num_filez=%d",(void *)filez,num_filez); jdebug(m);
 // sprintf(m,"filez_id = %d ",filez_id);  jdebug(m); 
     fn_bam[0] = (char)0;
     if (forcefilecgiarg[0]) strcpy(fn_bam,filecgiarg); 
@@ -8864,8 +8905,9 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
         }
         else
         {
+// sprintf(m,"before  do_by_gene_name_from_refflat");  jdebug(m); 
             do_by_gene_name_from_refflat(position,chr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
-sprintf(m,"after do_by_gene_name_from_refflat %d %d\n",alv_start,alv_end);  jdebug(m); 
+// sprintf(m,"after do_by_gene_name_from_refflat %d %d",alv_start,alv_end);  jdebug(m); 
         }
         strcpy(global_khr,chr); 
 

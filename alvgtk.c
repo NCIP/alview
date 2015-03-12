@@ -54,8 +54,9 @@ static void file_dialog( GtkWidget *w, gpointer   data )
     filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
     if (filename == (void *)0) return;
 
-#if 1
+#if 0
 fprintf(stderr,"file name = %p \n", filename);  fflush(stderr); 
+fprintf(stderr,"file name = %s \n", filename);  fflush(stderr); 
 #endif
     if (filename) strcpy(fn_bam,(char *)filename); 
 
@@ -71,7 +72,7 @@ fprintf(stderr,"file name = %p \n", filename);  fflush(stderr);
     dih = height;
     if (img) { free(img); }
     img = (void *)imgen_mem(filename,khr,khrstart,khrend,height, width,&status);
-fprintf(stderr,"after imgen_mem() img =%p, status=%d \n",img,status); fflush(stderr); 
+// fprintf(stderr,"after imgen_mem() img =%p, status=%d \n",img,status); fflush(stderr); 
     if (img)
     {
         darea_on = 1;
@@ -7948,7 +7949,7 @@ gboolean on_darea_expose (GtkWidget *widget, GdkEventExpose *event, gpointer use
 
 gboolean darea_configure_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    fprintf(stderr,"in darea_configure_eventw=%d h=%d\n",diw,dih); fflush(stderr); 
+//     fprintf(stderr,"in darea_configure_eventw=%d h=%d\n",diw,dih); fflush(stderr); 
 }
 
 
@@ -8036,10 +8037,10 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
 
     if (event->type == GDK_BUTTON_RELEASE)
     {
-        fprintf(stderr,"in darea_button_release_event (got button RELEASE\n"); fflush(stderr); 
+// fprintf(stderr,"in darea_button_release_event (got button RELEASE\n"); fflush(stderr); 
         gdk_window_get_pointer (event->window, &x, &y, &state);
 // we only really care about y not x
-        fprintf(stderr,"RELEASE at %d %d , state=%d\n",x,y,state); fflush(stderr); 
+// fprintf(stderr,"RELEASE at %d %d , state=%d\n",x,y,state); fflush(stderr); 
         end_select_x = x;
         xoron = 0;
         if (start_select_x > end_select_x)
@@ -8049,11 +8050,11 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
             end_select_x = tmp; 
         }
 
-fprintf(stderr,"in release , START %d %d , %d,%d w=%d\n",khrstart,khrend,start_select_x,end_select_x,diw); fflush(stderr);  
+// fprintf(stderr,"in release , START %d %d , %d,%d w=%d\n",khrstart,khrend,start_select_x,end_select_x,diw); fflush(stderr);  
         tmp = khrstart;
         khrstart = (int)(khrstart + (double)((start_select_x * ((khrend - khrstart)) / (double)diw)));
         khrend =   (int)(khrstart + (double)((end_select_x   * ((khrend - tmp)) / (double)diw)));             
-fprintf(stderr,"in release , END %d %d \n",khrstart,khrend); fflush(stderr);  
+// fprintf(stderr,"in release , END %d %d \n",khrstart,khrend); fflush(stderr);  
 
         if (khrstart < 1) khrstart = 1;
         if (khrend < 2) khrend = 2;
@@ -8076,17 +8077,17 @@ gboolean darea_button_press_event(GtkWidget *widget, GdkEventButton *event, gpoi
 {
     int x, y;
     GdkModifierType state;
-    fprintf(stderr,"in darea_button_press_event w=%d h=%d\n",diw,dih); fflush(stderr); 
+// fprintf(stderr,"in darea_button_press_event w=%d h=%d\n",diw,dih); fflush(stderr); 
 
     if (event->button == 1)
     {
-        fprintf(stderr,"in darea_button_press_event (got button) \n"); fflush(stderr); 
+// fprintf(stderr,"in darea_button_press_event (got button) \n"); fflush(stderr); 
     }
     if (event->type == GDK_BUTTON_PRESS)
     {
         gdk_window_get_pointer (event->window, &x, &y, &state);
         start_select_x = x;
-        fprintf(stderr,"in darea_button_press_event (got button PRESS) \n"); fflush(stderr); 
+//         fprintf(stderr,"in darea_button_press_event (got button PRESS) \n"); fflush(stderr); 
 // we only really care about x not y
     }
 }
@@ -8204,7 +8205,7 @@ fprintf(stderr,"in on_button_move START movek=%d , khrstart = %d khrend = %d diw
     img = (void *)imgen_mem(filename,khr,khrstart,khrend,dih, diw,&status);
     if (img)
     {
-fprintf(stderr,"in on_button_move , after imgen_mem, before unix_draw_image() \n"); fflush(stderr);  
+// fprintf(stderr,"in on_button_move , after imgen_mem, before unix_draw_image() \n"); fflush(stderr);  
         if (darea) gtk_widget_queue_draw(darea);
             // keep the image  around do not free now !!!!
     }
@@ -8307,18 +8308,34 @@ gboolean gettextentry(GtkWidget *widget)
 
     entry_text = (char *)0;
     entry_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntry));
-if (entry_text) { fprintf(stderr,"gettextentry() entry_text is %s \n",entry_text); fflush(stderr); }
+// if (entry_text) { fprintf(stderr,"gettextentry() entry_text is %s \n",entry_text); fflush(stderr); }
+
+#if 0
     status = parse_position(entry_text,khr,&khrstart,&khrend); 
+#endif
+     if (strncmp(entry_text,"chr",3) == 0)
+     {
+         parse_position(entry_text,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
+     }
+     else
+     {
+// fprintf(stderr,"in gettextentry() before do_by_gene_name_from_refflat() entry_text is [%s]\n",entry_text); fflush(stderr); 
+
+         do_by_gene_name_from_refflat(entry_text,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
+
+// fprintf(stderr,"in gettextentry() after do_by_gene_name_from_refflat(): %s %d %d\n",khr,khrstart,khrend); fflush(stderr); 
+     }
+
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
     gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
 
-    size = khrend-khrstart;
+    size = khrend - khrstart;
     sanity_khr();
     if (img) free(img);
     img = (unsigned char *)0;
     if (filename != (gchar)0) 
     {
-if (entry_text) { fprintf(stderr,"before imgen_mem %s %s %d %d %d %d ",filename,khr,khrstart,khrend,dih,diw); fflush(stderr); }
+// if (entry_text) { fprintf(stderr,"before imgen_mem %s %s %d %d %d %d ",filename,khr,khrstart,khrend,dih,diw); fflush(stderr); }
        status = 0;
        img = (unsigned char *)imgen_mem(filename,khr,khrstart,khrend,dih, diw,&status);
        if (img)
@@ -8552,7 +8569,7 @@ button = gtk_button_new_with_label ("base");
 
 void report_gtk_bad_genomemdir (void)
 {
-// burp
+// big error is happening !!!
     g_print ("ERROR: Invalid configuration. Solution: edit the text file named \"alview.conf\" (the alview configuration file).\nDownload large genome data for your build.   Set up GENOMEDATADIR properly for linux.\n");
     return;
 }
@@ -8601,7 +8618,7 @@ int check_genome_data_dir(void) // check of global variable GENOMEDATADIR exists
         return -1;
     }
     if (S_ISDIR(s.st_mode)) 
-    { /* it's a dir */
+    {                   /* it's a dir */
         return 0; // good 
     } 
 
@@ -8621,5 +8638,8 @@ int main( int   argc, char *argv[] )
     alv_gtk_main(argc,argv);
     return 0;
 }
+
+
+
 
 
