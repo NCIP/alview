@@ -642,7 +642,13 @@ void fix_up_support_file_paths(void)
     static int fixed_up_support_flag = 0;
 
 
+sprintf(m,"xxx in fix_up_support_file_paths(), blds = %s",blds); jdebug(m);
     if (fixed_up_support_flag  == 1) return;
+    if (blds[0] == 0)
+    {
+sprintf(m,"ERROR: xxx in fix_up_support_file_paths(), blds is null "); jdebug(m);
+          return;
+    }
 
     strcpy(refflat_d_fn,""); 
     strcpy(refflat_o_fn,""); 
@@ -764,10 +770,14 @@ int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end)
 
 
 // -- just blitz through flat file, not using index (cuz not sorted by name) to find match on "gene" parameter
-sprintf(m,"in do_by_gene_name_from_refflat - START gene=[%s]\n",gene);  jdebug(m); 
+sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,blds);  jdebug(m); 
+
     fix_up_support_file_paths();
     if (setup_refflat(refflat_d_fn,refflat_o_fn) < 0)  // 0 == good
     {
+        strcpy(chr,"chr1");
+        *start = 1 ; 
+        *end = 4042;
 sprintf(m,"ERROR: after setup_refflat() - in do_by_gene_name_from_refflat");  jdebug(m);
         return -1;
     }
@@ -806,10 +816,10 @@ sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",reffla
         if (fread (&f.exonEnds,4,1,fp_refflat_d) != 1 ) break;
         if (fread (&f.strand,4,1,fp_refflat_d) != 1 ) break;
 
-// sprintf(m,"do_by_gene_name_from_refflat CHECK :  %s %s\n",f.geneName,gene);  jdebug(m); 
+// sprintf(m,"do_by_gene_name_from_refflat CHECK :  %s %s",f.geneName,gene);  jdebug(m); 
         if (strcmp(f.geneName,gene) == 0) 
         {
-// sprintf(m,"matched in do_by_gene_name_from_refflat() %s %s\n",f.geneName,gene);  jdebug(m); 
+// sprintf(m,"matched in do_by_gene_name_from_refflat() %s %s",f.geneName,gene);  jdebug(m); 
             *start = (int)f.txStart;
             *end = (int)f.txEnd;
             strcpy(chr,f.chrom); 
@@ -873,7 +883,7 @@ char m[5120];
 
     if (fp_refflat_d == (void *)0) 
     { 
-        sprintf(m,"ERROR: in binary_search_refflat_file() - null fp_refflat_d\n"); jdebug(m); 
+        sprintf(m,"ERROR: in binary_search_refflat_file() - null fp_refflat_d"); jdebug(m); 
         return (struct flattype *)0; 
     }
 
@@ -886,7 +896,7 @@ sprintf(m,"dbg in binary_search_refflat_file() [%s:%d-%d] last_refflat_fseek_pla
 
     if (lo>hi) 
     {
-//        fprintf(stderr,"ERROR: can't find cuz lo > hi %ld and %ld in binary_search_refflat_file\n",lo,hi);
+//        fprintf(stderr,"ERROR: can't find cuz lo > hi %ld and %ld in binary_search_refflat_file",lo,hi);
         return (struct flattype *)0;
     }
     if (lo==hi)
@@ -894,7 +904,7 @@ sprintf(m,"dbg in binary_search_refflat_file() [%s:%d-%d] last_refflat_fseek_pla
         seekto = (SIZE_REFFLAT_REC * lo);
         if (fseek(fp_refflat_d,(size_t) seekto , SEEK_SET) < 0)
         {
-            sprintf(m,"SEEK to %ld ERROR in binary_search_refflat_file lo=%ld\n",seekto,lo); jdebug(m);
+            sprintf(m,"SEEK to %ld ERROR in binary_search_refflat_file lo=%ld",seekto,lo); jdebug(m);
             exit(0);
         }
         last_refflat_fseek_place = seekto; 
@@ -6591,7 +6601,7 @@ sprintf(m,"in do_fasta chr=%s start=%d end=%d",chr,start,end); jdebug(m);
     status = get_chr_lo_hi(chr,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d ",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_fasta()",chr,start,end); 
         jdebug(m);
         return -1;
     }
@@ -6601,6 +6611,7 @@ sprintf(m,"in do_fasta chr=%s start=%d end=%d",chr,start,end); jdebug(m);
 sprintf(m,"end do_fasta (fn_bam=%s)",fn_bam);  jdebug(m); 
     return 0;
 }
+
 
 int do_sam( int start ,int end, int image_type, char shortfilename[],char chr[],int khrstart, int khrend)
 {
@@ -6617,7 +6628,7 @@ sprintf(m,"in do_sam chr=%s start=%d end=%d",chr,start,end); jdebug(m);
     status = get_chr_lo_hi(chr,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_sam() ",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_sam()",chr,start,end); 
         jdebug(m);
         return -1;
     }
@@ -6644,7 +6655,7 @@ sprintf(m,"in do_gotoh chr=%s start=%d end=%d",chr,start,end); jdebug(m);
     status = get_chr_lo_hi(chr,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d ",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in go_gotoh()",chr,start,end); 
         jdebug(m);
         return -1;
     }
@@ -6880,7 +6891,7 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
 
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d %s ",chr,gs,ge,blds); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d %s in imgen()",chr,gs,ge,blds); 
         jdebug(m);
         return -1;
     }
@@ -7027,12 +7038,13 @@ unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, 
 
 
 sprintf(m,"in imgen_mem 0"); jdebug(m); 
- sprintf(m,"in imgen_mem 0.1 fn=%p",fn); jdebug(m); 
- sprintf(m,"in imgen_mem 0.2 fn=%s",fn); jdebug(m); 
- sprintf(m,"in imgen_mem 0.3 s=%d",khrstart); jdebug(m); 
- sprintf(m,"in imgen_mem 0.4 s=%d",khrend); jdebug(m); 
- sprintf(m,"in imgen_mem 0.5 h=%d",h); jdebug(m); 
- sprintf(m,"in imgen_mem 0.6 w=%d",w); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.1 s=%d",khrstart); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.2 e=%d",khrend); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.3 h=%d",h); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.4 w=%d",w); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.5 chr=%s",chr); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.6 fn=%p",fn); jdebug(m); 
+ sprintf(m,"in imgen_mem 0.7 fn=%s",fn); jdebug(m); 
 
     if (fn[0] == (char)0)
     {
@@ -7116,7 +7128,7 @@ jdebug(m);
 
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d %s ",chr,gs,ge,blds); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d %s in imgen_mem()",chr,gs,ge,blds); 
         jdebug(m);
         *ret_status = -3;
         return (unsigned char *)0;

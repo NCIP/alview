@@ -1,0 +1,4 @@
+wget "https://cgwb-test.nci.nih.gov:8443/imgareaselect-default.css"
+wget "https://cgwb-test.nci.nih.gov:8443/js/alview.jquery-1.8.3.js"
+wget "https://cgwb-test.nci.nih.gov:8443/js/alview.jquery-ui-1.9.2.custom.js"
+wget "https://cgwb-test.nci.nih.gov:8443/js/alview.jquery.imgareaselect.js"

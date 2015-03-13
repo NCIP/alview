@@ -61,9 +61,9 @@ char hacked_ced_for_sprintf[FILENAME_MAX];       // windows - for URL
 
 void jdebug(const char *s)         // for use in debuging 
 {
- // V--- if this set to zero then off
+ // V--- if this set to zero then off, 
 #if 0
- // ^--- this thing
+ // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
 
     static FILE *debugfp = (FILE *)0;
     static int cnt = 0;
@@ -7443,8 +7443,21 @@ void get_image_and_draw(HWND hwnd, int id, char bamfn_arg[])
 // get pos 
     tmps[0] = (char)0;
     GetWindowText(GetDlgItem(hwnd, IDC_EDIT1), tmps ,1000);
-    status = parse_position(tmps,khr,&khrstart,&khrend);
-    sanity_khr();
+    if (strncmp(tmps,"chr",3) == 0)
+    {
+        status = parse_position(tmps,khr,&khrstart,&khrend);
+        sanity_khr();
+        snprintf(pos,1022,"%s:%d-%d",khr,khrstart,khrend);
+    }
+    else
+    {
+snprintf(m,1022,"xxx before do_by_gene_name_from_refflat in deal_with_pos pos=[%s], blds=[%s]",tmps,blds); jdebug(m); 
+        do_by_gene_name_from_refflat(tmps,khr,&khrstart,&khrend); 
+        sanity_khr();
+snprintf(m,1022,"xxx after do_by_gene_name_from_refflat in deal_with_pos(%s:%d-%d) ",khr,khrstart,khrend); jdebug(m); 
+        snprintf(pos,1022,"%s:%d-%d",khr,khrstart,khrend);
+    }
+    SetWindowText(GetDlgItem(hwnd,IDC_EDIT1), pos);
 // h
     tmps[0] = (char)0;
     GetWindowText(GetDlgItem(hwnd, IDC_EDIT2), tmps ,1000);
@@ -7712,15 +7725,16 @@ void deal_with_pos( HWND hwnd)
     tmps[0] = (char)0;
     GetWindowText(GetDlgItem(hwnd,IDC_EDIT1), tmps ,1000); // pos window
 
-    if (strncmp(pos,"chr",3) == 0)
+    if (strncmp(tmps,"chr",3) == 0)
     {
         status = parse_position(tmps,khr,&khrstart,&khrend);
     }
     else
     {
-snprintf(m,1022,"before do_by_gene_name_from_refflat in deal_with_pos() "); jdebug(m); 
-        do_by_gene_name_from_refflat(pos,khr,&khrstart,&khrend);      // eg.: "position=chrX:37301314-37347604"
+snprintf(m,1022,"before do_by_gene_name_from_refflat in deal_with_pos(), tmps=[%s] blds=[%s] ",tmps,blds); jdebug(m); 
+        do_by_gene_name_from_refflat(tmps,khr,&khrstart,&khrend);      // eg.: "position=chrX:37301314-37347604"
     }
+    strcpy(pos,tmps);
     sanity_khr();
     snprintf(pos,1022,"%s:%d-%d",khr,khrstart,khrend);
     SetWindowText(GetDlgItem(hwnd,IDC_EDIT1), pos);
