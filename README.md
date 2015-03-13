@@ -1,14 +1,13 @@
 
 March 13, 2015     
-ALVIEW SES NATIVE GUIS ... GTK for Linux, Win32 for Windows and Cocoa for Mac.  It's fast, trim and zero licensing hassles.   Alview also runs as a web server or as a command line tool in batch. 
+ALVIEW USES NATIVE GUIS: GTK for Linux, Win32 for Windows and Cocoa for Mac.  It's fast, trim and zero licensing hassles.   Alview also runs as a web server or as a command line tool in batch. 
 
 <p>The WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
 <p>Windows Installer for GUI is here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
 
 Check BINARIES directory (above) for useable binaries.  Linux may require recompile from source; not a big deal though.
 
-PCs and Unix compters are typically locked down these days in company, college and research environments.  This Alview distribution allows you to bypass installation restrictions on your work computer.  The downside is you have to a ~little~ bit of hassle work.  Not a big deal for 
-wizards; but maybe a some careful work by novices.  You do have to download some big reference genome information.
+PCs and Unix compters are typically locked down these days in company, college and research environments.  This Alview distribution allows you to bypass installation restrictions on your work computer.  The downside is you have to a ~little~ bit of hassle work.  Not a big deal for wizards; but maybe a some careful work by novices.  You do have to download some big reference genome information.
 
 Alview Runtime binaries rely only on standard runtime libraries.   No system updates necessary.
 Just download the binary, some support files, edit alview.conf,  check permissions .... and GO VIEW YOUR BAMS.
