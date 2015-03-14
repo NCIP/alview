@@ -65,20 +65,18 @@ straightforward for Linux and Apple MAC ...
 Make and/or install  1) samtools and 2)zlib if they are not already there.  
 You'll need access to ".a" library files for samtools and zlib.
 
-Typically you have to make samtools yourself.
+Typically you have to make samtools yourself.  Download and "ake" should do the trick.
 
-Currently the samtools 1.1 is a bit hard to get right.
+Currently the samtools 1.1 is a bit hard to get right on Windows.
 The samtools 0.1.18 is what is currently supported and works with old compilers.
-
-Apple users may have to do the "configure/make/install" routine for some
-packages as there is limited official support from Apple for many software solutions.  Linux users should
-have packages easily install-able via apt-get or yum or your GUI installer.  Know in what
+Loux users should gtk2 (not gtk3) development 
+packages easily install-able via apt-get or yum or your GUI installer.  Know in what
 directories the libraries are as you'll need to provide them to the linker.  
 
 Sources for Windows versions of the required support libraries are provided at
 Alview github (zlib and samtools).  These are hacked to work with (Visual Studio's) cl.exe C/C++ compiler
 
-A free command line version is availible. Soon. I'll try and get this by December 15.
+A free command line version will soon be available.  It is in the queue.          
 
 Set the appropriate IFDEF flags.  These flags are APPLE, UNIX, WINDOWS,
 WEB_SERVER, CMD_LINE  Set UNIX=1 for Linux. Set them as compiler flags.
@@ -96,16 +94,13 @@ Then, set up the genome data directory and edit alview.conf properly.
 
 Setting up the genome data directory involves this ... 
 Download the large genome data support files n the tarbzip2 file named
-alview_hg18hg19_genomedata.tar.bz2 
-from my dropbox account at
-https://www.dropbox.com/sh/ymszmksj6v83rmt/OCLsYTjgSu . 
-This is large (>1GB) file and takes a while to decompress and "untar".
+http://45.56.125.191/AlviewGenomeData.tar .  This is my linode server.  
+ 
+This is large (1.6 GB) file and takes a while to decompress and "untar".
 
-Use these commands
+Use this command
 
-bzip2 -d alview_hg18hg19_genomedata.tar.bz2
-
-tar xvf alview_hg18hg19_genomedata.tar 
+tar xvf AlviewGeneomeData.tar 
 
 Edit alview.conf file to point to the correct genome data location that you
 just created, make sure cgi programs can access this.
@@ -130,24 +125,17 @@ set correctly to point to these large files.  This is a text file and
 editable.
 
 You must also download the large genome data support files targzipped in the
-file 
-named alview_hg18hg19_genomedata.tar.bz2 from my dropbox account at 
-https://www.dropbox.com/sh/ymszmksj6v83rmt/OCLsYTjgSu . This is large (>1GB)
-file 
-and takes a while to decompress and "untar". Grab the binary and shared
-libraries 
-from BINARIES directory hereabouts on Github. 
+file http://45.56.125.191/AlviewGenomeData.tar
+ 
 The TWO command lines to prepare this file (on LINUX, Mac command line or
 cygwin [ or cmd.exe with unix utilities ] ) ...
 
-bzip2 -d alview_hg18hg19_genomedata.tar.bz2
-
-tar xvf alview_hg18hg19_genomedata.tar 
+tar xvf AlviewGenomeData.tar
 
 Linux version is 64bit specific. Set up the "alview.conf" file .
 
 Linux compilation is done vi the "gogtk" batch file.
-Edit to point to your samtools.
+Edit this file to point to your samtools.  You may have to download gtk2 development library.
 
 IV.  Operation as Command Line Utility.
 
@@ -180,7 +168,7 @@ So, create a batch file of BAMS and , for instance, SNP call regions to
 examine.
 You can view the output in a slideshow, the file "slideshowtemplate.html" is a
 template file we provide for assisting in this.
-
+Edit slideshowtemplate like this:
 Set the "IMGSHERE" and "ANOSHERE" lines with image files and annotation.  This
 is a little work, but makes viewing your massive 40,000 SNP calls easy to review !!!!
 This is probably the true power user's tool for reviewing his lab results and
@@ -209,7 +197,7 @@ Example "list.public" file is ...
 
 VI.  Running Alview as a GUI 
 Enter the genomic coordinates in the position box or a HUGO gene name.
-You can select a region to zoom in.
+You can drag select with a mouse a region to zoom in.
 You can use the navigation buttons to move around.
 You can use the quality flag to view a grayscale graphic of the quality
 values.
