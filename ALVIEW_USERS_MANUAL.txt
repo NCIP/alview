@@ -1,6 +1,6 @@
 
 Alview User's Manual
-Latest revision March 10, 2015 
+Latest revision March 13, 2015 
 
 Contents.
 I.   Introduction.
@@ -16,11 +16,12 @@ Alview is a fast computer program for viewing BAM files.  The most powerful
 way to use the program is to use the command line and batch requests for 
 very rapid viewing using a slide show.  This takes some user engagement.  
 Otherwise, it is useful for browsing bam files and checking interesting 
-locations as a GUI desktop or webserver.
-It currently supports hg18 and hg19 and large genome support files are required.
+locations as a GUI application or as a web service.
+It currently supports hg18 and hg19 via large genome support files.  They are required.
 More builds are forthcoming (mouse, GrCh38, etc).
 
 Alview is available via github at https://github.com/NCIP/alview
+Please note the new Windows GUI version installer.  Mac ingtaller is coming.
 
 Alview can take three forms: 
 
@@ -39,15 +40,15 @@ This is relatively new, I'd appreciate feedback. Contact me at my email address 
 
 II.  Power User Fast Start
 Alview is a webserver or command line utility or a native standalone GUI application.  For 
-GUI, download the package for your operating system.  
+Windows GUI, download the installation via link on the github front page. 
 
-Pick a directory to put alview in.   You should make a new one dedicated to Alview and support files.
+Pick a directory to put alview in.   You should make a new one dedicated to Alview and it's support files.
 
 Next download the binary for your OS: alview.exe for Windows, alvmac for Apple or alvgtk for Linux from 
 the "BINARIES" directory.
 
-Check the README.md file on the github page.  This will contain the location of the support files.
-(Currently they are in my drop box account).  Carefully decompress and untar them.
+Check the README.md file on the github page.  This will point to the location of the support files.
+(Currently they are in m Carefully decompress and untar them.
 Yes, this is a hassle. It make take a few minutes on your home DSL.
 
 Make sure you have permissions to the files in the resulting untarred directory where the 
