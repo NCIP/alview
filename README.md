@@ -1,9 +1,10 @@
 
-March 13, 2015     
-ALVIEW USES NATIVE GUIS: GTK for Linux, Win32 for Windows and Cocoa for Mac.  It's fast, trim and zero licensing hassles.   Alview also runs as a web server or as a command line tool in batch. 
+March 16, 2015  
 
 <p>The WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
-<p>Windows Installer for GUI is here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
+<p>Various Installers are here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
+
+Alview is a very fast bam file viewer.  GUI versions now support GTK for Linux, Win32 for Windows and Cocoa for Mac.  It's fast, trim and there are zero licensing hassles.   Alview also runs as a web server or as a command line tool in batch. 
 
 Check BINARIES directory (above) for useable binaries.  Linux may require recompile from source; not a big deal though.
 
