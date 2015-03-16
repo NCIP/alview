@@ -1,12 +1,11 @@
 
-#if 0
-vi +1711  x2.c ; gcc -g -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN  -Wall -o x2 x2.c -lz 2> joke2 ; head joke2
-vi +179 party3rd.c ; gcc -DHAVE_CONFIG_H -DPIC -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.13' -DPNG_BUILDING_SYMBOL_TABLE -DPNG_NO_USE_READ_MACROS -DSYMBOL_PREFIX='' -Wall -o party3rd party3rd.c 2> joke2 ; head -30 joke2
--DHAVE_CONFIG_H -DPIC -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.13' -DPNG_BUILDING_SYMBOL_TABLE -DPNG_NO_USE_READ_MACROS -DSYMBOL_PREFIX=''
-zlib-1.2.8.tar.gz
-This the minimal stuff ported from open source ZLIB and PNG libraires.
-Just need png write and 
-#endif
+/**************
+This the miscellaneous code ported from open source PNG libraires and other routines.
+Not the copyright for  LODE png stuff .  It's open source but requires attribution. 
+
+Other stuff is open source re-imagining of GD graphics library.
+
+***********/
 
 
 #include <stdio.h>
@@ -17,9 +16,11 @@ Just need png write and
 #include <errno.h>
 #include <ctype.h>
 #include <assert.h>
+
 /* int8_t nonsense
 #include <unistd.h>
 */
+
 #include <limits.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -217,8 +218,7 @@ unsigned lodepng_encode32_file(const char* filename,
                                const unsigned char* image, unsigned w, unsigned h);
 
 /*Same as lodepng_encode_file, but always encodes from 24-bit RGB raw image.*/
-unsigned lodepng_encode24_file(const char* filename,
-                               const unsigned char* image, unsigned w, unsigned h);
+unsigned int lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
 #endif /*LODEPNG_COMPILE_DISK*/
 #endif /*LODEPNG_COMPILE_ENCODER*/
 
@@ -7474,19 +7474,17 @@ unsigned lodepng_encode_file(const char* filename, const unsigned char* image, u
   return error;
 }
 
-#if 1 // rpf 
-unsigned ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
+unsigned int ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
      return lodepng_encode_file(filename,image,w,h, LCT_RGB, 8);
 }
-#endif
 
 unsigned lodepng_encode32_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
   return lodepng_encode_file(filename, image, w, h, LCT_RGBA, 8);
 }
 
-unsigned lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
+unsigned int lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
   return lodepng_encode_file(filename, image, w, h, LCT_RGB, 8);
 }

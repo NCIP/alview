@@ -21,7 +21,7 @@ It currently supports hg18 and hg19 via large genome support files.  They are re
 More builds are forthcoming (mouse, GrCh38, etc).
 
 Alview is available via github at https://github.com/NCIP/alview
-Please note the new Windows GUI version installer.  Mac ingtaller is coming.
+Please note the new Windows GUI version installer.  Mac installer is coming.
 
 Alview can take three forms: 
 
@@ -52,7 +52,7 @@ Check the README.md file on the github page.  This will point to the location of
 Yes, this is a hassle. It make take a few minutes on your home DSL.
 
 Make sure you have permissions to the files in the resulting untarred directory where the 
-alview file is: alview.exe, alvmac or alvgtk need execute permissions.  The GEONMEDATA directory 
+alview file is: alview.exe, alvmac or alvgtk need execute permissions.  The GENOMEDATA directory 
 (the big download you did) must have read permission for all files.  You may need to use chmod on Apple
 or Mac or icacls on Windows.
 
@@ -100,7 +100,7 @@ This is large (1.6 GB) file and takes a while to decompress and "untar".
 
 Use this command
 
-tar xvf AlviewGeneomeData.tar 
+tar xvf AlviewGenomeData.tar 
 
 Edit alview.conf file to point to the correct genome data location that you
 just created, make sure cgi programs can access this.

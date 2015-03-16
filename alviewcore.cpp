@@ -10,7 +10,6 @@ To deal with this : just keep keep #define GOTOH=0 to disable it OR re-engineer 
 Otherwise, do whatever you want!  NIH assumes no liabilities or responsibilities.  Use at your own risk.
 
 #Compile for Webserver on Linux ...
-
 g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -o alview alviewcore.cpp alvmisc.cpp -lz -Wall -I/h1/finneyr/samtools-0.1.18/ /h1/finneyr/samtools-0.1.18/libbam.a -lm -lz
 
 # notes ...
@@ -33,8 +32,11 @@ gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
 /h1/finneyr/samtools-1.0//htslib-1.0/libhts.a \
 -lbam -lm -lz -lgd -lpthread -lstdc++
 
-#OLD using old samtools  - compile for command line on linux ...
-gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. -I/data/nextgen/finneyr/samtools-0.1.18/ -L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz -lgd  -lstdc++
+#Using old samtools  - compile for command line on linux ...
+# note, can't mix c and cpp effortlessley
+cp alvmisc.c alvmisc.cpp
+gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ -L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz  -lstdc++
+
 
 todo: (soon !) 
 Prev Next
@@ -9270,7 +9272,7 @@ int command_line_main(int argc,char *argv[])
     if (argc < 3) 
     { 
         fprintf(stderr,"ERROR: usage inbam outpng position build [imageheight] [ imagewidth ]\n"); 
-        fprintf(stderr,"or usage2 :  CALL inbam position build \n"); 
+        fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build \n"); 
         exit(0); 
     }
     if (argc == 4) 
@@ -9293,10 +9295,8 @@ int command_line_main(int argc,char *argv[])
     if (argc >= 7) iw = atoi(argv[6]); 
 
 
-#ifdef WIN32
+#if 0 // don't use GD graphcis anymore
 // defaults 
-    strcpy(FULL_PATH_TO_TTF,"/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf");
-#else
     strcpy(FULL_PATH_TO_TTF,"/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf");
 #endif
 
