@@ -20,6 +20,7 @@ language='*'\"")
 #define DEFAULT_HEIGHT 400
 
 
+void jdebug(const char *s);
 void ImageXRectangle(struct image_type *im,int x, int y, int x1, int y1 );
 void ImageXRectangle2(struct image_type *im,int x, int y, int x1, int y1 ,int *dots);
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status);
@@ -56,31 +57,9 @@ HBITMAP hBMP  = 0;
 HBITMAP chBMP = 0;
 
 const char g_szClassName[] = "myWindowClass";    // MAIN WINDOW (?)
-char hacked_ced[FILENAME_MAX];  //  windows - for URL 
-char hacked_ced_for_sprintf[FILENAME_MAX];       // windows - for URL 
+extern char hacked_ced[];  // current executing directory
+extern char hacked_ced_for_sprintf[];   
 
-void jdebug(const char *s)         // for use in debuging 
-{
- // V--- if this set to zero then off, 
-#if 0
- // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
-
-    static FILE *debugfp = (FILE *)0;
-    static int cnt = 0;
-//     int i = 0;
-    char fn[2048];
-//     char m[2048];
-
-    strcpy(fn,"x"); 
-    if (!debugfp) debugfp = fopen(fn,"a");
-    if (debugfp == (FILE *)0) { return; }
-    fprintf(debugfp,"%d:%s\n",cnt++,s);
-    fflush(debugfp); 
-//     fclose(debugfp);
-#endif
-
-    return;
-}
 
 void msg(char *s)
 {
@@ -7451,7 +7430,7 @@ void get_image_and_draw(HWND hwnd, int id, char bamfn_arg[])
     }
     else
     {
-snprintf(m,1022,"xxx before do_by_gene_name_from_refflat in deal_with_pos pos=[%s], blds=[%s]",tmps,blds); jdebug(m); 
+// snprintf(m,1022,"xxx before do_by_gene_name_from_refflat in deal_with_pos pos=[%s], blds=[%s]",tmps,blds); jdebug(m); 
         do_by_gene_name_from_refflat(tmps,khr,&khrstart,&khrend); 
         sanity_khr();
 snprintf(m,1022,"xxx after do_by_gene_name_from_refflat in deal_with_pos(%s:%d-%d) ",khr,khrstart,khrend); jdebug(m); 
@@ -7731,7 +7710,7 @@ void deal_with_pos( HWND hwnd)
     }
     else
     {
-snprintf(m,1022,"before do_by_gene_name_from_refflat in deal_with_pos(), tmps=[%s] blds=[%s] ",tmps,blds); jdebug(m); 
+// snprintf(m,1022,"before do_by_gene_name_from_refflat in deal_with_pos(), tmps=[%s] blds=[%s] ",tmps,blds); jdebug(m); 
         do_by_gene_name_from_refflat(tmps,khr,&khrstart,&khrend);      // eg.: "position=chrX:37301314-37347604"
     }
     strcpy(pos,tmps);

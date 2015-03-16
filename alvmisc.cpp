@@ -1,25 +1,57 @@
 
-/**************
-This the miscellaneous code ported from open source PNG libraires and other routines.
-Not the copyright for  LODE png stuff .  It's open source but requires attribution. 
+#if 0
+vi +1711  x2.c ; gcc -g -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN  -Wall -o x2 x2.c -lz 2> joke2 ; head joke2
+vi +179 party3rd.c ; gcc -DHAVE_CONFIG_H -DPIC -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.13' -DPNG_BUILDING_SYMBOL_TABLE -DPNG_NO_USE_READ_MACROS -DSYMBOL_PREFIX='' -Wall -o party3rd party3rd.c 2> joke2 ; head -30 joke2
+-DHAVE_CONFIG_H -DPIC -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.13' -DPNG_BUILDING_SYMBOL_TABLE -DPNG_NO_USE_READ_MACROS -DSYMBOL_PREFIX=''
+zlib-1.2.8.tar.gz
+This the minimal stuff ported from open source ZLIB and PNG libraires.
+Just need png write and 
+#endif
 
-Other stuff is open source re-imagining of GD graphics library.
+#if __CYGWIN__
+#include <inttypes.h>
+#include <unistd.h>
+#if 0
+   /* This is the int8_t nonsense */
+typedef char           __int8_t;
+typedef unsigned char           __uint8_t;
+typedef signed short int        __int16_t;
+typedef unsigned short int      __uint16_t;
+typedef signed int              __int32_t;
+typedef unsigned int            __uint32_t;
+typedef signed long long int    __int64_t;
+typedef unsigned long long int  __uint64_t;
+typedef unsigned long long int  uint64_t;
+typedef char           int8;
+typedef unsigned char           int8;
+typedef unsigned char           uint8;
+typedef signed short int        int16;
+typedef unsigned short int      uint16;
+typedef signed int              int32;
+typedef unsigned int            uint32;
+typedef signed long long int    int64;
+typedef char           __int8;
+typedef unsigned char           __int8;
+typedef unsigned char           __uint8;
+typedef signed short int        __int16;
+typedef unsigned short int      __uint16;
+typedef signed int              __int32;
+typedef unsigned int            __uint32;
+typedef signed long long int    __int64;
+#endif
+#endif
 
-***********/
-
-
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <ctype.h>
 #include <assert.h>
 
-/* int8_t nonsense
-#include <unistd.h>
-*/
+/* __CYGWIN__ is predine on cygwin; you can view prefindeds with this command "gcc -E -dM -x c /dev/null" */
+
 
 #include <limits.h>
 #include <fcntl.h>
@@ -218,7 +250,8 @@ unsigned lodepng_encode32_file(const char* filename,
                                const unsigned char* image, unsigned w, unsigned h);
 
 /*Same as lodepng_encode_file, but always encodes from 24-bit RGB raw image.*/
-unsigned int lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
+unsigned lodepng_encode24_file(const char* filename,
+                               const unsigned char* image, unsigned w, unsigned h);
 #endif /*LODEPNG_COMPILE_DISK*/
 #endif /*LODEPNG_COMPILE_ENCODER*/
 
@@ -7474,17 +7507,19 @@ unsigned lodepng_encode_file(const char* filename, const unsigned char* image, u
   return error;
 }
 
-unsigned int ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
+#if 1 // rpf 
+unsigned ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
      return lodepng_encode_file(filename,image,w,h, LCT_RGB, 8);
 }
+#endif
 
 unsigned lodepng_encode32_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
   return lodepng_encode_file(filename, image, w, h, LCT_RGBA, 8);
 }
 
-unsigned int lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
+unsigned lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h)
 {
   return lodepng_encode_file(filename, image, w, h, LCT_RGB, 8);
 }

@@ -1,5 +1,3 @@
-
-
 :: cl /EHsc -c -I c:/rich/H/ app_four.c
 ::odbc32.lib odbccp32.lib 
 

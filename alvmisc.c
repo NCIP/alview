@@ -8,18 +8,51 @@ This the minimal stuff ported from open source ZLIB and PNG libraires.
 Just need png write and 
 #endif
 
+#if __CYGWIN__
+#include <inttypes.h>
+#include <unistd.h>
+#if 0
+   /* This is the int8_t nonsense */
+typedef char           __int8_t;
+typedef unsigned char           __uint8_t;
+typedef signed short int        __int16_t;
+typedef unsigned short int      __uint16_t;
+typedef signed int              __int32_t;
+typedef unsigned int            __uint32_t;
+typedef signed long long int    __int64_t;
+typedef unsigned long long int  __uint64_t;
+typedef unsigned long long int  uint64_t;
+typedef char           int8;
+typedef unsigned char           int8;
+typedef unsigned char           uint8;
+typedef signed short int        int16;
+typedef unsigned short int      uint16;
+typedef signed int              int32;
+typedef unsigned int            uint32;
+typedef signed long long int    int64;
+typedef char           __int8;
+typedef unsigned char           __int8;
+typedef unsigned char           __uint8;
+typedef signed short int        __int16;
+typedef unsigned short int      __uint16;
+typedef signed int              __int32;
+typedef unsigned int            __uint32;
+typedef signed long long int    __int64;
+#endif
+#endif
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <ctype.h>
 #include <assert.h>
-/* int8_t nonsense
-#include <unistd.h>
-*/
+
+/* __CYGWIN__ is predine on cygwin; you can view prefindeds with this command "gcc -E -dM -x c /dev/null" */
+
+
 #include <limits.h>
 #include <fcntl.h>
 #include <sys/types.h>

@@ -20,9 +20,7 @@ g++ -DUNIX -DWEB_SERVER=1 -UQT_GUI -UCOMMAND_LINE -DNATIVE -Wall -o alview alvie
 #  -momit-leaf-frame-pointer Omit the frame pointer in leaf functions
 
 
-compile for command line 
-Using NEW samtools 1.0 ( after august 2014) 
-
+Compile for command line Using NEW samtools 1.0 ( after august 2014)  on linux 
 gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
 -I/h1/finneyr/samtools-1.0/ \
 -I/h1/finneyr/samtools-1.0/htslib-1.0/ \
@@ -32,10 +30,26 @@ gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
 /h1/finneyr/samtools-1.0//htslib-1.0/libhts.a \
 -lbam -lm -lz -lgd -lpthread -lstdc++
 
-#Using old samtools  - compile for command line on linux ...
-# note, can't mix c and cpp effortlessley
+Compile for command line Using old samtools  - compile for command line on linux ...
+****** note, can't mix c and cpp effortlessley
 cp alvmisc.c alvmisc.cpp
 gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ -L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz  -lstdc++
+
+Compile for command line cygwin (USE SAMTOOLS 0.18) 
+cp alvmisc.c alvmisc.cpp
+gcc -Wall -DUNIX=1 -DCMD_LINE=1  -o alview_cmdline_cygwin alvmisc.cpp alviewcore.cpp -I.  -Ic:/rich/samtools-0.1.18 -Lc:/rich/samtools-0.1.18 -lbam -lm -lz  -lstdc++ 
+
+Example command line run (cygwin) :
+G/alview_cmdline_cygwin.exe  c:/rich/BAMS/RW1.BWA-aln.RG.MKDUP.bam x.png chr17:7512444-7519536 hg19
+
+Compile command line for Windows cl.exe compliter (visual C), note usage of hacked samtools library  
+cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alviewcore.cpp 
+cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alvmisc.cpp
+link /MACHINE:x86  /OUT:alview_cmd_win.exe Alvmisc.obj alviewcore.obj sam01832/my.lib zlib32/zlib.lib
+
+     
+
+
 
 
 todo: (soon !) 
@@ -230,8 +244,8 @@ char cwd[FILENAME_MAX];
 char ced[FILENAME_MAX]; 
 
 #ifdef WIN32
-extern char hacked_ced[FILENAME_MAX];  //  windows - for URL 
-extern char hacked_ced_for_sprintf[FILENAME_MAX];  //  windows - for URL 
+char hacked_ced[FILENAME_MAX];  //  windows - for current executing directory
+char hacked_ced_for_sprintf[FILENAME_MAX];       // windows - for URL 
 #endif
 
 void full_path_to_current_and_executing_directory(char cwd[], char ced[])
@@ -403,7 +417,27 @@ struct disease_type
 
 #if WIN32
 // jdebug is in alvwin32.cpp file
-void jdebug(const char *s);
+void jdebug(const char *s)         // for use in debuging 
+{
+ // V--- if this set to zero then off, 
+#if 0
+ // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
+
+    static FILE *debugfp = (FILE *)0;
+    static int cnt = 0;
+//     int i = 0;
+    char fn[2048];
+//     char m[2048];
+
+    strcpy(fn,"x"); 
+    if (!debugfp) debugfp = fopen(fn,"a");
+    if (debugfp == (FILE *)0) { return; }
+    fprintf(debugfp,"%d:%s\n",cnt++,s);
+    fflush(debugfp); 
+//     fclose(debugfp);
+#endif
+    return;
+}
 #else
 
 void jdebug(const char *s) // for use in debuging on internet
@@ -10854,6 +10888,4 @@ void freedom_for_memory(void)
     if (ppp) free(ppp);
     ppp = (unsigned char *)0;
 }
-
-
 
