@@ -52,4 +52,5 @@ git push origin master --force
 git push https://github.com/NCIP/alview.git --force
 
 
-
+#force command line not gtk/X on linux ...
+unset SSH_ASKPASS
