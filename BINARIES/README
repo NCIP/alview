@@ -1,22 +1,25 @@
-
 Installation Quick Start.
 
+Linux,Windows,MacOSX install packages are at http://45.56.125.191/
+
 1) Decide where to put your alview executable and support data, support data is about 1 GB per build (example hg18, hg19 )
-   The default location for the  GENOMEDATADIR specified in alview.conf file is in a directory called GENOMEDATADIR off the  
-   alview executeable's directory. Easiest way is to pick a directory for alview, and create GENOMEDATADIR there.
+   The default location for the GENOMEDATADIR specified in alview.conf file is in a directory called GENOMEDATADIR off the  
+   alview executeable's directory. Easiest way is to create a directory for alview, and create GENOMEDATADIR there in that 
+   new directory.
+   
 
 2) Download the executable for your system
 
 alvgtk               LINUX
 alview.exe           WINDOWS
-alvmace              MAC
+alvmac              MAC
 
 3) Download the build(s) you want and put therm where you decided to put them in #1
 
 4) edit alview.conf
 
 An example  ... notice that the windows line is uncommented.  This is an example 
-# comments stat with #
+# comments start with #
 # USE / at end of directories
 # windows  ...
 GENOMEDATADIR=c:\rich\GENOMEDATA\
@@ -32,5 +35,6 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 
  in linux .. ./alvgtk
  on windows, there are many way to start the program
- on mac .. ./alvmac from a command or line or by clicking
+ on mac .. ./alvmac from a command or line or by clicking via finder.
+ 
 
