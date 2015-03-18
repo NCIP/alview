@@ -1,34 +1,38 @@
 
-Look in BINARIES directory for exectuables.  Please follow instructions for setting up GENOMEDATADIR and alview.conf configuration file.
+This is the base ALVIEW source directory.
+See "ALVIEW_USERS_MANUAL.txt" and "README.md" files for more information.
+Look in BINARIES directory for exectuables.  They are operating system specific. 
+Please follow instructions for setting up 1) GENOMEDATADIR and 2) "alview.conf" configuration file. 
 
-This is the base source dicectory.
+_________ ________________________ __________________________________
+Class     Filename                 Notes
+--------- ------------------------ ----------------------------------
+ALL       README                   You are here                 
+ALL       ALVIEW_USERS_MANUAL.txt  users manual
+Windows   winwacky.h               isolate visual C non Posix-isms 
+PORTABLE  logo.bmp                 NCI logo(tm), replace with your own if you want
+PORTABLE  alview.h                 Alview's header file
+Windows   StdAfx.h                 windows stuff
+Windows   sam01832                 specially compiled samtools library for Visual C
+Windows   WINWACKY                 isolate visual C non Posix-isms         
+Windows   zlib32                   specially complies zlib for Visual C       
+Windows   godbg.bat                compile for windows with debug on
+Windows   rundbg.bat               run debugger on windows
+Windows   StdAfx.cpp               win32 boilerplate 
+PORTABLE  alvmisc.cpp              MIT licensed software goes here (LODE png library, among other things)
+PORTABLE  alvmisc.c                MIT licensed software goes here (LODE png library, among other things) .   fix
+Windows   resource.h               win32 paint your initial screen stuff 
+Windows   alview.rc                win32 resource compiler (must match what's in resource.h)          
+PORTABLE  alviewcore.cpp           interface to samtools and imaging here               
+Windows   alvwin32.cpp             Windows GUI frontend for Alview             
+LINUX     config.h                 some linux GTK stuff         
+LINUX     gomkgtk                  compile/link script for linux using gtk2 (not gtk3)        
+Windows   gowin32.bat              compile/link script for Windows
+PORTABLE  alview.conf              CONFIGURATION FILE  (edit this to point to your GENOMEDIR )            
+Linux     alvgtk.c                 linux/bsd/unix version for Alview using GTK2 
+Apple     alvmac.m                 Cocoa GUI front end 
+Apple     gomac                    compile/link script for mac               
+DIR       BINARIES                 Ready to roll, just download the genome reference you want         
 
-Windows   winwacky.h       isolate visual C non posis-isms 
-Windows   logo.bmp         NCI logo(tm), mayke your own if you want
-Windows   alview.h         alview's header file
-Windows   StdAfx.h         windows stuff
-Windows   sam01832         specially compoiled samtools library for Visual C
-Windows   WINWACKY         isolate visual C non posis-isms         
-Windows   zlib32           specially complies zlib for Visual C       
-Windows   godbg.bat        compile for windows with debug on
-Windows   rundbg.bat       run debugger on windows
-Windows   StdAfx.cpp       win32 boilerplate 
-PORTABLE  alvmisc.cpp      MIT licensed software goes here (LODE png library, amoung other things)
-PORTABLE  alvmisc.c        MIT licensed software goes here (LODE png library, amoung other things) .   fix
-Linuxws   resource.h       win32 paint your initial screen stuff 
-Windows   alview.rc        win32 resource compiler (must match what's in resource.h)          
-PORTABLE  alviewcore.cpp   interface to samootls and imaging here               
-Windows   alvwin32.cpp     Windows GUI frontent for alview             
-Windows   config.h         some linux GTK stuff         
-Windows   gomkgtk          compile/link script for linux        
-Windows   gowin32.bat      compile/link script for Windows
-PORTABLE  alview.conf      CONFIGURATION FILE  (edit this to point to your GENOMEDIR )            
-Linux     alvgtk.c         linux/bsd/unix version fot alview using GTK2 
-Linux     alvgtk           linux binary.  might work but probably not on your system.  compile/link is easy, though        
-Linuxws   notes            what it say
-Apple     alvmac.m         Cocoa GUI front end 
-Apple     gomac            compile/link script for mac               
-ALL       BINARIES         Ready to roll, just download the geoome refrenece you want         
-ALL       README           You are here                 
-
+_________ ________________________ __________________________________
 
