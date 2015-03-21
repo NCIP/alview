@@ -1,12 +1,12 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision March 20, 2015 
+Latest revision March 21, 2015 
 
 Contents.
 I.    Introduction.
 II.   Power User Fast Start
-III.  INstallation.
+III.  Installation.
 IV.   Compilation.
 V.    Operation as Command Line Utility
 VI.   Operation as Web Server
@@ -16,6 +16,10 @@ VIII. "alview.conf" text configuration file
 I. Introduction.
 Alview is a fast computer program for viewing BAM files.  Various
 versions are available at my webserver at http://45.56.125.191/ .
+
+This is relatively new, I'd appreciate feedback. Contact me at my email 
+address : [finneyr AT mail nih gov](add @ and dots) with any questions 
+or to troubleshoot a problem.
 
 Alview can take three forms: 
 
@@ -29,38 +33,37 @@ It is supported on three Operating Systems:
 #2 Linux (current release is 64 bit, recompilation on another UNIX is easy) 
 #3 Apple MAC 64 bit
 
-This is relatively new, I'd appreciate feedback. Contact me at my email 
-address : [finneyr AT mail nih gov](add @ and dots)
 
-Alview is available via github at https://github.com/NCIP/alview
+Alview is available via the NCI/NIH github at https://github.com/NCIP/alview
 Please note the Windows GUI version installer.  Mac DMG and tarball is now 
 available as is a 64bit Linux tarball.
 
 The command line can be used to batch create images of snp locations 
-in bam files.  The user can then crete a slide show for rapid viewing.  This 
-takes some user engagement.  It currently supports hg18 and hg19 via large genome 
+in bam files.  The user can then create a slide show for rapid viewing.  This 
+takes some user engagement.  Alview currently supports hg18 and hg19 via large genome 
 support files.  They are required.  More builds are forthcoming (mouse, GrCh38, 
 etc).
 
 
 II.  Power User Fast Start
 Consult the Alview github page for the link to from my personal webserver.  
-Various Alview builds are available there.
+Currently it is at http://45.56.125.191/ .  Various Alview builds are available there.
 
 If you are blocked from installing your system, then do this: Pick or create a 
-directory to put alview in.   Download the binary for your system at 
+directory on your computer to put Alview in.   Download the binary for your system at 
 https://github.com/NCIP/alview/tree/master/BINARIES.  Put it in your
-directory.  Set permissions to "execute".
+directory.  Set permissions to the alview executeable to "execute".
 Download http://45.56.125.191/AlviewGenomeData.tar from my personal 
 webserver to your Alview directory.  This is a hassle on slower connections. 
 It might make take a few minutes on your home DSL.  Untar this with 
 "tar xvf AlviewGenomeData.tar" command (or use a graphical uncompression 
-program for your OS).  This suport data is in subdirectories of the
-newly create directory named "GENOMEDATA".  Make sure all new files have read 
-permissions set correctly.  You may need to use chmod on Apple or Mac or
+program for your OS).  Untar-ing (extracting) the genomic support data 
+from "AlviewGenomeData.tar" creates genome subdirectories off of the
+newly create directory named "GENOMEDATA" .  Make sure all new files have read 
+permissions set correctly.  You may need to use chmod on Linux, Mac or
 Cygwin or icacls.exe on Windows.
 
-Set up text configuration file "alview.conf". This must be is correct. The 
+Set up text configuration file "alview.conf". This must be correct. The 
 file "alview.conf" is editable using a text editor.  Check it carefully.
 Make sure it points to the GENOMEDATA directory.
 
@@ -70,10 +73,9 @@ It's pretty straightforward for Linux and Apple MAC ...
 
 Make and/or install  1) samtools and 2)zlib if they are not already there.  
 
-
 Sample Compile for command line Using NEW samtools 1.0 ( after august 2014)  on Linux
 
-#set samtools to proper directory for you system.
+# set samtools to proper directory for you system.
     gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
     -I/h1/finneyr/samtools-1.0/ \
     -I/h1/finneyr/samtools-1.0/htslib-1.0/ \
@@ -98,7 +100,7 @@ compile.  For most, download samtools and "make" should do the trick.
 
 Currently the samtools 1.1 is a bit hard to get right on Windows.  For Windows 
 the samtools version 0.1.18 is what is currently supported and works with old 
-compilers.  For a GUI Linux users should install gtk2 (not gtk3) development 
+compilers.  For a GUI Linux, users should install gtk2 (not gtk3) development 
 packages.  This is easily install-able via apt-get or yum or your GUI installer.  
 Know in what directories the libraries are in as you'll need to provide them 
 to the linker.  
@@ -114,12 +116,11 @@ Not that most version have static compilation, you can compile Alview with
 shared libraries if you wish.
 
 Windows users may just want the Linux version; just compile Linux version and 
-under CYGWIN and just use CYGWIN.   The makefile must modified to make samtools 
-support libary work.
+under CYGWIN and just use CYGWIN.   The makefile must be modified to make samtools 
+support libary work.  Consult the internet for troubleshooting tips.
 
-You will have to setup the genome data directory for command line version.  
-Set the text file "alview.conf" properly !!!  Be careful.
-
+You will have to setup the genome data directory for command line version:  
+set the text file "alview.conf" properly !!!  Be careful.
 
 Sample Webserver compilation for Linux ...
 
@@ -131,6 +132,7 @@ Sample Webserver compilation for Linux ...
 
 See the WEBSERVER section for Web Server setup.
 
+
 III. Installation
 Alview is a fast computer program for viewing BAM files.  Various
 versions are available at http://45.56.125.191/ .
@@ -138,62 +140,84 @@ versions are available at http://45.56.125.191/ .
 Windows: run the Windows version installer from http://45.56.125.191/ .
 
 APPLE MAC GUI: Download DMG files, click on it.  If there is a complaint about
-Download alvmac, download GENOMEDATADIR data, edit alview.conf, check permission, run alvmac.
+Download alvmac, download GENOMEDATADIR data, edit alview.conf, check permission, run "alvmac".
+Click on downloaded DMG, then on Alview.  A Mac tarball is also available.
+
+Linux: A 64bit Linux compile on an old system is available, so it ~should~ run on
+later 64 bit Linux versions. Download, untar , set permissions, edit 
+"alview.conf", run alvgtk. 
+
 
 IV. Compilation.
 At the Alview github page, check README.md file for the latest versions with 
-and current instructions.  You can just install GUIs on your desktop, 
-but must compile for webserver or command line.
+and additional instructions.  Remember, you can just install GUIs on your desktop, 
+and some standalones, but must compile for webserver or some command lines.
 
-You must also download the large genome data support files targzipped in the
-file http://45.56.125.191/AlviewGenomeData.tar
  
-The TWO command lines to prepare this file (on LINUX, Mac command line or
-cygwin [ or cmd.exe with unix utilities ] ) ...
-
-tar xvf AlviewGenomeData.tar
-
-Linux version is 64bit specific. Set up the "alview.conf" file .
-
-Linux compilation is done vi the "gogtk" batch file.
-Edit this file to point to your samtools.  You may have to download gtk2 development library.
-
-
-V.  Operation as Command Line Utility.
-
-You must compile for standalone or download a working version. See compilation section
-if you need to compile. 
-
 Install 1 samtools, 2) curses and 3)zlib if they are 
-not already there.  Set the appropriate IFDEF flags.  These flags are 
+not already there.   Samtools is a non-standard package and must
+be installed by hand.   The package "curses" and "zlib" are required by samtools. 
+Sometimes curses is called "ncurses".
+
+Linux compilation is done via the "gogtk" batch file.  
+Edit this file ("gogtk") to point to your samtools.  
+You may have to download gtk2 development library; which is not  big deal
+if you have root or admin privleges.  Ask your sysadmin for help
+or download and make gtk2 in your user local filesystems.
+
+Set the appropriate IFDEF flags.  These flags are 
 APPLE, UNIX, WINDOWS, WEB_SERVER, CMD_LINE.  You can set them via 
 the command line program options as you invoke the compiler.
 
 Example compilation on Linux for command line ...
 
-    # note the -I and -L paramters need to pont to *your*' samtools directory
+    # note the -I and -L parameters need to point to *your*' samtools directory
     gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
     -I/data/nextgen/finneyr/samtools-0.1.18/ \
     -L/data/nextgen/finneyr/samtools-0.1.18/ -lbam -lm -lz -lgd  -lstdc++ 
 
+You must also download the large genome data support files targzipped in the
+file http://45.56.125.191/AlviewGenomeData.tar . 
+From the directory where you want to put a new GENOMEDATA directory,
+run this command line to prepare this AlviewGenomeData.tar 
+
+    tar xvf AlviewGenomeData.tar
+
+(this works on on LINUX, Mac command line or Cygwin [ or cmd.exe with unix utilities ] )
+
+Set up the "alview.conf" file .  Edit this file with a text editor.
+
+
+V.  Operation as Command Line Utility.
+
+You might have to compile for standalone or download a working version. See compilation section
+if you need to compile. 
 
 Running alview command line ...
-The command line argument are ...
-    arg1 fn_bam = name of bam files (will use to determine bai file)
-    arg2 outimg = output file name ( png file)
-    arg3 position = example chr17:10000-10500  it can handle 17:10000-10500
-type positions
-    arg4 blds = build string (example "hg19")
-    (optional) arg5 ih = image height
-    (optional) arg6 iw = image width
+    The command line argument are ...
+        arg1 fn_bam = name of bam files (will use to determine bai file)
+        arg2 outimg = output file name ( png file)
+        arg3 position = example chr17:10000-10500  it can handle 17:10000-10500
+                    type positions
+        arg4 blds = build string (example "hg19")
+        (optional) arg5 ih = image height
+        (optional) arg6 iw = image width
 
-So, create a batch file of BAMS and , for instance, SNP call regions to
-examine.
+So, create a batch file to call Alview repeatedly call to make pictures of
+different BAM files or regions (centered on the SNP of interest).
+
+*** THIS PART TAKES SOME USER INVOLVMENT **
+Feel free to improvise ot customize as you see fit.
+Alview command line just takes a picture.  You can add lots of value
+to this collection of pictures via other tools.  You can
+use whatever tools you want to organize or examine these images.
+
 You can view the output in a slideshow, the file "slideshowtemplate.html" is a
 template file we provide for assisting in this.
-Edit slideshowtemplate like this:
+
+Edit slideshowtemplate.html like this:
 Set the "IMGSHERE" and "ANOSHERE" lines with image files and annotation.  This
-is a little work, but makes viewing your massive 40,000 SNP calls easy to review !!!!
+is a little work, but makes viewing your massive 40,000 SNP calls easy to review!
 This is probably the true power user's tool for reviewing his lab results and
 prioritizing further work.
 
@@ -204,34 +228,34 @@ V.   Operation as Web Server
 
 For the webserver, create the alview program for webserver and copy the 
 resulting alview to the cgi-bin directory and check permissions.
-Then, set up the genome data directory and edit alview.conf properly.
+See compilation for examples.
+
+Then, set up the genome data directory and edit "alview.conf" properly.
 
 Setting up the genome data directory involves this ... 
-Download the *large* genome data support files n the tar file named
-http://45.56.125.191/AlviewGenomeData.tar .  This is my linode server.  
+Download the *large* genome data support files which are in the tar file t
+http://45.56.125.191/AlviewGenomeData.tar .  (This is my linode server).
  
 This is large (1.6 GB) file and takes a while to decompress (via "tar xvf " command) 
 
 Use this command
 
-tar xvf AlviewGenomeData.tar 
+     tar xvf AlviewGenomeData.tar 
 
 Edit "alview.conf" file to point to the correct genome data location that you
 just created, make sure cgi programs can access this.
 If in doubt, just set it up off the executable (cgi-bin) directory as a
-
-
 subdirectory [ the default location should get detected].
 
-There are 1 CSS and 3 javasript files to install from 
-https://github.com/NCIP/alview/blob/master/MISC/
+Alview webserver use 1 CSS and 3 javascript files. Hand install them from 
+https://github.com/NCIP/alview/blob/master/MISC/ ...
 Create at "js" directory off of your HTDOCS directory (the Apache default directory).
 Make sure it's readable.
 
-    alview.jquery-1.8.3.js                      - put in "js" of off the HTDOCS (default) diectory
-    alview.jquery-ui-1.9.2.custom.js            - put in "js" of off the HTDOCS (default) diectory
-    alview.jquery.imgareaselect.js              - put in "js" of off the HTDOCS (default) diectory
-    imgareaselect-default.css                   - put in HTDOCS (default) diectory
+    alview.jquery-1.8.3.js                      - put in "js" of off the HTDOCS (default) directory
+    alview.jquery-ui-1.9.2.custom.js            - put in "js" of off the HTDOCS (default) directory
+    alview.jquery.imgareaselect.js              - put in "js" of off the HTDOCS (default) directory
+    imgareaselect-default.css                   - put in HTDOCS (default) directory
 
 Compile the file alviewcore.cpp with appropriate OS flag and define 
 WEBSERVER to 1.  Install binary in cgi-bin directory and run as web
@@ -247,11 +271,16 @@ to your bam files.  Place this in the cgi-bin directory.
 
 Example "list.public" file is ...
 
-#This is list for PUBLIC ALVIEW for NCI - public datasets - comments begin with #
+#This is list for PUBLIC ALVIEW - public datasets - comments begin with #
 /tcga_next_gen_a/bam_tier_2/GASTRIC/AGP1_RNA.bam AGP1_RNA T Asian_Gastric_RNA
 /tcga_next_gen_a/bam_tier_2/GASTRIC/AGP2_RNA.bam AGP2_RNA T Asian_Gastric_RNA
 /tcga_next_gen_a/bam_tier_2/GASTRIC/AGP3_RNA.bam AGP3_RNA T Asian_Gastric_RNA
 /tcga_next_gen_a/bam_tier_2/GASTRIC/AGP4_RNA.bam AGP4_RNA T Asian_Gastric_RNA
+
+Hooks in the code are available for creating your own security mechanisms.
+****This is the user's responsibility****
+For instance you can create user logins and examine cookies and you on user databases.
+Additionally, you could restrict access  to certain IP addresses.
 
 
 VI.  Running Alview as a GUI 
@@ -274,9 +303,8 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 #GENOMEDATADIR=/home/rfinney/GENOMEDATA/
 # mac  ...
 #GENOMEDATADIR=/Users/finneyr/GENOMEDATA/
+#end
 ---PREVIOUS LINE IS LAST LINE OF alview.conf CONFIGURATION TEXT FILE
 
-#end
 #01234567890123456789012345678901234567890123456789012345678901234567890123456789
 
-uncompression
