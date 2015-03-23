@@ -1,7 +1,7 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision March 21, 2015 
+Latest revision March 23, 2015 
 
 Contents.
 I.    Introduction.
@@ -52,7 +52,7 @@ Currently it is at http://45.56.125.191/ .  Various Alview builds are available 
 If you are blocked from installing your system, then do this: Pick or create a 
 directory on your computer to put Alview in.   Download the binary for your system at 
 https://github.com/NCIP/alview/tree/master/BINARIES.  Put it in your
-directory.  Set permissions to the alview executeable to "execute".
+directory.  Set permissions to the alview executable to "execute".
 Download http://45.56.125.191/AlviewGenomeData.tar from my personal 
 webserver to your Alview directory.  This is a hassle on slower connections. 
 It might make take a few minutes on your home DSL.  Untar this with 
@@ -162,7 +162,7 @@ Sometimes curses is called "ncurses".
 Linux compilation is done via the "gogtk" batch file.  
 Edit this file ("gogtk") to point to your samtools.  
 You may have to download gtk2 development library; which is not  big deal
-if you have root or admin privleges.  Ask your sysadmin for help
+if you have root or admin privileges.  Ask your sysadmin for help
 or download and make gtk2 in your user local filesystems.
 
 Set the appropriate IFDEF flags.  These flags are 
@@ -206,7 +206,7 @@ Running alview command line ...
 So, create a batch file to call Alview repeatedly call to make pictures of
 different BAM files or regions (centered on the SNP of interest).
 
-*** THIS PART TAKES SOME USER INVOLVMENT **
+*** THIS PART TAKES SOME USER INVOLVEMENT **
 Feel free to improvise ot customize as you see fit.
 Alview command line just takes a picture.  You can add lots of value
 to this collection of pictures via other tools.  You can
