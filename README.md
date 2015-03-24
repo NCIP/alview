@@ -1,9 +1,10 @@
 
-March 18, 2015  
+March 24, 2015  
 
 <p>The Alview WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
 <p>Installers for Mac/Windows/Linux are here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
-
+<p>User's Manual is here : <a href="https://raw.githubusercontent.com/NCIP/alview/master/ALVIEW_USERS_MANUAL.txt">
+ https://raw.githubusercontent.com/NCIP/alview/master/ALVIEW_USERS_MANUAL.txt .
 Current hg18 and hg19 are supported.  More genomes are coming.
 
 If your system is locked down and you cannot install the package for your Operating System, then do this: .... create a directory to store alview program and data.  Then grab a binary from BINARIES directory ( from this NCIP Alview Github Front Page)  <a href="https://github.com/NCIP/alview/tree/master/BINARIES">  https://github.com/NCIP/alview/tree/master/BINARIES </a> , download and untar the Genome support data ("AlviewGenomeData.tar") in your new directory (this is very large) <a href="http://45.56.125.191/AlviewGenomeData.tar> http://45.56.125.191/AlviewGenomeData.tar</a>, Then download and edit the sample alview.conf file (sample at <a href="http://45.56.125.191/alview.conf"> http://45.56.125.191/alview.conf </a> to point to GENOMEDATADIR directory.
