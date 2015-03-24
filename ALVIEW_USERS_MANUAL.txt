@@ -1,7 +1,7 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision March 23, 2015 
+Latest revision March 24, 2015 
 
 Contents.
 I.    Introduction.
