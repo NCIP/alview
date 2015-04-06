@@ -7938,19 +7938,19 @@ gboolean unix_draw_image (GtkWidget *widget)
 {
     unsigned char *ptr;
 
-fprintf(stderr,"xxx in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
+// fprintf(stderr,"xxx in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
     if (darea_on == 1)           // flag, means RGB image is loaded in "im"
     {
         if (!im) return;
-fprintf(stderr,"xxx in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
+// fprintf(stderr,"xxx in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
         gtk_widget_set_size_request (widget,(gint)diw,(gint)dih);
         if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return; }
         else       ptr = im->data;
 
-fprintf(stderr,"in unix_draw_image here 1\n"); fflush(stderr); 
+// fprintf(stderr,"in unix_draw_image here 1\n"); fflush(stderr); 
         gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
                 0, 0, diw /* IMAGE_WIDTH*/, dih /*IMAGE_HEIGHT*/, GDK_RGB_DITHER_MAX, ptr, diw * 3);
-fprintf(stderr,"xxx in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
+// fprintf(stderr,"xxx in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
     }
     else
     {
