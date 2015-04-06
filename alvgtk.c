@@ -1,7 +1,8 @@
 
 #include <gtk/gtk.h>
 
-// #include "demo-common.h"
+// #include "demo-common.h" OLD
+//    how to debug : g_message ("Hello, file thing!\n");
 
 #include <string.h>
 #include <stdlib.h>
@@ -20,11 +21,11 @@ unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, 
 int start_select_x = 0;
 int end_select_x = 0;
 int xoron = 0;
-char pos[1024];
 unsigned char *img;
 unsigned char *img2; // "xor" area, so called because it was originall XORed
-int diw;     // "darea" pixbuff width 
-int dih;     // "darea" pixbuff height 
+char pos[2048];// IMPORTANT GLOBAL VARIABLE , position (genomic) 
+int diw = 900;     // IMPORTANT GLOBAL VARIABLE "darea" pixbuff width 
+int dih = 400 ;     // IMPORTANT GLOBAL VARIABLE "darea" pixbuff height 
 int khrstart =0 ;
 int khrend = 0 ;
 char khr[1024];
@@ -33,20 +34,43 @@ GdkPixbuf *pixbuf = NULL;
 int darea_on = 0; // flag, means RGB image is loaded in "im"
 GtkWidget *darea;
 GtkWidget *submitbutton = (void *)0;
-GtkWidget *TextEntry = (void *)0;
+GtkWidget *TextEntryPosition = (void *)0;
+GtkWidget *TextEntryWidth = (void *)0;
+GtkWidget *TextEntryHeight = (void *)0;
 
 extern struct image_type *im;
 extern char fn_bam[]; // [FILENAME_MAX]; -the bam file name
 extern char GENOMEDATADIR[];
 
+void get_height_and_width() // sets diw and dih 
+{
+    const char *entry_text_width;
+    const char *entry_text_height;
+    char tmps[5120];
+
+    entry_text_width = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntryWidth));
+    diw = atoi(entry_text_width );
+    if (diw < 300) diw = 300;
+    if (diw > 5000) diw = 5000;
+    sprintf(tmps,"%d",diw); 
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryWidth),(gchar *)tmps);
+
+    entry_text_height = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntryHeight));
+    dih = atoi(entry_text_height );
+    if (dih < 200) dih = 200;
+    if (dih > 5000) dih = 5000;
+    sprintf(tmps,"%d",dih); 
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryHeight),(gchar *)tmps);
+
+}
+
+
 static void file_dialog( GtkWidget *w, gpointer   data )
 {
     GtkWidget *dialog;
-    int height; // height
-    int width; // width
+    int height = dih; // height
+    int width = diw ; // width
     int status;
-
-//    g_message ("Hello, file thing!\n");
 
     dialog = gtk_file_chooser_dialog_new ("Open file...", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, 
                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -60,19 +84,19 @@ fprintf(stderr,"file name = %s \n", filename);  fflush(stderr);
 #endif
     if (filename) strcpy(fn_bam,(char *)filename); 
 
- if (khr[0] == (char)0)
- {
-     strcpy(khr,"chr1"); 
-     height = 400;
-     width = 1000;
-     khrstart = 12982;
-     khrend = 15849;
- }
-    diw = width;
-    dih = height;
+// xxx 
+    if (khr[0] == (char)0)
+    {
+         strcpy(khr,"chr1"); 
+         khrstart = 12982;
+         khrend = 15849;
+    }
+    get_height_and_width(); // sets diw and dih 
     if (img) { free(img); }
     img = (void *)imgen_mem(filename,khr,khrstart,khrend,height, width,&status);
+
 // fprintf(stderr,"after imgen_mem() img =%p, status=%d \n",img,status); fflush(stderr); 
+
     if (img)
     {
         darea_on = 1;
@@ -7912,30 +7936,27 @@ unsigned char ncilogo[] = {
 
 gboolean unix_draw_image (GtkWidget *widget)
 {
-    gint xxw,xxh;
-    xxw=(gint)diw;
-    xxh=(gint)dih;
+    unsigned char *ptr;
 
-//     fprintf(stderr,"in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
+fprintf(stderr,"xxx in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
     if (darea_on == 1)           // flag, means RGB image is loaded in "im"
     {
         if (!im) return;
-// fprintf(stderr,"in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
-        gtk_widget_set_size_request (widget,xxw,xxh);
-unsigned char *ptr;
-if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return; }
-else       ptr = im->data;
+fprintf(stderr,"xxx in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
+        gtk_widget_set_size_request (widget,(gint)diw,(gint)dih);
+        if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return; }
+        else       ptr = im->data;
+
+fprintf(stderr,"in unix_draw_image here 1\n"); fflush(stderr); 
         gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
                 0, 0, diw /* IMAGE_WIDTH*/, dih /*IMAGE_HEIGHT*/, GDK_RGB_DITHER_MAX, ptr, diw * 3);
-//         fprintf(stderr,"in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
+fprintf(stderr,"xxx in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
     }
     else
     {
-        diw = ncilogo_width;
-        dih = ncilogo_height;
         gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
-                       0, 0, diw /* IMAGE_WIDTH*/, dih /*IMAGE_HEIGHT*/,
-                       GDK_RGB_DITHER_MAX, ncilogo, diw * 3);
+                       0, 0, ncilogo_width   /* IMAGE_WIDTH*/, ncilogo_height  /*IMAGE_HEIGHT*/,
+                       GDK_RGB_DITHER_MAX, ncilogo, ncilogo_width* 3);
     }
 }
 
@@ -7944,12 +7965,14 @@ gboolean on_darea_expose (GtkWidget *widget, GdkEventExpose *event, gpointer use
 {
 //    fprintf(stderr,"in on_darea_expose w=%d h=%d xoron=%d\n",diw,dih,xoron); fflush(stderr); 
     unix_draw_image (widget);
+    return TRUE; 
 }
 
 
 gboolean darea_configure_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 //     fprintf(stderr,"in darea_configure_eventw=%d h=%d\n",diw,dih); fflush(stderr); 
+    return TRUE; 
 }
 
 
@@ -7961,14 +7984,15 @@ struct image_type im2;
         if (img2) free(img2); 
         img2 = malloc(dih*diw*3);
         if (!img2) return;
-        memcpy(img2,img,dih*diw*3);
-im2.data = img2;
-im2.width = diw;
-im2.height = dih;
-void ImageXRectangle(struct image_type *im,int x, int y, int x1, int y1 );
+        memcpy(img2,img, dih*diw*3);
+        im2.data = img2;
+        im2.width = diw;
+        im2.height = dih;
+void ImageXRectangle(struct image_type *im,int x, int y, int x1, int y1 ); // prototype for next line
         ImageXRectangle(&im2,r->x, 0, r->x+r->width, dih );
         xoron = 1;
     }
+    return;
 }
     
 
@@ -8068,9 +8092,10 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
             // NOOOO - keep the image  around do not free !!!!       free(img);
         }
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-        gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+        gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
         start_select_x = end_select_x = 1;
     }
+    return TRUE;
 }
 
 gboolean darea_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -8119,7 +8144,8 @@ fprintf(stderr,"zoom in \n"); fflush(stderr);
         if (darea) gtk_widget_queue_draw(darea); // keep the image  around do not free now !!!!
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
+    return TRUE;
 }
 
 gboolean zoom_out(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
@@ -8141,7 +8167,8 @@ gboolean zoom_out(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
         if (darea) gtk_widget_queue_draw(darea); // keep the image  around do not free now !!!!
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
+    return TRUE;
 }
 
 gboolean zoom_base(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
@@ -8163,7 +8190,8 @@ gboolean zoom_base(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
             // keep the image  around do not free now !!!!
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
+    return TRUE;
 }
 
  // not a call back but is called by call backs
@@ -8181,6 +8209,7 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
     }
 
     movek = user_data; 
+
 fprintf(stderr,"in on_button_move START movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
     if (movek == 1)   // page right special code 
     {
@@ -8210,8 +8239,10 @@ fprintf(stderr,"in on_button_move START movek=%d , khrstart = %d khrend = %d diw
             // keep the image  around do not free now !!!!
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
 fprintf(stderr,"in on_button_move END movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
+
+    return TRUE;
 }
 
 
@@ -8307,27 +8338,21 @@ gboolean gettextentry(GtkWidget *widget)
     int third;
 
     entry_text = (char *)0;
-    entry_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntry));
+    entry_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntryPosition));
 // if (entry_text) { fprintf(stderr,"gettextentry() entry_text is %s \n",entry_text); fflush(stderr); }
 
-#if 0
-    status = parse_position(entry_text,khr,&khrstart,&khrend); 
-#endif
      if (strncmp(entry_text,"chr",3) == 0)
      {
          parse_position(entry_text,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
      }
      else
      {
-// fprintf(stderr,"in gettextentry() before do_by_gene_name_from_refflat() entry_text is [%s]\n",entry_text); fflush(stderr); 
-
          do_by_gene_name_from_refflat(entry_text,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
-
-// fprintf(stderr,"in gettextentry() after do_by_gene_name_from_refflat(): %s %d %d\n",khr,khrstart,khrend); fflush(stderr); 
      }
+     get_height_and_width(); // sets diw and dih 
 
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
-    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntry),(gchar *)pos);
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
 
     size = khrend - khrstart;
     sanity_khr();
@@ -8354,6 +8379,7 @@ gboolean gettextentry(GtkWidget *widget)
 
 int alv_gtk_main(int argc, char *argv[])
 {
+    char tmps[5012];
     GtkWidget *filemenu = (void *)0;
     GtkWidget *file = (void *)0;
     GtkWidget *quit = (void *)0;
@@ -8454,19 +8480,45 @@ TRAWLER: TP53 |
 /// line 1
     hbox = gtk_hbox_new(FALSE, 0);
 
-    TextEntry = gtk_entry_new();
-    gtk_box_pack_start (GTK_BOX (hbox), TextEntry, FALSE, FALSE, 2);
-    gtk_widget_show(TextEntry);
-gtk_entry_set_width_chars((GtkEntry *)TextEntry, (int)(strlen("chr1:246,112,574-249,250,620") + 6));
+// pos
+    GtkWidget *pos1 = gtk_label_new( "Position: "); 
+    gtk_box_pack_start (GTK_BOX (hbox), pos1, FALSE, FALSE, 2);
+    gtk_widget_show(pos1);
+    TextEntryPosition = gtk_entry_new();
+    gtk_box_pack_start (GTK_BOX (hbox), TextEntryPosition, FALSE, FALSE, 2);
+    gtk_widget_show(TextEntryPosition);
+    gtk_entry_set_width_chars((GtkEntry *)TextEntryPosition, (int)(strlen("chr1:246,112,574-249,250,620") + 6));
+    gtk_widget_show (TextEntryPosition);
 
+// --- submit
     submitbutton = gtk_button_new_with_label ("Submit ");
     gtk_box_pack_start (GTK_BOX (hbox), submitbutton, FALSE, FALSE, 2);
     gtk_widget_show (submitbutton);
-    g_signal_connect(GTK_OBJECT(submitbutton), "clicked", G_CALLBACK(gettextentry), TextEntry);
+    g_signal_connect(GTK_OBJECT(submitbutton), "clicked", G_CALLBACK(gettextentry), TextEntryPosition);
 
-    GtkWidget *info1 = gtk_label_new( " Position: Width: Height:    Splice Only On:   BaseColor:   Uniq:   Quality:"); 
-    gtk_box_pack_start (GTK_BOX (hbox), info1, FALSE, FALSE, 2);
-    gtk_widget_show (info1);
+// --- width 
+    GtkWidget *width1label = gtk_label_new( "Width: "); 
+    gtk_box_pack_start (GTK_BOX (hbox), width1label, FALSE, FALSE, 2);
+    gtk_widget_show(width1label);
+    TextEntryWidth = gtk_entry_new();
+    gtk_box_pack_start (GTK_BOX (hbox), TextEntryWidth, FALSE, FALSE, 2);
+    gtk_widget_show(TextEntryWidth);
+    gtk_entry_set_width_chars((GtkEntry *)TextEntryWidth, (int)6);
+    gtk_widget_show (TextEntryWidth);
+    sprintf(tmps,"%d",diw); 
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryWidth),(gchar *)tmps);
+
+// --- height 
+    GtkWidget *height1abel = gtk_label_new( "Height: "); 
+    gtk_box_pack_start (GTK_BOX (hbox), height1abel, FALSE, FALSE, 2);
+    gtk_widget_show(height1abel);
+    TextEntryHeight = gtk_entry_new();
+    gtk_box_pack_start (GTK_BOX (hbox), TextEntryHeight, FALSE, FALSE, 2);
+    gtk_widget_show(TextEntryHeight);
+    gtk_entry_set_width_chars((GtkEntry *)TextEntryHeight, 6);
+    gtk_widget_show (TextEntryHeight);
+    sprintf(tmps,"%d",dih); 
+    gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryHeight),(gchar *)tmps);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
     gtk_widget_show (hbox);
