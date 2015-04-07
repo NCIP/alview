@@ -496,11 +496,16 @@ int myid;
     }
     else if (self->myid == 2) // { 2  ,   10 ,110,  60, 30, "base" } ,
     {
+// printf("base 1 %s %d %d \n",khr,khrstart,khrend); 
         mid = (khrend+khrstart)/2;
         khrstart = mid - (diw/2);
         khrend = khrstart + diw;
         sanity_khr();
+// printf("base 2 %s %d %d \n",khr,khrstart,khrend); 
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
+// wtf?  why I need next 2 lines ????? should be done int get_aprams_and_draw ??? ??? ???
+    NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+    [texts[0].object setStringValue:defval];
         get_params_and_draw(1);
     }
     else if (self->myid == 3) // { 3  ,   70 ,110,  60, 30, "<Page" } ,
