@@ -540,11 +540,11 @@ int myid;
     }
     else if (self->myid == 7) // { 7  ,  310 ,110,  60, 30, "ZoomIN" } ,
     {
-        status = on_button_move(1);
         int third;
 
         size = khrend-khrstart;
         third=size/3;
+        if (third<1) third = 1;
         khrend = khrend - third;
         khrstart = khrstart + third;
         sanity_khr();
@@ -561,6 +561,7 @@ int myid;
         size = khrend-khrstart;
 // printf("Zoomout %s %d %d, size=%d\n",khr,khrstart,khrend,size); 
         half= size/2;
+        if (half<1) half = 1;
         khrend = khrend + half;
         khrstart = khrstart - half;
         sanity_khr();
