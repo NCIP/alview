@@ -1,8 +1,7 @@
 
-#define USE_GD 0 // getting rid of this 
 
 /* 
-Written by Richard Finney, National Cancer Institute, National Institutes of Health 2014
+Written by Richard Finney, National Cancer Institute, National Institutes of Health 2015
 This file "alviewcore.cpp" contains the core alview routines.  
 This is *** MOSTLY ***  public domain ...  EXCEPTION: note GOTOH code by Peter Clote.  
 Clote's GOTOH (optimized Smith-Watterman) code is only for non-commercial users.  
@@ -134,7 +133,7 @@ example web usage in Excel ...
 #ifdef WIN32
 
 #if 0
-gd is removed
+*** boutell gd graphics library had been removed ***
 // needed for gd.h stuff ...
 #define NONDLL 1
 #define BGDWIN32 1
@@ -150,6 +149,7 @@ gd is removed
 #include "interface.h" // routines to make work on a GUI
 #else
 
+#define USE_GD 0 // got rid of gd graphics library - using custom implementation now
 #if USE_GD
 #include <gd.h> // gd library
 gdImagePtr im;
@@ -183,14 +183,15 @@ struct image_type *im; //  = &image;
 
 #define NEEDSQL 0
 // needsql is for my tcga and target stuff.  private access only.  sadly.  they really should make this data public 
+
 #define FAVEBACKGROUNDCOLOR "F8F2E4"
 
-int did_content_type = 0; // for web services , "started output" 
-char blds[512];   //build string : example "hg19"
-char fn_bam[FILENAME_MAX]; // bam file name
-int inited_colors_flag = 0;  // used to init color for gd image
-int ih = 350;
-int iw = 1000;
+int ih = 350; // Image Height, 350 picked as default
+int iw = 1000; // Image Width, 1000 picked as default
+char blds[512];   // "genomic build" string : example "hg19"
+char fn_bam[FILENAME_MAX];    // bam file name
+int did_content_type = 0; // for web services , "started output" , this means printed "Content-type: text/html\n\n" to output for html rendering
+int inited_colors_flag = 0;  // used to init colors for graphics
 
 char CONFIGFILE[] = "alview.conf";
 char URL[512];
@@ -2430,8 +2431,6 @@ char  dna_t_s[24];
 char  dna_I_s[24]; // insert
 char  dna_D_s[24]; // delete
 
-#if USE_GD
-#else
 void ImageColorAllocate(int *color,unsigned char R,unsigned char G,unsigned char B)
 {
     unsigned char *z;
@@ -2441,11 +2440,10 @@ void ImageColorAllocate(int *color,unsigned char R,unsigned char G,unsigned char
     *(z+2) = B;
     return;
 }
-#endif
 
 void init_colors(void)
 {
-#if USE_GD 
+#if 0 // USE_GD 
     if (inited_colors_flag == 0) 
     {
         red   = gdImageColorAllocate(im, 255,    0,   0);
@@ -2514,7 +2512,9 @@ strcpy(dna_D_s,"ffb000");  // yellow  delete
 
         inited_colors_flag = 1; 
     }
-#else
+#endif
+
+// our own custom implemention that does not use GD graphics library, but uses our custom implementation  ...
     if (inited_colors_flag == 0) 
     {
         ImageColorAllocate(&red, 255,    0,   0);
@@ -2582,9 +2582,9 @@ strcpy(dna_D_s,"ffb000");  // yellow  delete
 
         inited_colors_flag = 1; 
     }
-#endif
     return;
 }
+
 
 
 #if 0
@@ -2780,8 +2780,15 @@ int mms[5000];
 int mmsLQ[5000];
 double pxwidth; // pixel width 
 
+#define SLOTS 0
+// slots is a new method 
+#if SLOTS
+unsigned char *slots;
+int num_slots;
+#else
 unsigned char *ppp;
 int ppp_firsttime = 1;
+#endif
 
 static int set_which_mm(int whichmm) 
 {
@@ -2931,6 +2938,9 @@ static void aldetails(int diff, int offset, int len,
  }
 #endif
 
+#if SLOTS
+#else
+// xxx
     if (ppp_firsttime == 1) 
     {
         if (ppp) {free(ppp); ppp = (unsigned char *)0; }
@@ -2990,6 +3000,8 @@ static void aldetails(int diff, int offset, int len,
             // *(ppp+(y2*iw)+i) = (char)1;        // ppp[i][y2] = 1;
         }
     }
+#endif
+
 // sprintf(m,"in aldetailx x1= %d pxw=%f",x1,pxwidth); jdebug(m); 
 
     if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
@@ -3025,11 +3037,11 @@ static void aldetails(int diff, int offset, int len,
             x = x1;
             xx = x2;
             kkolor = yellow;
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x,y2-1,xx,y1+2,kkolor);
-#else
-            ImageFilledRectangle(im,x,y2-1,xx,y1+2,kkolor);
 #endif
+            ImageFilledRectangle(im,x,y2-1,xx,y1+2,kkolor);
+
             coff += cig_ops[j].len; 
             dnaat += cig_ops[j].len; 
             continue;
@@ -3045,11 +3057,11 @@ static void aldetails(int diff, int offset, int len,
             x = x1;
             xx = x2;
             xcolor = cyan; // mark insert here
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x,y2-2,xx,y1+2,xcolor);
-#else
-            ImageFilledRectangle(im,x,y2-2,xx,y1+2,xcolor);
 #endif
+            ImageFilledRectangle(im,x,y2-2,xx,y1+2,xcolor);
+
             coff -= cig_ops[j].len; 
 
             if ((dnaat>=0)&&(dnaat<dnasize))
@@ -3075,11 +3087,10 @@ static void aldetails(int diff, int offset, int len,
                 xx = x2;
                 i++;
                 xcolor = black;
-#if USE_GD
+#if 0 // USE_GD
                 gdImageFilledRectangle(im,x,y2,xx,y1,xcolor);
-#else
-                ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
 #endif
+                ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
             }
             // dnaat += cig_ops[j].len; 
             continue;
@@ -3150,12 +3161,12 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
             else               xcolor = grays[9];
             }
 #endif
-#if USE_GD
+#if 0 // USE_GD
                     gdImageFilledRectangle(im,x,y2,xx,y1,xcolor);
-#else
-// fprintf(stderr,"in aldetails pxw=%f offset=%d, before ImagFillRectangle %d %d %d %d",pxwidth,offset, x,y2,xx,y1); fflush(stderr);
-                    ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
 #endif
+                    ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
+// debug fprintf(stderr,"in aldetails pxw=%f offset=%d, before ImagFillRectangle %d %d %d %d",pxwidth,offset, x,y2,xx,y1); fflush(stderr);
+
                 }
                 if (dnacnts) *(dnacnts+dnaat) += 1;
                 if ((dnaspace) && (dnamms))
@@ -3174,18 +3185,18 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
         if (fwdflag == 0)
         {
             x1 = (int)(pxwidth * (double)offset); 
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,yellow);
-#else
-            ImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,yellow);
 #endif
+            ImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,yellow);
+
         }
         else
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x2-2,y2+1,x2,  y1-1,yellow);
-#else
-            ImageFilledRectangle(im,x2-2,y2+1,x2,  y1-1,yellow);
 #endif
+            ImageFilledRectangle(im,x2-2,y2+1,x2,  y1-1,yellow);
+
     }
 #endif
     return;
@@ -3573,25 +3584,23 @@ if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
         xcolor = lightpink;
     }
     
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#else
-    ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 #endif
+    ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 
                       // make a notch at start (fwd or rev) for read 
     if (fwdflag == 1)
-#if USE_GD
+#if 0 // USE_GD
         gdImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,lightpink);
-#else
+#endif
         ImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,lightpink);
-#endif
+
     else
-#if USE_GD
+#if 0 // USE_GD
         gdImageFilledRectangle(im,x2-1,y2+1,x2,  y1-1,lightpink);
-#else
-        ImageFilledRectangle(im,x2-1,y2+1,x2,  y1-1,lightpink);
 #endif
+        ImageFilledRectangle(im,x2-1,y2+1,x2,  y1-1,lightpink);
 
     if (bowtie_flag) 
     {
@@ -3603,11 +3612,11 @@ if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
             mm_min = (int)(pxwidth * (double)(offset+notch_mm_where)); 
             mm_max = (int)(pxwidth * (double)(offset+notch_mm_where+1)); 
             mmcolor = set_which_mm(whichmm1); 
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
-#else
-            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
 #endif
+            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
+
         }
         if (bi2>=0)
         {
@@ -3618,11 +3627,11 @@ if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
         mm2_max = (int)(pxwidth * (double)(offset+notch_mm_where+1)); 
 // nope! if (qual < QUALCUTOFF ) mmcolor = pink; else mmcolor = orange;
             mmcolor = set_which_mm(whichmm2); 
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
-#else
-            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
 #endif
+            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
+
         }
         for (i=x1 ;i<=x2 ; i++)
         {
@@ -3645,11 +3654,10 @@ if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
             if (qual < QUALCUTOFF ) mmcolor = pink; else mmcolor = orange;
 #endif
             mmcolor = set_which_mm(whichmm1); 
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
-#else
-            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
 #endif
+            ImageFilledRectangle(im,mmx1,y2,mmx2,y1,mmcolor);
     
             mm_min = (int)(pxwidth * (double)(offset+notch_mm_where)); 
             mm_max = (int)(pxwidth * (double)(offset+notch_mm_where+1)); 
@@ -3790,27 +3798,25 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                 if (x2 < 0) x2 = 0;
                 if (x2>=iw) x2 = iw-1;;
 
-#if USE_GD
+#if 0 // USE_GD
                 gdImageFilledRectangle(im,x1,y1,x2,y2,black);
-#else
-                ImageFilledRectangle(im,x1,y1,x2,y2,black);
 #endif
+                ImageFilledRectangle(im,x1,y1,x2,y2,black);
+
                 if (strcmp(prev,temp_refflat_space.geneName))
                 {
 // sprintf(m,"in paint_gene_annot() -- still here 4 [%s]",temp_refflat_space.geneName);  jdebug(m);
                     unsigned char *ucptr = (unsigned char *)&temp_refflat_space.geneName[0];
-#if USE_GD
-    int brect[8];
+#if 0 // USE_GD
+                    int brect[8];
 #ifdef WIN32
                     gdImageString(im,gdFontGetLarge(),x1,22,ucptr,blue);
 #else
-// old                     gdImageStringFT (im, brect, blue, FULL_PATH_TO_TTF , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
                     gdImageStringFT (im, brect, blue, "" , 10, 0, x1,22 /*ih-30*/,(char *)ucptr);
 #endif
-#else
-// sprintf(m,"in paint_gene_annot() before ImageStringFT [%s]",ucptr);  jdebug(m); 
-                    ImageString(im,x1,22,ucptr,blue);
 #endif
+
+                    ImageString(im,x1,22,ucptr,blue);
 
                       if (gotten_genes_index < MAXGOTGENES)
                       {
@@ -3824,11 +3830,10 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                     int x3 = (int)(local_pxwidth * (double)(prev_start-s));
                     if (x3 < 0) x3 = 0;
                     if (x3 >= iw) x3 = iw;
-#if USE_GD
+#if 0 // USE_GD
                     gdImageFilledRectangle(im,x3,y1+2,x2,y1+3,black);
-#else
-                    ImageFilledRectangle(im,x3,y1+2,x2,y1+3,black);
 #endif
+                    ImageFilledRectangle(im,x3,y1+2,x2,y1+3,black);
                 }
                 prev_end = end;
                 prev_start = start;
@@ -3970,11 +3975,11 @@ static void draw_dnacnts_and_dnamms(char khr[], int s, int e, int offset)
             if (x1==x2) x2++;
             if (x1>=iw) break;
             if (x2>=iw) break;
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#else
-            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 #endif
+            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
+
         }
     }
     xcolor = blue;
@@ -3994,11 +3999,10 @@ static void draw_dnacnts_and_dnamms(char khr[], int s, int e, int offset)
             if (x1==x2) x2++;
             if (x1>=iw) break;
             if (x2>=iw) break;
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#else
-            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 #endif
+            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
         }
     }
     xcolor=red;
@@ -4017,11 +4021,10 @@ static void draw_dnacnts_and_dnamms(char khr[], int s, int e, int offset)
             if (x1==x2) x2++;
             if (x1>=iw) break;
             if (x2>=iw) break;
-#if USE_GD
+#if 0 // USE_GD
             gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#else
-            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 #endif
+            ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
         }
     }
 // sprintf(m,"end draw_dnacnts_and_dnamms() i=%d of %d",i,len); jdebug(m);
@@ -4050,11 +4053,10 @@ static void underline(int diff, int offset, int len, int downamt)
 
     if (downamt == 0)  kolor = lightblue;
     else               kolor = yellow;
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im,x1,y1+downamt,x2,y1+downamt+1,kolor);
-#else
-    ImageFilledRectangle(im,x1,y1+downamt,x2,y1+downamt+1,kolor);
 #endif
+    ImageFilledRectangle(im,x1,y1+downamt,x2,y1+downamt+1,kolor);
 
     return;
 }
@@ -5185,9 +5187,7 @@ for (i = 0; i < c->n_cigar; ++i)
                   }
 #endif
                   totalcnt++;
-#if 1
-// xxx rpf 
-// quality 
+// do nucleotide base quality for the read 
                 if (qual_flag == 1) 
                 {
                     uint8_t *seq_q;
@@ -5206,7 +5206,6 @@ for (i = 0; i < c->n_cigar; ++i)
                             }
                     }
                 }
-#endif
 
 #ifdef CMD_LINE
                 if (snp_call_flag == 1) 
@@ -6746,19 +6745,18 @@ sprintf(m,"in draw_mapability_lines_at_bottom() 000 , khroffset=%u s=%d e=%d chr
         x2 = (int)(pxwidth * (double)(i+1)); 
         if (uc & (0x1 << 1))
         {
-#if USE_GD
+#if 0 // USE_GD
            gdImageFilledRectangle(im,x1,ih-3-(yoffset*4),x2,ih-2-(yoffset*4),kolor1);
-#else
-           ImageFilledRectangle(im,x1,ih-3-(yoffset*4),x2,ih-2-(yoffset*4),kolor1);
 #endif
+           ImageFilledRectangle(im,x1,ih-3-(yoffset*4),x2,ih-2-(yoffset*4),kolor1);
         }
         if (uc & (0x1 << 0))
         {
-#if USE_GD
+#if 0 // USE_GD
            gdImageFilledRectangle(im,x1,ih-5-(yoffset*4),x2,ih-4-(yoffset*4),kolor2);
-#else
-           ImageFilledRectangle(im,x1,ih-5-(yoffset*4),x2,ih-4-(yoffset*4),kolor2);
 #endif
+           ImageFilledRectangle(im,x1,ih-5-(yoffset*4),x2,ih-4-(yoffset*4),kolor2);
+
         }
 // sprintf(m,"%d got %x from freading draw_mapability_lines_at_bottom() ",i,uc);  jdebug(m); 
         i++;
@@ -6819,11 +6817,10 @@ void draw_mapability_lines_at_bottom2(int khroffset,int s, int e,char chr[],int 
         else                         kolor = pink;
         y1 = ih-(yoffset*4)-2; 
         y2 = y1 + 3; 
-#if USE_GD
+#if 0 // USE_GD
         gdImageFilledRectangle(im,x1,y1,x2,y2,kolor);
-#else
-        ImageFilledRectangle(im,x1,y1,x2,y2,kolor);
 #endif
+        ImageFilledRectangle(im,x1,y1,x2,y2,kolor);
 
 // sprintf(m,"%d got %x from freading draw_mapability_lines_at_bottom2() ",i,uc);  jdebug(m); 
         i++;
@@ -6898,14 +6895,14 @@ sprintf(m,"ERROR: in imgen() size is too big "); jdebug(m);
     ppp_firsttime = 1; 
 
 sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename); jdebug(m);
-#if USE_GD
+#if 0 // USE_GD
     im = gdImageCreate(iw,ih);
     if (im == (void *)0)
     {
         sprintf(m,"ERROR: in imgen, NO im, gdImageCreate failed");  jdebug(m);
         return -1;
     }
-#else
+#endif
     im = &image;
     im->width = iw;
     im->height = ih;
@@ -6915,7 +6912,6 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
         sprintf(m,"ERROR: in imgen, NO im, image create failed");  jdebug(m);
         return -1;
     }
-#endif
 
     inited_colors_flag = 0; 
     init_colors(); //  inited_colors_flag  may already be set  
@@ -6931,13 +6927,12 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
         jdebug(m);
         return -1;
     }
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im,0,0,iw,ih,black);
     gdImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
-#else
+#endif
     ImageFilledRectangle(im,0,0,iw,ih,black);
     ImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
-#endif
 
     setup_reference_dna(chrchr,gs,ge,1); // importantly, get 2 bit data 
     setup_dnacnts_and_dnamms(ge-gs+1);
@@ -6960,11 +6955,11 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
 // sprintf(m,"in imgen() after draw_mapability_lines_at_bottom2's ");  jdebug(m); 
 
 // put notch in middle
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
-#else
-    ImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
 #endif
+    ImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
+
 sprintf(m,"in imgen() in imgen() after gdImageFilledRectangle");  jdebug(m); 
 
 #if 0 // QT_GUI
@@ -7127,7 +7122,7 @@ sprintf(m,"in imgen_mem 0"); jdebug(m);
 
 sprintf(m,"start imgen_mem() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,fn_bam); jdebug(m);
 
-#if USE_GD
+#if 0 // USE_GD
     im = gdImageCreate(iw,ih);
     if (im == (void *)0)
     {
@@ -7135,7 +7130,7 @@ sprintf(m,"start imgen_mem() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,fn_bam); 
         *ret_status = -2;
         return (unsigned char *)0;
     }
-#else
+#endif
     im = &image;
 sprintf(m,"in imgen_mem() 1 w=%d h=%d ",iw,ih); jdebug(m);
     mallocsize = (iw*ih*3);
@@ -7151,7 +7146,6 @@ sprintf(m,"in imgen_mem() 2 %d %d ,malloced %d",iw,ih,mallocsize); jdebug(m);
         return (unsigned char *)0;
     }
     memset(im->data,0,mallocsize);
-#endif
 
 sprintf(m,"in imgen_mem() 3 %d %d ",iw,ih); jdebug(m);
     init_colors();
@@ -7169,13 +7163,12 @@ jdebug(m);
         *ret_status = -3;
         return (unsigned char *)0;
     }
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im,0,0,iw,ih,black);
     gdImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
-#else
+#endif
     ImageFilledRectangle(im,0,0,iw,ih,black);
     ImageFilledRectangle(im,1,1,iw-2,ih-2,verylightgray);
-#endif
 
     setup_reference_dna(chrchr,gs,ge,1); // importantly, get 2 bit data 
     setup_dnacnts_and_dnamms(ge-gs+1);
@@ -7197,11 +7190,10 @@ jdebug(m);
 sprintf(m,"in imgen() after draw_mapability_lines_at_bottom2's ");  jdebug(m); 
 
 // put notch in middle
-#if USE_GD
+#if 0 // USE_GD
     gdImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
-#else
-    ImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
 #endif
+    ImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
 
 sprintf(m,"in imgen_mem(after gdImageFilledRectangle, did notch, near end");  jdebug(m); 
 
