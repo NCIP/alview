@@ -1,7 +1,7 @@
 
 
 /* 
-Written by Richard Finney, National Cancer Institute, National Institutes of Health 2015
+Written by Richard Finney, 2015, National Cancer Institute, National Institutes of Health 
 This file "alviewcore.cpp" contains the core alview routines.  
 This is *** MOSTLY ***  public domain ...  EXCEPTION: note GOTOH code by Peter Clote.  
 Clote's GOTOH (optimized Smith-Watterman) code is only for non-commercial users.  
@@ -2774,16 +2774,16 @@ int getbowtie_places(long int foff, int *i1, char *c1,char *c2, int *i2, char *c
 #endif
 
 
-int line[5000];
-int line2[5000];
-int mms[5000];
-int mmsLQ[5000];
-double pxwidth; // pixel width 
+static int line[5000];
+static int line2[5000];
+static int mms[5000];
+static int mmsLQ[5000];
+static double pxwidth; // pixel width 
 
 #define SLOTS 0
-// slots is a new method 
+// slots is a new method - still working on this - coming soon
 #if SLOTS
-unsigned char *slots;
+unsigned char *slots;   // slots is this y dimension is slots, x is pixels, set to one for is already covered.
 int num_slots;
 #else
 unsigned char *ppp;
@@ -2898,11 +2898,6 @@ static void aldetails(int diff, int offset, int len,
     int x1,x2,y1,y2;
     int keepgoing = 1;
 
-
-// fprintf(stderr,"in aldetails(), snp_call_flag = %d %s offset=%d\n", snp_call_flag,chr,offset); fflush(stderr); 
-
-// char m[512];
-// sprintf(m, "in aldetails"); jdebug(m); 
     if (!dnaspace) return;
     if (offset < 0) return;
 
@@ -2955,8 +2950,8 @@ static void aldetails(int diff, int offset, int len,
         ppp_firsttime = 0;
     }
 
-// FIND A PLACE TO PUT THE READ(alignment)
-    if (cig_ops[0].cmd == 'S')
+// FIND A PLACE TO PUT THE READ (alignment)
+    if (cig_ops[0].cmd == 'S') // soft clip
     {
         offset  = offset - cig_ops[0].len;
     }
@@ -2965,7 +2960,7 @@ static void aldetails(int diff, int offset, int len,
     {
         x1 = (int)(pxwidth * (double)offset); 
         x2 = x1 + (int)(pxwidth * (double)len); 
-        x2 = (int)(x2 + extra_splice_space() * pxwidth); 
+        x2 = (int)(x2 + extra_splice_space() * pxwidth);  // count the "N" (splice) in cigar
         if ( x2 > iw) x2=iw; 
 
         y1 = ih - 50 - jump;
@@ -3073,7 +3068,7 @@ static void aldetails(int diff, int offset, int len,
             dnaat -= cig_ops[j].len; 
             continue;
         }
-        else if (cig_ops[j].cmd == 'S')
+        else if (cig_ops[j].cmd == 'S') // soft clip
         {
             for (k=0 ; k<cig_ops[j].len ; k++)
             {
@@ -3202,6 +3197,7 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
     return;
 }
 
+
 void snp_call_aldetails(int diff, int offset, int len,  
         int fwdflag, int optical_dupe_flag ,char seq[], char *quality, int seqlen, char cigar[], int splice_source)
 {
@@ -3274,7 +3270,7 @@ fflush(stderr);
     }
 
 // FIND A PLACE TO PUT THE READ(alignment)
-    if (cig_ops[0].cmd == 'S')
+    if (cig_ops[0].cmd == 'S') // soft clip
     {
         offset  = offset - cig_ops[0].len;
     }
@@ -3387,7 +3383,7 @@ fflush(stderr);
             dnaat -= cig_ops[j].len; 
             continue;
         }
-        else if (cig_ops[j].cmd == 'S')
+        else if (cig_ops[j].cmd == 'S') // soft clip
         {
             for (k=0 ; k<cig_ops[j].len ; k++)
             {
@@ -3401,14 +3397,11 @@ fflush(stderr);
                 xx = x2;
                 i++;
                 xcolor = black;
-            //     ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
             }
-            // dnaat += cig_ops[j].len; 
             continue;
         }
-        else if (cig_ops[j].cmd == 'H') // ignore !
-        {
-// ignore
+        else if (cig_ops[j].cmd == 'H') // ignore ! hard clip
+        {                    // ignore
         }
 
             /* SO it's draw nucleotide "matches" = 'M' ------------------*/
@@ -3503,6 +3496,7 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
 }
 
 
+// WHY ?
 static void paint_align_box(int diff, int offset, int len, int wcode, int notch_mm_where, int qual, 
         int fwdflag, int bowtie_flag,int split_flag, int whichmm1, int whichmm2, int optical_dupe_flag )
 {
@@ -5047,18 +5041,18 @@ jdebug("faile to get XR tag");
 #endif
 
 
-int kknt = 0;
+// old? static int kknt = 0;
 const char *rpf_bam_nt16_rev_table = "=ACMGRSVTWYHKDBN"; // a local copy, samtools library on windows is not exporting data for some reason
 
+// rpf_format2() is called often
+// rpf_format2 is called from view_func(), rpf_format2 call aldetails() 
 static char *rpf_format2(const bam_header_t *header, const bam1_t *b)
 {
+    char cigar[512];
     int8_t *qbuff = (int8_t *)0;
     int splice_source;
     int i = 0;
-    char cigar[512];
     const bam1_core_t *c = &b->core;
-
-// sprintf(m, "in rpf_format2 start"); jdebug(m); 
 
 #if 0
 char m[1024];
@@ -5124,6 +5118,9 @@ char m[1024];
                                bam1_cigar(b)[i]>>BAM_CIGAR_SHIFT, "MIDNSHP"[bam1_cigar(b)[i]&BAM_CIGAR_MASK]);
 		}
 	}
+
+
+// unused code ^^^^ 
 #endif
 
 
@@ -5135,7 +5132,8 @@ char m[1024];
             opticaldupecount++;
         else if (bam1_badqual(b) == 1) badqualcount++;
         else 
-            if (c->n_cigar == 0) 
+        {
+            if (c->n_cigar == 0)  // number of cigar operations
             {
                strcpy(cigar,"*");
                nocigarcount++;
@@ -5149,14 +5147,14 @@ char m[1024];
                     sprintf(tmps,"%d%c", bam1_cigar(b)[i]>>BAM_CIGAR_SHIFT, "MIDNSHP"[bam1_cigar(b)[i]&BAM_CIGAR_MASK]);
                     strcat(cigar,tmps);
                 }
-                if (c->l_qseq >= 2048)
+                if (c->l_qseq >= 2048) // l_qseq = length of query sequence read
+/// WHY IS THIS HERE ????? 
                 {
                     paint_align_box(gdiff,c->pos+1-gs ,c->l_qseq,/*wcode*/0,/*notch*/-1,/*qual*/-1,/*fwd*/bam1_strand(b),/*bow*/0,0,0,0,
                              bam1_opticaldupe(b));
                 }
                 else
                 {
-// sprintf(m, "in rpf_format2 4"); jdebug(m); 
  	            uint8_t *s = bam1_seq(b); // , *t = bam1_qual(b);
 	            for (i = 0; i < c->l_qseq; i++) 
 	            {
@@ -5215,16 +5213,13 @@ for (i = 0; i < c->n_cigar; ++i)
                     aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
                                 /*fwd*/bam1_strand(b), bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
 #else
-                    aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
+                aldetails(gdiff,c->pos+1-gs ,c->l_qseq,
                                 /*fwd*/bam1_strand(b), bam1_opticaldupe(b),seq,(char *)qbuff,c->l_qseq,cigar,splice_source);
 #endif
-// sprintf(m, "in VF3"); jdebug(m); 
                 }
             }
-
-//	if (mystr.s) free(mystr.s);
+        }
         globalreadscount++;
-
 	return (char *)0; // mystr.s;
 }
 
@@ -5974,14 +5969,16 @@ static char *rpf_format_fasta(const bam_header_t *header, const bam1_t *b)
 }
 
 
-int rpfwrite(samfile_t *fp, const bam1_t *b)
+#if 0
+static int rpfwrite(samfile_t *fp, const bam1_t *b)
 {
      rpf_format2(fp->header, b);
      return 0;
 }
+#endif
 
 
-// callback function for bam_fetch()
+// callback function for bam_fetch() ** THIS GETS CALLED A LOT 
 static int view_func(const bam1_t *b, void *data)
 {
     if (!__g_skip_aln(((samfile_t*)data)->header, b))
