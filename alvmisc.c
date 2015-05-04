@@ -7921,7 +7921,7 @@ int save_img_to_png_file (unsigned char *image, int width, int height, const cha
 {
     int i;
     unsigned char *out;
-    unsigned status;
+//    unsigned status;
     size_t outsize;
     unsigned char *rgba = (unsigned char *)0;
 
@@ -7935,7 +7935,7 @@ int save_img_to_png_file (unsigned char *image, int width, int height, const cha
     }
 //     encode(filename, rgba, width, height);
 // unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
-status =  lodepng_encode24(&out, &outsize, rgba, width, height);
+    (void) /* status = */  lodepng_encode24(&out, &outsize, rgba, width, height);
 
 return 0;
 }
@@ -7999,7 +7999,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     unsigned char *z;
     int kolor;
     int i,j;
-    int maxx;
+//    int maxx; not used
     int width;
     int height;
     unsigned char *img;
@@ -8024,7 +8024,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     img = im->data;
     width = im->width;
     height = im->height;
-    maxx = (im->width * im->height *3);
+//    maxx = (im->width * im->height *3);  no used
 
     kolor = color;
     z = (unsigned char *)&kolor;

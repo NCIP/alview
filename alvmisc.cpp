@@ -7921,7 +7921,7 @@ int save_img_to_png_file (unsigned char *image, int width, int height, const cha
 {
     int i;
     unsigned char *out;
-    unsigned status;
+//    unsigned status;
     size_t outsize;
     unsigned char *rgba = (unsigned char *)0;
 
@@ -7935,9 +7935,10 @@ int save_img_to_png_file (unsigned char *image, int width, int height, const cha
     }
 //     encode(filename, rgba, width, height);
 // unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
-status =  lodepng_encode24(&out, &outsize, rgba, width, height);
+//    status =  lodepng_encode24(&out, &outsize, rgba, width, height);
+    (void)lodepng_encode24(&out, &outsize, rgba, width, height);
 
-return 0;
+    return 0;
 }
 
 /* Given "value" and "max", the maximum value which we expect "value" to take, this returns an integer between 0 and 255 proportional to

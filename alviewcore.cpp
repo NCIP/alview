@@ -774,7 +774,7 @@ sprintf(m,"in setup_refflat FILE=%p ",fp_refflat_d);  jdebug(m);
     error = errno;
     if (status != 0) 
     {
-       sprintf(m,"ERROR: can't fseek to end in file \"%s\" -- in setup in setup_refflat() ] - errno=%d",input_flat_file_name_d,errno); jdebug(m);
+       sprintf(m,"ERROR: can't fseek to end in file \"%s\" -- in setup in setup_refflat() ] - errno=%d",input_flat_file_name_d,error); jdebug(m);
        fclose(fp_refflat_d);
        fp_refflat_d = (FILE *)0;
        return -2;
@@ -1937,9 +1937,9 @@ void debug_cgi_environment_variables_or_whatever_they_are()
 {
     int j;
     char *ptr2current_env_variable;
-    long mylen;
+//    long mylen;
     char *endptr;
-    long contentlength;
+//     long contentlength; not used
 
     for (j=0 ; j<20 ; j++)
     {
@@ -1951,10 +1951,10 @@ void debug_cgi_environment_variables_or_whatever_they_are()
             continue;
         }
 
-        mylen = strtol(ptr2current_env_variable, &endptr, 10);
+//        mylen = strtol(ptr2current_env_variable, &endptr, 10);
         if (strcmp("CONTENT_LENGTH",evars[j]) == 0) /* same ? */      
         {
-            contentlength = mylen;
+            // contentlength = mylen; not used
 //char m[500];
 //sprintf(m,"contentlength = %ld ",contentlength ); jdebug(m);
         }
@@ -2242,11 +2242,11 @@ static void zap_tmpalview_files(void)
 {
     DIR *d;
     struct dirent *e;
-    time_t now;
     time_t timer;
     time_t ptimer;        // past
     char filename2zap[2048];
     char directory[2048];
+//     time_t now; not used
 
 
     strcpy(directory, HTDOCSDIR );
@@ -2269,7 +2269,7 @@ static void zap_tmpalview_files(void)
     }
 #endif
 
-    now = time(NULL);
+//    now = time(NULL); not used
     
     while (1) 
     {
@@ -2893,7 +2893,6 @@ static void aldetails(int diff, int offset, int len,
     int x,xx;
     int jump = 1;
     int xcolor;
-    int frcolor;
     int i;
     int x1,x2,y1,y2;
     int keepgoing = 1;
@@ -2919,7 +2918,6 @@ static void aldetails(int diff, int offset, int len,
 
     setup_cigar_stuff(cigar);
     x1 = x2 = y1 = y2 = 0;
-    frcolor = purple;
 
 
 // fprintf(stderr,"in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
@@ -3210,11 +3208,10 @@ void snp_call_aldetails(int diff, int offset, int len,
     double d;
     int x,xx;
     int jump = 1;
-    int xcolor;
-    int frcolor;
     int i;
     int x1,x2,y1,y2;
     int keepgoing = 1;
+    int xcolor; // not used ??
 
 
 // debug fprintf(stderr,"in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
@@ -3241,7 +3238,6 @@ fflush(stderr);
 
     setup_cigar_stuff(cigar);
     x1 = x2 = y1 = y2 = 0;
-    frcolor = purple;
 
 
 // fprintf(stderr,"in snp_call_aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
@@ -3332,6 +3328,7 @@ fflush(stderr);
             if (splice_source == 1)  kkolor = black;  // refseq
             else if (splice_source == 2)  kkolor = red; // novel altsplice
             else if (splice_source == 3)  kkolor = green; // est
+// WHY 
 //             ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
             coff += cig_ops[j].len; 
             dnaat += cig_ops[j].len; 
@@ -3502,7 +3499,6 @@ static void paint_align_box(int diff, int offset, int len, int wcode, int notch_
 {
     int jump = 1;
     int xcolor;
-    int frcolor;
     int i;
     int x1,x2,y1,y2;
     int mmx1, mmx2;
@@ -3517,7 +3513,6 @@ static void paint_align_box(int diff, int offset, int len, int wcode, int notch_
 
  
     x1 = x2 = y1 = y2 = 0;
-    frcolor = purple;
 
     if (ppp_firsttime == 1) 
     {
@@ -3689,12 +3684,11 @@ char m[512];
     unsigned int start = (long int)0;
     unsigned int end = (long int)0;
     unsigned int prev_start = (long int)0;
-    unsigned int prev_end = (long int)0;
+//    unsigned int prev_end = (long int)0; not used
     long int spot;
-    int did_gene_name_flag = 0;
+//    int did_gene_name_flag = 0; not used
     char prev[512];
     double local_pxwidth;
-    int frcolor;
     int j = 0;
     int x1,x2,y1,y2;
     struct flattype *z;
@@ -3711,7 +3705,6 @@ char m[512];
     x1 = x2 = 0;
     y1 = 1;
     y2 = 8;
-    frcolor = purple;
     strcpy(prev,"");
 
     fix_up_support_file_paths();
@@ -3817,7 +3810,7 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                           strcpy(gotgenes[gotten_genes_index++],temp_refflat_space.geneName);
                       }
                       strcpy(prev,temp_refflat_space.geneName);
-                      did_gene_name_flag = 1;
+//                      did_gene_name_flag = 1; not used
                 }
                 if (jj)
                 {
@@ -3829,7 +3822,7 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
 #endif
                     ImageFilledRectangle(im,x3,y1+2,x2,y1+3,black);
                 }
-                prev_end = end;
+//                prev_end = end; not used
                 prev_start = start;
 
             }
@@ -3871,7 +3864,6 @@ static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
     double local_pxwidth;
     int yoffset = 18;
     int xcolor;
-    int frcolor;
     int i;
     int x1,x2,y1,y2;
     int lastx1, lastx2;
@@ -3891,7 +3883,6 @@ sprintf(m,"ERROR: in setup_reference_dna() dnaspace from twobit() is null "); jd
     slice_len_in_bases = e - s;
     local_pxwidth = (double)iw/(double)(slice_len_in_bases);
     x1 = x2 = y1 = y2 = 0;
-    frcolor = purple;
 
     lastx1 = lastx2 = 0;
     y1 = ih-3-yoffset;
@@ -4524,10 +4515,8 @@ void do_form(char chr[], int start, int end, int s, int e)
 {
     int j;
     int tmp1;
-    int flushtr;
 
     tmp1 =  0;
-    flushtr = 0;
 
     printf("<br>\n");
     printf("<form name=\"form1\" action=\"../cgi-bin/%s\">\n",progname);
@@ -6029,13 +6018,14 @@ void bam_zap_old_files(void)
     char m[512];
     DIR *d;
     struct dirent *e;
-    time_t now;
     time_t timer;
     time_t ptimer;        // past
     char filename2zap[2048];
     char directory[2048];
+//    time_t now; not used
 
 
+//    now = time(NULL); not used
     strcpy(directory, "/tmp" );
 
     timer = time(NULL);         // returns the time since 00:00:00 GMT, Jan. 1, 1970, measured in seconds.
@@ -6047,7 +6037,6 @@ void bam_zap_old_files(void)
         return;
     }
 
-    now = time(NULL);
     
     while (1) 
     {
@@ -6223,8 +6212,7 @@ int global_bamerr = 0;
 int dobam_fasta(char fn[],int khroffset,int s, int e,char chr[],int kstart, int kend, int code )
 {
     bam_index_t *idx = 0;
-    int searcht;
-    int numrecs = 0;
+//    int searcht = 0; not used
     char m[512];
     int tid, beg, end;
     int is_header = 0, is_header_only = 0, is_bamin = 1, ret = 0, is_uncompressed = 0, is_bamout = 0;
@@ -6234,8 +6222,8 @@ int dobam_fasta(char fn[],int khroffset,int s, int e,char chr[],int kstart, int 
     char *fn_list = 0;
     char bai_fn[1024];  // BAm Index
     char *fn_out = 0;
+//    int numrecs = 0; not used
 
-    numrecs = searcht = 0;
     globalreadscount = 0;
     global_code = code;
 
@@ -6329,7 +6317,7 @@ view_end:
     samclose(out);
  sprintf(m,"in dobam_fasta, before unlink"); jdebug(m); 
 */
-#if 0 // not needed now that we use nul of /dev/null 
+#if 0 // not needed now that we use nul or /dev/null 
 #ifdef WIN32
     _unlink(junkfile);
 #else
@@ -6349,8 +6337,7 @@ view_end:
 int dobam_sam(char fn[],int khroffset,int s, int e,char chr[],int kstart, int kend, int code )
 {
     bam_index_t *idx = 0;
-    int searcht;
-    int numrecs = 0;
+//    int searcht = 0; not used
     char m[512];
     int tid, beg, end;
     int is_header = 0, is_header_only = 0, is_bamin = 1, ret = 0, is_uncompressed = 0, is_bamout = 0;
@@ -6359,9 +6346,9 @@ int dobam_sam(char fn[],int khroffset,int s, int e,char chr[],int kstart, int ke
     char in_mode[24], out_mode[24]; 
     char *fn_list = 0;
     char bai_fn[128];  // BAm Index
+//     int numrecs = 0; not used
 
     char *fn_out = 0;
-    numrecs = searcht = 0;
     globalreadscount = 0;
     global_code = code;
 
@@ -6480,8 +6467,6 @@ int dobam(char fn[],int khroffset,int s, int e,char chr[])
 {
     bam_index_t *idx = 0;
     int errornumber; // holds errno
-    int searcht;
-    int numrecs = 0;
     char m[5120];
     int tid, beg, end;
     int is_header = 0, is_header_only = 0, is_bamin = 1, ret = 0, is_uncompressed = 0, is_bamout = 0;
@@ -6491,10 +6476,11 @@ int dobam(char fn[],int khroffset,int s, int e,char chr[])
     char *fn_list = (char *)0;
     char bai_fn[1280];  // BAM Index ".bai" file
     char *fn_out = 0;
+//     int numrecs = 0; not used
+//     int searcht = 0; not used
 
 // debug fprintf(stderr,"in dobam(file=%s) %s %d %d",fn,chr,s,e);  fflush(stderr); 
 
-    numrecs = searcht = 0;
     globalreadscount = 0;
     memset(line,0,5000);
     memset(line2,0,5000);
@@ -7960,10 +7946,8 @@ fclose(fp);
 void pick_form()
 {
     int tmp1;
-    int flushtr;
 
     tmp1 =  0;
-    flushtr = 0;
 
     print_some_javascript_for_popups();
     printf("<br>\n");

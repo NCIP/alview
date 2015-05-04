@@ -504,14 +504,14 @@ static const gchar *ui_info =
 
 
 
+#if 0
 /* This function registers our custom toolbar icons, so they can be themed.
  *  *
  *   * It's totally optional to do this, you could just manually insert icons
  *    * and have them not be themeable, especially if you never expect people
  *     * to theme your app.
  *      */
-static void
-register_stock_icons (void)
+static void register_stock_icons (void)
 {
   static gboolean registered = FALSE;
 
@@ -574,9 +574,10 @@ register_stock_icons (void)
       g_object_unref (factory);
     }
 }
+#endif
 
-static void
-update_statusbar (GtkTextBuffer *buffer, GtkStatusbar  *statusbar)
+#if 0
+static void update_statusbar (GtkTextBuffer *buffer, GtkStatusbar  *statusbar)
 {
 #if 1
 fprintf(stderr,"in update_statusbar() - bypassing \n"); fflush(stderr); 
@@ -608,15 +609,17 @@ return;
   g_free (msg);
 #endif
 }
+#endif
 
-static void
-mark_set_callback (GtkTextBuffer     *buffer,
+#if 0
+static void mark_set_callback (GtkTextBuffer     *buffer,
                    const GtkTextIter *new_location,
                    GtkTextMark       *mark,
                    gpointer           data)
 {
   update_statusbar (buffer, GTK_STATUSBAR (data));
 }
+#endif
 
 static void
 update_resize_grip (GtkWidget           *widget,
@@ -8115,6 +8118,7 @@ gboolean darea_button_press_event(GtkWidget *widget, GdkEventButton *event, gpoi
 //         fprintf(stderr,"in darea_button_press_event (got button PRESS) \n"); fflush(stderr); 
 // we only really care about x not y
     }
+    return TRUE;
 }
 
 void sanity_khr()
@@ -8323,10 +8327,12 @@ void hello (GtkButton * button,gpointer   data)
 }
 
 
+#if 0
 static void on_open_bam ( GtkWidget        *w, GtkFileSelection *fs )
 {
     g_print ("%s\n", gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)));
 }
+#endif
 
 
 gboolean gettextentry(GtkWidget *widget)
@@ -8373,6 +8379,7 @@ gboolean gettextentry(GtkWidget *widget)
     {
         fprintf(stderr,"ERROR: invalid file name (null) in gettextentry() \n");
     }
+    return TRUE;
 }
 
 
@@ -8381,7 +8388,7 @@ int alv_gtk_main(int argc, char *argv[])
 {
     char tmps[5012];
     GtkWidget *filemenu = (void *)0;
-    GtkWidget *file = (void *)0;
+//    GtkWidget *file = (void *)0;
     GtkWidget *quit = (void *)0;
     GtkWidget *label = (void *)0;
     GtkRequisition req;
@@ -8389,7 +8396,7 @@ int alv_gtk_main(int argc, char *argv[])
     GtkWidget *button = (void *)0;
     GtkWidget *buttonx = (void *)0;
     GtkWidget *hbox = (void *)0;
-    GtkWidget *hbox2 = (void *)0;
+//    GtkWidget *hbox2 = (void *)0;
     GtkWidget *bar = (void *)0;
     GtkWidget *vbox = (void *)0;
     GtkWidget *vport = (void *)0;
