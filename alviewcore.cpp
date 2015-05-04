@@ -799,7 +799,7 @@ sprintf(m,"end  setup_refflat refflat_fixed_hi=%ld , returning 0(==good)",reffla
 }
 
 
-int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end)
+int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
 {
     char m[5120];
     struct flattype f;
@@ -1938,7 +1938,7 @@ void debug_cgi_environment_variables_or_whatever_they_are()
     int j;
     char *ptr2current_env_variable;
 //    long mylen;
-    char *endptr;
+//    char *endptr;
 //     long contentlength; not used
 
     for (j=0 ; j<20 ; j++)

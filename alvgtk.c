@@ -235,8 +235,8 @@ GtkWidget *get_option_menu( void )
 }
 
 static GtkWidget *window = NULL;
-static GtkWidget *infobar = NULL;
-static GtkWidget *messagelabel = NULL;
+// static GtkWidget *infobar = NULL;
+// static GtkWidget *messagelabel = NULL;
 
 gchar *rpf_demo_find_file (char *fn, char *junk)
 {
@@ -244,6 +244,7 @@ gchar *rpf_demo_find_file (char *fn, char *junk)
 }
 
 
+#if 0
 static void delete_event (GtkAction *action)
 {
   const gchar *name = gtk_action_get_name (action);
@@ -263,8 +264,9 @@ static void delete_event (GtkAction *action)
 
   gtk_widget_show (dialog);
 }
+#endif
 
-static void activate_action (GtkAction *action)
+void activate_action (GtkAction *action)
 {
   const gchar *name = gtk_action_get_name (action);
   const gchar *typename = G_OBJECT_TYPE_NAME (action);
@@ -284,6 +286,7 @@ static void activate_action (GtkAction *action)
   gtk_widget_show (dialog);
 }
 
+#if 0
 static void activate_radio_action (GtkAction *action, GtkRadioAction *current)
 {
   const gchar *name = gtk_action_get_name (GTK_ACTION (current));
@@ -304,8 +307,10 @@ static void activate_radio_action (GtkAction *action, GtkRadioAction *current)
       g_free (text);
     }
 }
+#endif
 
 
+#if 0
 static void about_cb (GtkAction *action, GtkWidget *window)
 {
   GdkPixbuf *pixbuf, *transparent;
@@ -352,6 +357,7 @@ static void about_cb (GtkAction *action, GtkWidget *window)
 
   g_object_unref (transparent);
 }
+#endif
 
 typedef struct
 {
@@ -376,6 +382,7 @@ tool_menu_action_init (ToolMenuAction *action)
 {
 }
 
+#if 0
 static GtkActionEntry entries[] = {
   { "FileMenu", NULL, "_File" },               /* name, stock id, label */
   { "OpenMenu", NULL, "_Open" },               /* name, stock id, label */
@@ -412,9 +419,13 @@ static GtkActionEntry entries[] = {
     "GTK+",                                    /* tooltip */
     G_CALLBACK (activate_action) },
 };
+#endif
+#if 0
 static guint n_entries = G_N_ELEMENTS (entries);
+#endif
 
 
+#if 0
 static GtkToggleActionEntry toggle_entries[] = {
   { "Bold", GTK_STOCK_BOLD,                    /* name, stock id */
      "_Bold", "<control>B",                    /* label, accelerator */
@@ -422,7 +433,11 @@ static GtkToggleActionEntry toggle_entries[] = {
     G_CALLBACK (activate_action),
     TRUE },                                    /* is_active */
 };
+#endif
+
+#if 0
 static guint n_toggle_entries = G_N_ELEMENTS (toggle_entries);
+#endif
 
 enum {
   COLOR_RED,
@@ -430,6 +445,7 @@ enum {
   COLOR_BLUE
 };
 
+#if 0
 static GtkRadioActionEntry color_entries[] = {
   { "Red", NULL,                               /* name, stock id */
     "_Red", "<control>R",                      /* label, accelerator */
@@ -441,7 +457,10 @@ static GtkRadioActionEntry color_entries[] = {
     "_Blue", "<control>B",                     /* label, accelerator */
     "Sky", COLOR_BLUE },                       /* tooltip, value */
 };
+#endif
+#if 0
 static guint n_color_entries = G_N_ELEMENTS (color_entries);
+#endif
 
 enum {
   SHAPE_SQUARE,
@@ -449,6 +468,7 @@ enum {
   SHAPE_OVAL
 };
 
+#if 0
 static GtkRadioActionEntry shape_entries[] = {
   { "Square", NULL,                            /* name, stock id */
     "_Square", "<control>S",                   /* label, accelerator */
@@ -460,9 +480,12 @@ static GtkRadioActionEntry shape_entries[] = {
     "_Oval", "<control>O",                     /* label, accelerator */
     "Egg", SHAPE_OVAL },                       /* tooltip, value */
 };
-static guint n_shape_entries = G_N_ELEMENTS (shape_entries);
+#endif
 
-static const gchar *ui_info =
+#if 0
+guint n_shape_entries = G_N_ELEMENTS (shape_entries);
+
+const gchar *ui_info =
 "<ui>"
 "  <menubar name='MenuBar'>"
 "    <menu action='FileMenu'>"
@@ -501,6 +524,7 @@ static const gchar *ui_info =
 "    <toolitem action='Logo'/>"
 "  </toolbar>"
 "</ui>";
+#endif
 
 
 
@@ -621,8 +645,8 @@ static void mark_set_callback (GtkTextBuffer     *buffer,
 }
 #endif
 
-static void
-update_resize_grip (GtkWidget           *widget,
+#if 0
+static void update_resize_grip (GtkWidget           *widget,
 		    GdkEventWindowState *event,
 		    GtkStatusbar        *statusbar)
 {
@@ -636,6 +660,7 @@ update_resize_grip (GtkWidget           *widget,
       gtk_statusbar_set_has_resize_grip (statusbar, !maximized);
     }
 }
+#endif
 
 static GtkWidget *create_bbox (gint  horizontal, char *title, gint  spacing, gint  layout)
 {
@@ -7944,10 +7969,10 @@ gboolean unix_draw_image (GtkWidget *widget)
 // fprintf(stderr,"xxx in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
     if (darea_on == 1)           // flag, means RGB image is loaded in "im"
     {
-        if (!im) return;
+        if (!im) return TRUE;
 // fprintf(stderr,"xxx in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
         gtk_widget_set_size_request (widget,(gint)diw,(gint)dih);
-        if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return; }
+        if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return TRUE; }
         else       ptr = im->data;
 
 // fprintf(stderr,"in unix_draw_image here 1\n"); fflush(stderr); 
@@ -7961,6 +7986,7 @@ gboolean unix_draw_image (GtkWidget *widget)
                        0, 0, ncilogo_width   /* IMAGE_WIDTH*/, ncilogo_height  /*IMAGE_HEIGHT*/,
                        GDK_RGB_DITHER_MAX, ncilogo, ncilogo_width* 3);
     }
+    return TRUE; 
 }
 
 
@@ -8058,9 +8084,9 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
 {
     GdkModifierType state;
     int status;
-    int size;
     int tmp;
     int x, y;
+//     int size;
 
     if (event->type == GDK_BUTTON_RELEASE)
     {
@@ -8178,7 +8204,7 @@ gboolean zoom_out(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 gboolean zoom_base(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
     int status;
-    int size;
+//    int size;
     int mid;
 
     mid = (khrend+khrstart)/2;
@@ -8204,12 +8230,12 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
     int page_nts = 0;
     int status = 0;
     int movek = 0;
-    GdkModifierType state;
+//     GdkModifierType state;
 
     if (filename == (char *)0)
     {
         fprintf(stderr,"No bam specified.  Plase pick one. \n"); fflush(stderr);
-        return;
+        return TRUE;
     }
 
     movek = user_data; 
@@ -8260,53 +8286,53 @@ fprintf(stderr,"in button one movek = %d \n",movek); fflush(stderr);
 
 gboolean button_1(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -1);
 }
 
 gboolean button10(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, 10);
 }
 
 gboolean button_10(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -10);
 }
 
 gboolean button100(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, 100);
 }
 
 gboolean button_100(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -100);
 }
 gboolean button1000(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -1000);
 }
 gboolean button_1000(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, 1000);
 }
 gboolean button10000(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
-fprintf(stderr," in button10000, movek = %d , user_data = %p\n",movek,user_data); fflush(stderr); 
+//    int movek = GPOINTER_TO_INT(user_data);
+// fprintf(stderr," in button10000, movek = %d , user_data = %p\n",movek,user_data); fflush(stderr); 
     return on_button_move(widget, event, 10000);
 }
 
 gboolean button_10000(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+//    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -10000);
 }
 
@@ -8341,7 +8367,6 @@ gboolean gettextentry(GtkWidget *widget)
     const char *entry_text;
     // char *entry_text;
     int size;
-    int third;
 
     entry_text = (char *)0;
     entry_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntryPosition));
@@ -8387,9 +8412,9 @@ gboolean gettextentry(GtkWidget *widget)
 int alv_gtk_main(int argc, char *argv[])
 {
     char tmps[5012];
-    GtkWidget *filemenu = (void *)0;
+//    GtkWidget *filemenu = (void *)0;
 //    GtkWidget *file = (void *)0;
-    GtkWidget *quit = (void *)0;
+//    GtkWidget *quit = (void *)0;
     GtkWidget *label = (void *)0;
     GtkRequisition req;
     GtkWidget *window = (void *)0;
@@ -8402,8 +8427,8 @@ int alv_gtk_main(int argc, char *argv[])
     GtkWidget *vport = (void *)0;
     GtkWidget *scrolled_window = (void *)0;
     GtkWidget *menubar = (void *)0;
-    GtkWidget *popup_button = (void *)0;
-    GtkWidget *option_menu = (void *)0;
+//    GtkWidget *popup_button = (void *)0;
+//     GtkWidget *option_menu = (void *)0;
 
 
     gtk_init (&argc, &argv);
@@ -8697,7 +8722,6 @@ int main( int   argc, char *argv[] )
     alv_gtk_main(argc,argv);
     return 0;
 }
-
 
 
 
