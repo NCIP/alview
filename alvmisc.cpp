@@ -7935,10 +7935,9 @@ int save_img_to_png_file (unsigned char *image, int width, int height, const cha
     }
 //     encode(filename, rgba, width, height);
 // unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
-//    status =  lodepng_encode24(&out, &outsize, rgba, width, height);
-    (void)lodepng_encode24(&out, &outsize, rgba, width, height);
+    (void) /* status = */  lodepng_encode24(&out, &outsize, rgba, width, height);
 
-    return 0;
+return 0;
 }
 
 /* Given "value" and "max", the maximum value which we expect "value" to take, this returns an integer between 0 and 255 proportional to
@@ -8000,7 +7999,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     unsigned char *z;
     int kolor;
     int i,j;
-    int maxx;
+//    int maxx; not used
     int width;
     int height;
     unsigned char *img;
@@ -8025,7 +8024,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     img = im->data;
     width = im->width;
     height = im->height;
-    maxx = (im->width * im->height *3);
+//    maxx = (im->width * im->height *3);  no used
 
     kolor = color;
     z = (unsigned char *)&kolor;
