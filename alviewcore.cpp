@@ -1,5 +1,4 @@
 
-
 /* 
 Written by Richard Finney, 2015, National Cancer Institute, National Institutes of Health 
 This file "alviewcore.cpp" contains the core alview routines.  
@@ -45,11 +44,6 @@ Compile command line for Windows cl.exe compliter (visual C), note usage of hack
 cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alviewcore.cpp 
 cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alvmisc.cpp
 link /MACHINE:x86  /OUT:alview_cmd_win.exe Alvmisc.obj alviewcore.obj sam01832/my.lib zlib32/zlib.lib
-
-     
-
-
-
 
 todo: (soon !) 
 Prev Next
@@ -417,17 +411,15 @@ struct disease_type
 
 
 #if WIN32
-// jdebug is in alvwin32.cpp file
 void jdebug(const char *s)         // for use in debuging 
 {
  // V--- if this set to zero then off, 
 #if 0
  // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
-
     static FILE *debugfp = (FILE *)0;
     static int cnt = 0;
-//     int i = 0;
     char fn[2048];
+//     int i = 0;
 //     char m[2048];
 
     strcpy(fn,"x"); 
@@ -814,7 +806,7 @@ sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,b
     {
         strcpy(chr,"chr1");
         *start = 1 ; 
-        *end = 4042;
+        *end = 18915;
 sprintf(m,"ERROR: after setup_refflat() - in do_by_gene_name_from_refflat");  jdebug(m);
         return -1;
     }
@@ -827,7 +819,7 @@ sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",re
         { 
            strcpy(chr,"chr1");
            *start = 1 ; 
-           *end = 4042;
+           *end = 18915;
            sprintf(m,"ERROR: can not open refflat_d_fn = %s ",refflat_d_fn); jdebug(m); 
            return -1;
         }
@@ -2441,6 +2433,7 @@ void ImageColorAllocate(int *color,unsigned char R,unsigned char G,unsigned char
     return;
 }
 
+
 void init_colors(void)
 {
 #if 0 // USE_GD 
@@ -2452,7 +2445,7 @@ void init_colors(void)
         cyan =  gdImageColorAllocate(im, 0x5, 0xeb,0xf9); // 05ebf9
 
         lightgreen = gdImageColorAllocate(im, 64, 125, 64);
-        black = gdImageColorAllocate(im, 0, 0, 0);
+        black  = gdImageColorAllocate(im, 0, 0, 0);
         purple = gdImageColorAllocate(im, 150, 0, 255);
         orange = gdImageColorAllocate(im, 255, 100 , 0  );
 
@@ -3011,7 +3004,7 @@ static void aldetails(int diff, int offset, int len,
             x = x1;
             xx = x2;
             kkolor = yellow;
-            if (splice_source == 1)  kkolor = black;  // refseq
+            if (splice_source == 1)       kkolor = black;  // refseq
             else if (splice_source == 2)  kkolor = red; // novel altsplice
             else if (splice_source == 3)  kkolor = green; // est
             ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
@@ -3325,7 +3318,7 @@ fflush(stderr);
             x = x1;
             xx = x2;
             kkolor = yellow;
-            if (splice_source == 1)  kkolor = black;  // refseq
+            if (splice_source == 1)       kkolor = black;  // refseq
             else if (splice_source == 2)  kkolor = red; // novel altsplice
             else if (splice_source == 3)  kkolor = green; // est
 // WHY 
@@ -3868,26 +3861,27 @@ static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
     int x1,x2,y1,y2;
     int lastx1, lastx2;
     int slice_len_in_bases;
-char m[512];
+    unsigned char base[2];
+    char m[512]; // debug string
 
     if (dnaspace) free(dnaspace);
-// use 2bit
+              // use 2bit file for accessing sequence
     dnaspace = twobit(khr, s , e+1,blds); // free return if return != 0
     if (!dnaspace) 
     {
-sprintf(m,"ERROR: in setup_reference_dna() dnaspace from twobit() is null "); jdebug(m);
+        sprintf(m,"ERROR: in setup_reference_dna() dnaspace from twobit() is null "); jdebug(m);
         return;
     }
-    if (paint_it_flag == 0) return;
+    if (paint_it_flag == 0) return; // argument to this function
  
-    slice_len_in_bases = e - s;
+    slice_len_in_bases = e - s;   // end minus start
     local_pxwidth = (double)iw/(double)(slice_len_in_bases);
     x1 = x2 = y1 = y2 = 0;
 
     lastx1 = lastx2 = 0;
     y1 = ih-3-yoffset;
     y2 = ih-7-yoffset;
-sprintf(m,"in rainbow(), got dnaspace  %p len=%d y1=%d y2=%d ih=%d off=%d",dnaspace,slice_len_in_bases,y1,y2,ih,yoffset); jdebug(m);
+// sprintf(m,"in rainbow(), got dnaspace  %p len=%d y1=%d y2=%d ih=%d off=%d",dnaspace,slice_len_in_bases,y1,y2,ih,yoffset); jdebug(m);
     for (i=0 ; i<slice_len_in_bases ; i++)
     {
         x1 = (int)(local_pxwidth * (double)(i)); 
@@ -3908,6 +3902,14 @@ sprintf(m,"in rainbow(), got dnaspace  %p len=%d y1=%d y2=%d ih=%d off=%d",dnasp
             default : xcolor = pink;
         }
         ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
+        if (local_pxwidth > 7)  // draw A,T,C,G or N
+        {
+            base[0] = *(dnaspace+i);
+            base[1] = (char)0;
+            xcolor = black;
+//             ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
+            ImageString5x5(im,x1+((x2-x1)/2),y2, base,xcolor);
+        }
         lastx1 = x1;
         lastx2 = x2;
     }

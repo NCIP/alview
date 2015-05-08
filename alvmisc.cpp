@@ -8147,6 +8147,42 @@ void OLDImageXRectangle(struct image_type *im,int x, int y, int x1, int y1 )
 }
 
 
+char font5x5[] =   // ACGTN
+{
+	/* Char 0 */
+   //0   1   2   3   4 
+    'X','X','X','X','X',  // A
+    'X',' ',' ',' ','X',                                                                                                                                        
+    'X','X','X','X','X',
+    'X',' ',' ',' ','X',                                                                                                                                        
+    'X',' ',' ',' ','X',                                                                                                                                        
+                        
+    'X','X','X','X','X',  // C
+    'X',' ',' ',' ',' ',
+    'X',' ',' ',' ',' ',
+    'X',' ',' ',' ',' ',
+    'X','X','X','X','X',
+
+    'X','X','X','X','X',  // G
+    'X',' ',' ',' ',' ',
+    'X',' ','X','X','X',
+    'X',' ',' ',' ','X',
+    'X','X','X','X','X',
+                            
+    'X','X','X','X','X',  // T
+    ' ',' ','X',' ',' ',
+    ' ',' ','X',' ',' ',
+    ' ',' ','X',' ',' ',
+    ' ',' ','X',' ',' ',
+                            
+    'X',' ',' ',' ','X',  // N
+    'X','X',' ',' ','X',
+    'X',' ','X',' ','X',
+    'X',' ',' ','X','X',
+    'X',' ',' ',' ','X',
+};
+
+
 char pixelfont[] = 
 {
 	/* Char 0 */
@@ -12786,14 +12822,89 @@ void ImageString(struct image_type *im, int x, int y, unsigned char *s, int colo
             {
                if (*z++ == 'X') // draw dot
                {
-// xxx
-                   loc = (((im->width*(y+i))+(x+j)) * 3) + (k*8*3);
-//(3 * im->width * (y+i)) + (x+j) + (k*8); 
+                   loc = (((im->width*(y+i))+(x+j)) * 3) + (k*8*3); // location into the x*y*3 rgb image
 // printf("%c k=%d %d %d loc=%d\n",*(s+k),k,i,j,loc);
                    if (loc++ < maxx) *(img+loc+0) = R;
                    if (loc++ < maxx) *(img+loc+1) = G;
                    if (loc   < maxx) *(img+loc+2) = B;
                }
+            }
+        }
+    }
+
+    return;
+}
+
+void kdebug(const char *s)         // for use in debuging 
+{
+    static FILE *kdebugfp = (FILE *)0;
+    static int cnt = 0;
+    char fn[2048];
+
+    strcpy(fn,"x2"); 
+    if (!kdebugfp) kdebugfp = fopen(fn,"a");
+    if (kdebugfp == (FILE *)0) { return; }
+    fprintf(kdebugfp,"%d:%s\n",cnt++,s);
+    fflush(kdebugfp); 
+    return;
+}
+
+void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int color)
+{
+    char ch;
+    int idx;
+    int kolor;
+    int maxx;
+    unsigned char *img;
+    int loc;
+    int i,j,k;
+    unsigned char *z;
+
+    kolor = color;
+    z = (unsigned char *)&kolor;
+    unsigned char R = *(z+0);
+    unsigned char G = *(z+1);
+    unsigned char B = *(z+2);
+    img = im->data;
+    maxx = im->width*im->height*3;
+
+    for (k=0 ; *(s+k) ; k++)     // traverse string 
+    {
+        ch = *(s+k);
+        if      ((ch == 'a') || (ch == 'A')) idx = 0;
+        else if ((ch == 'c') || (ch == 'C')) idx = 1;
+        else if ((ch == 'g') || (ch == 'G')) idx = 2;
+        else if ((ch == 't') || (ch == 'T')) idx = 3;
+        else if ((ch == 'n') || (ch == 'N')) idx = 4;
+        else continue; // must be 'A','C','T' or 'G'  ... or 'N'
+
+        z = (unsigned char *)(font5x5 + ((5*5) * idx)); // byte offset where the char is in font5x5 font structure
+        for (i=0;i<5;i++) // 5 down 
+        {
+            for (j=0;j<5;j++)  // 5 across
+            {
+                   loc = (((im->width*(y+i))+(x+j)) * 3) + (k*5*3); // location into the x*y*3 rgb image
+char m[512];
+// xxx
+sprintf(m,"ImageString5x5 %c k=%d %d %d loc=%d\n",*(s+k),k,i,j,loc);
+kdebug(m);
+                   if (loc++ < maxx) *(img+loc+0) = 0xff;
+                   if (loc++ < maxx) *(img+loc+1) = 0xff;
+                   if (loc   < maxx) *(img+loc+2) = 0xff;
+#if 0
+               if (*z++ == 'X') // draw dot
+               {
+                   loc = (((im->width*(y+i))+(x+j)) * 3) + (k*5*3); // location into the x*y*3 rgb image
+
+                   if (loc++ < maxx) *(img+loc+0) = R;
+                   if (loc++ < maxx) *(img+loc+1) = G;
+                   if (loc   < maxx) *(img+loc+2) = B;
+
+                   if (loc++ < maxx) *(img+loc+0) = 0xff;
+                   if (loc++ < maxx) *(img+loc+1) = 0xff;
+                   if (loc   < maxx) *(img+loc+2) = 0xff;
+               }
+#endif
             }
         }
     }
