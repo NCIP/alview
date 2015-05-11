@@ -2774,7 +2774,7 @@ static int mmsLQ[5000];
 static double pxwidth; // pixel width 
 
 #define SLOTS 0
-// slots is a new method - still working on this - coming soon
+// slots is a new method - still working on this - coming soon ... maybe
 #if SLOTS
 unsigned char *slots;   // slots is this y dimension is slots, x is pixels, set to one for is already covered.
 int num_slots;
@@ -2890,8 +2890,12 @@ static void aldetails(int diff, int offset, int len,
     int x1,x2,y1,y2;
     int keepgoing = 1;
 
+
     if (!dnaspace) return;
+// fprintf(stderr,"in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
+#if 0
     if (offset < 0) return;
+#endif
 
     if (spliceonly_flag == 1)
     {
@@ -2916,12 +2920,12 @@ static void aldetails(int diff, int offset, int len,
 // fprintf(stderr,"in aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
 
 #ifdef QT_GUI
- if ((++time_out_every_once_a_while % 50000) == 0)
- {
- // might need to cal this QCoreApplication::processEvents()QCoreApplication::processEvents()
- hack_timeout_to_process_events();
- time_out_every_once_a_while = 1; // reset count
- }
+    if ((++time_out_every_once_a_while % 50000) == 0)
+    {
+         // might need to cal this QCoreApplication::processEvents()QCoreApplication::processEvents()
+        hack_timeout_to_process_events();
+        time_out_every_once_a_while = 1; // reset count
+    }
 #endif
 
 #if SLOTS
@@ -2983,7 +2987,6 @@ static void aldetails(int diff, int offset, int len,
         if (oset < (iw*ih))
         {
             *(ppp+oset) = (char)1;        // ppp[i][y2] = 1;
-            // *(ppp+(y2*iw)+i) = (char)1;        // ppp[i][y2] = 1;
         }
     }
 #endif
@@ -3189,6 +3192,7 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
 }
 
 
+// command line only routine
 void snp_call_aldetails(int diff, int offset, int len,  
         int fwdflag, int optical_dupe_flag ,char seq[], char *quality, int seqlen, char cigar[], int splice_source)
 {
@@ -3196,7 +3200,7 @@ void snp_call_aldetails(int diff, int offset, int len,
     int oset;
     int j,k,coff;
     int dnaat = 0;
-    int kkolor;
+//    int kkolor;
     int gotn;
     double d;
     int x,xx;
@@ -3204,11 +3208,11 @@ void snp_call_aldetails(int diff, int offset, int len,
     int i;
     int x1,x2,y1,y2;
     int keepgoing = 1;
-    int xcolor; // not used ??
+//    int xcolor; // not used ??
 
 
 // debug fprintf(stderr,"in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
-fflush(stderr); 
+// fflush(stderr); 
 
     if (!dnaspace) return;
     if (offset < 0) return;
@@ -3304,7 +3308,7 @@ fflush(stderr);
         }
     }
 
-    if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
+//    if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
     for (i=k=coff=j=0 ; j<num_cig_ops ; j++) 
     {
         if (i>= seqlen) break; // done
@@ -3317,10 +3321,12 @@ fflush(stderr);
             x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
             x = x1;
             xx = x2;
+/*
             kkolor = yellow;
             if (splice_source == 1)       kkolor = black;  // refseq
             else if (splice_source == 2)  kkolor = red; // novel altsplice
             else if (splice_source == 3)  kkolor = green; // est
+*/
 // WHY 
 //             ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
             coff += cig_ops[j].len; 
@@ -3337,7 +3343,7 @@ fflush(stderr);
             x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
             x = x1;
             xx = x2;
-            kkolor = yellow;
+//            kkolor = yellow;
 //             ImageFilledRectangle(im,x,y2-1,xx,y1+2,kkolor);
             coff += cig_ops[j].len; 
             dnaat += cig_ops[j].len; 
@@ -3356,7 +3362,7 @@ fflush(stderr);
             x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
             x = x1;
             xx = x2;
-            xcolor = cyan; // mark insert here
+//            xcolor = cyan; // mark insert here
 //             ImageFilledRectangle(im,x,y2-2,xx,y1+2,xcolor);
             coff -= cig_ops[j].len; 
 
@@ -3377,7 +3383,7 @@ fflush(stderr);
         {
             for (k=0 ; k<cig_ops[j].len ; k++)
             {
-                xcolor = black;
+//                xcolor = black;
                 d = x1 + (pxwidth * (i+coff));
                 x = (int)d;
                 d = x1 + (pxwidth * (i+1+coff));
@@ -3386,7 +3392,6 @@ fflush(stderr);
                 x = x1;
                 xx = x2;
                 i++;
-                xcolor = black;
             }
             continue;
         }
@@ -3400,13 +3405,13 @@ fflush(stderr);
             if (dnaat >= dnasize) break;
             ch = seq[i];
 // fprintf(stderr,"in snp_call_aldetails(), dnaat=%d snd=%d '%c'\n", dnaat,snp_call_dnaat,ch); fflush(stderr); 
-            if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
+//            if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
             if ((dnaat >= 0) && (dnaat < dnasize))
             {
                 if ((basecolors_flag == 1) || ( (toupper(ch)) != toupper(*(dnaspace+dnaat)) ))
                 {
-                    if      (ch == 'A') xcolor = dna_a; else if (ch == 'C') xcolor = dna_c;
-                    else if (ch == 'G') xcolor = dna_g; else if (ch == 'T') xcolor = dna_t;
+//                    if      (ch == 'A') xcolor = dna_a; else if (ch == 'C') xcolor = dna_c;
+//                    else if (ch == 'G') xcolor = dna_g; else if (ch == 'T') xcolor = dna_t;
                 }
                 d = x1 + (pxwidth * (i+coff));
                 x = (int)d;
@@ -3426,9 +3431,6 @@ fflush(stderr);
            if (qual_flag == 1)
            {                // override if qual flag on
 // quality values co-incident with sequence 
-               char qch;
-                if (quality) qch = *(quality+i);
-                else         qch = 0;
 #if 0
 /*
 The character '!' represents the lowest quality while '~' is the highest. Here are the quality value characters in left-to-right increasing order of quality (ASCII):
@@ -3438,11 +3440,15 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
  0         1         2         3         4         5         6         7         8         9
 */
 #endif
-            int idx = qch;
 // sprintf(m,"idx = %d from %c",idx,qch); jdebug(m);
 // grays[0] = white
 // grays[9] = black
 
+/*
+                char qch;
+                if (quality) qch = *(quality+i);
+                else         qch = 0;
+            int idx = qch;
             if (idx > 65)      xcolor = grays[1];
             else if (idx > 61) xcolor = grays[2];
             else if (idx > 57) xcolor = grays[3];
@@ -3452,6 +3458,7 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
             else if (idx > 41) xcolor = grays[7];
             else if (idx > 37) xcolor = grays[8];
             else               xcolor = grays[9];
+*/
             }
 #endif
 // fprintf(stderr,"in snp_call_aldetails pxw=%f offset=%d, before ImagFillRectangle %d %d %d %d",pxwidth,offset, x,y2,xx,y1); fflush(stderr);
@@ -3500,8 +3507,8 @@ static void paint_align_box(int diff, int offset, int len, int wcode, int notch_
     int mm_max = -1; 
     int mm2_min = -1; 
     int mm2_max = -1; 
-    int mm_minLQ = -1; 
-    int mm_maxLQ = -1; 
+//    int mm_minLQ = -1; 
+//    int mm_maxLQ = -1; 
     int keepgoing = 1;
 
  
@@ -3647,8 +3654,8 @@ if ((y2<=0)|| (y1<=0)) { y2 = 1; y1=4; break; }
 
         if ( ((qual > 0)) && (qual < QUALCUTOFF ) && (notch_mm_where >= 0) )
         {
-            mm_minLQ = (int)(pxwidth * (double)(offset+notch_mm_where)); 
-            mm_maxLQ = (int)(pxwidth * (double)(offset+notch_mm_where+1)); 
+//            mm_minLQ = (int)(pxwidth * (double)(offset+notch_mm_where)); 
+//            mm_maxLQ = (int)(pxwidth * (double)(offset+notch_mm_where+1)); 
         }
         for (i=x1 ;i<=x2 ; i++)
         {
@@ -3907,7 +3914,6 @@ static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
             base[0] = *(dnaspace+i);
             base[1] = (char)0;
             xcolor = black;
-//             ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
             ImageString5x5(im,x1+((x2-x1)/2),y2, base,xcolor);
         }
         lastx1 = x1;

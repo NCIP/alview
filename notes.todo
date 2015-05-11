@@ -1,14 +1,14 @@
-Help Files
-Add ATCG colors
-Add ATCG to reference - add little atcg
-Make sure only valid BAMS load;
-Multi-image - need now.
-Need slideshow - Slidewhow mode
-Base level zoom
-Add linux 32 bit edition
-Improve Documentation
-Discuss IGV
-Export Image
-add discusssion of HTDOCDIR in server setup
-Find good place to park when starting new bam.
-"Slots"method to lower memory usage
+    Help Files
+    Export Image
+ o  Base level zoom
+ #  Add ATCG to reference - add little atcg
+ o  Find good place to park when starting new bam.
+    Add ATCG colors
+    Multi-image - need now.
+    Need slideshow - Slidewhow mode
+    Add linux 32 bit edition
+    Improve Documentation
+    add discusssion of HTDOCDIR in server setup
+    Discuss IGV
+    Make sure only valid BAMS load;
+    Slots method to lower memory usage

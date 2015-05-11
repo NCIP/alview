@@ -3,8 +3,8 @@
 #download and install GTK2 development tools, samtools and zlib
 
 # download and make samtools, point to the place you put by editing the next line ...
-SAMTOOLS_PLACE=/data/nextgen/finneyr/samtools-0.1.18/ 
-#SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.18/ 
+#SAMTOOLS_PLACE=/data/nextgen/finneyr/samtools-0.1.18/ 
+SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.18/ 
 
 gcc -DUNIX=1 -DGTK=1 -Wall -x c -o alvgtk -I${SAMTOOLS_PLACE}  alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` -L/usr/lib -L${SAMTOOLS_PLACE} -lbam -lm -lz 
 

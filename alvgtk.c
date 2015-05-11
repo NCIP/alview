@@ -776,10 +776,10 @@ GtkWidget *rpf_do_button_box (GtkWidget *sw)
 //  GtkWidget *main_vbox;
   GtkWidget *val_label = (void *)0;
   GtkWidget *hbox = (void *)0;
-  GtkWidget *vbox = (void *)0;
+//  GtkWidget *vbox = (void *)0;
   GtkWidget *button = (void *)0;
 
-  vbox = gtk_hbox_new (FALSE, 0);
+//  vbox = gtk_hbox_new (FALSE, 0);
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 10);
   button = gtk_button_new_with_label ("TEST 1");
@@ -8160,7 +8160,7 @@ gboolean zoom_in(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
     int size;
     int third;
 
-fprintf(stderr,"zoom in \n"); fflush(stderr); 
+//fprintf(stderr,"zoom in \n"); fflush(stderr); 
     size = khrend-khrstart;
     third=size/3;
     khrend = khrend - third;
@@ -8240,7 +8240,7 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
 
     movek = user_data; 
 
-fprintf(stderr,"in on_button_move START movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
+// fprintf(stderr,"in on_button_move START movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
     if (movek == 1)   // page right special code 
     {
          page_nts = khrend - khrstart;
@@ -8366,7 +8366,7 @@ gboolean gettextentry(GtkWidget *widget)
     int status;
     const char *entry_text;
     // char *entry_text;
-    int size;
+//    int size;
 
     entry_text = (char *)0;
     entry_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)TextEntryPosition));
@@ -8385,7 +8385,7 @@ gboolean gettextentry(GtkWidget *widget)
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
     gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
 
-    size = khrend - khrstart;
+//    size = khrend - khrstart;
     sanity_khr();
     if (img) free(img);
     img = (unsigned char *)0;
