@@ -671,11 +671,11 @@ void fix_up_support_file_paths(void)
     static int fixed_up_support_flag = 0;
 
 
-sprintf(m,"xxx in fix_up_support_file_paths(), blds = %s",blds); jdebug(m);
+sprintf(m,"in fix_up_support_file_paths(), blds = %s",blds); jdebug(m);
     if (fixed_up_support_flag  == 1) return;
     if (blds[0] == 0)
     {
-sprintf(m,"ERROR: xxx in fix_up_support_file_paths(), blds is null "); jdebug(m);
+sprintf(m,"ERROR: in fix_up_support_file_paths(), blds is null "); jdebug(m);
           return;
     }
 
@@ -826,7 +826,6 @@ sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",re
     }
  
     fseek(fp_refflat_d, 0, SEEK_SET); // rewind 
-// xxx rpf 
 sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",refflat_d_fn);  jdebug(m); 
 
     rec_cnt = 0;
@@ -2930,7 +2929,6 @@ static void aldetails(int diff, int offset, int len,
 
 #if SLOTS
 #else
-// xxx
     if (ppp_firsttime == 1) 
     {
         if (ppp) {free(ppp); ppp = (unsigned char *)0; }
@@ -2996,21 +2994,21 @@ static void aldetails(int diff, int offset, int len,
     if (fwdflag == 0) xcolor = grays[2]; else  xcolor = grays[3];
     for (i=k=coff=j=0 ; j<num_cig_ops ; j++) 
     {
-        if (i>= seqlen) break; // done
+        if (i >= seqlen) break; // done
         if (cig_ops[j].cmd == 'N')  // skip 
         {
-            d = x1 + (pxwidth * (i+coff));
-            x = (int)d;
-            d = x1 + (pxwidth * (i+1+coff));
-            x1 = (int)(pxwidth * (double)(offset+i+coff)); 
-            x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
-            x = x1;
-            xx = x2;
+// xxx
             kkolor = yellow;
             if (splice_source == 1)       kkolor = black;  // refseq
-            else if (splice_source == 2)  kkolor = red; // novel altsplice
-            else if (splice_source == 3)  kkolor = green; // est
-            ImageFilledRectangle(im,x,y2+1,xx,y1-2,kkolor); // make a thin line twixt alignments
+            else if (splice_source == 2)  kkolor = red;    // novel altsplice
+            else if (splice_source == 3)  kkolor = green;  // est (expressed sequence tags)
+            x1 = (int)(pxwidth * (double)(offset+i+coff)); 
+            x2 = (int)(pxwidth * (double)(offset+i+coff+cig_ops[j].len)); 
+            if (x1<0) x1=0;
+            if (x2<0) x2=0;
+            if (y1<0) y1=0;
+            if (y2<0) y2=0;
+            ImageFilledRectangle(im,x1,y2+1,x2,y1-2,kkolor); // make a thin line twixt alignments
             coff += cig_ops[j].len; 
             dnaat += cig_ops[j].len; 
             continue; 
@@ -3215,7 +3213,9 @@ void snp_call_aldetails(int diff, int offset, int len,
 // fflush(stderr); 
 
     if (!dnaspace) return;
+#if 0
     if (offset < 0) return;
+#endif
 
     if (spliceonly_flag == 1)
     {

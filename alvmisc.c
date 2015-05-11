@@ -7999,10 +7999,10 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     unsigned char *z;
     int kolor;
     int i,j;
-//    int maxx; not used
     int width;
     int height;
     unsigned char *img;
+//    int maxx; not used
 
     if ((x<0) || (y<0))
     {
@@ -8024,7 +8024,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     img = im->data;
     width = im->width;
     height = im->height;
-//    maxx = (im->width * im->height *3);  no used
+//    maxx = (im->width * im->height *3);  not used
 
     kolor = color;
     z = (unsigned char *)&kolor;

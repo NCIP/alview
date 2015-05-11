@@ -7999,10 +7999,10 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     unsigned char *z;
     int kolor;
     int i,j;
-//    int maxx; not used
     int width;
     int height;
     unsigned char *img;
+//    int maxx; not used
 
     if ((x<0) || (y<0))
     {
@@ -8024,7 +8024,7 @@ void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,in
     img = im->data;
     width = im->width;
     height = im->height;
-//    maxx = (im->width * im->height *3);  no used
+//    maxx = (im->width * im->height *3);  not used
 
     kolor = color;
     z = (unsigned char *)&kolor;
@@ -8152,9 +8152,9 @@ char font5x5[] =   // ACGTN
 	/* Char 0 */
    //0   1   2   3   4 
     'X','X','X','X','X',  // A
-    'X',' ',' ',' ','X',                                                                                                                                        
+    'X',' ',' ',' ','X', 
     'X','X','X','X','X',
-    'X',' ',' ',' ','X',                                                                                                                                        
+    'X',' ',' ',' ','X',
     'X',' ',' ',' ','X',                                                                                                                                        
                         
     'X','X','X','X','X',  // C
@@ -12835,6 +12835,7 @@ void ImageString(struct image_type *im, int x, int y, unsigned char *s, int colo
     return;
 }
 
+#if 0
 void kdebug(const char *s)         // for use in debuging 
 {
     static FILE *kdebugfp = (FILE *)0;
@@ -12848,6 +12849,14 @@ void kdebug(const char *s)         // for use in debuging
     fflush(kdebugfp); 
     return;
 }
+#endif
+
+extern int black;
+extern int white;
+extern int dna_a;
+extern int dna_c;
+extern int dna_g;
+extern int dna_t;
 
 void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int color)
 {
@@ -12861,22 +12870,22 @@ void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int c
     unsigned char *z;
 
     kolor = color;
-    z = (unsigned char *)&kolor;
-    unsigned char R = *(z+0);
-    unsigned char G = *(z+1);
-    unsigned char B = *(z+2);
     img = im->data;
     maxx = im->width*im->height*3;
 
     for (k=0 ; *(s+k) ; k++)     // traverse string 
     {
         ch = *(s+k);
-        if      ((ch == 'a') || (ch == 'A')) idx = 0;
-        else if ((ch == 'c') || (ch == 'C')) idx = 1;
-        else if ((ch == 'g') || (ch == 'G')) idx = 2;
-        else if ((ch == 't') || (ch == 'T')) idx = 3;
-        else if ((ch == 'n') || (ch == 'N')) idx = 4;
+        if      ((ch == 'a') || (ch == 'A')) { idx = 0; kolor = dna_c; }  // fine 
+        else if ((ch == 'c') || (ch == 'C')) { idx = 1; kolor = black; } 
+        else if ((ch == 'g') || (ch == 'G')) { idx = 2; kolor = dna_t; }  // fine 
+        else if ((ch == 't') || (ch == 'T')) { idx = 3; kolor = white; } 
+        else if ((ch == 'n') || (ch == 'N')) { idx = 4; kolor = black; } 
         else continue; // must be 'A','C','T' or 'G'  ... or 'N'
+        z = (unsigned char *)&kolor;
+        unsigned char R = *(z+0);
+        unsigned char G = *(z+1);
+        unsigned char B = *(z+2);
 
         z = (unsigned char *)(font5x5 + ((5*5) * idx)); // byte offset where the char is in font5x5 font structure
         for (i=0;i<5;i++) // 5 down 
@@ -12884,27 +12893,27 @@ void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int c
             for (j=0;j<5;j++)  // 5 across
             {
                    loc = (((im->width*(y+i))+(x+j)) * 3) + (k*5*3); // location into the x*y*3 rgb image
+#if 0
 char m[512];
 // xxx
-sprintf(m,"ImageString5x5 %c k=%d %d %d loc=%d\n",*(s+k),k,i,j,loc);
-kdebug(m);
                    if (loc++ < maxx) *(img+loc+0) = 0xff;
                    if (loc++ < maxx) *(img+loc+1) = 0xff;
                    if (loc   < maxx) *(img+loc+2) = 0xff;
-#if 0
-               if (*z++ == 'X') // draw dot
+#endif
+               if (*z++ == 'X')     // draw dot
                {
                    loc = (((im->width*(y+i))+(x+j)) * 3) + (k*5*3); // location into the x*y*3 rgb image
+// debug printf("ImageString5x5 %c k=%d %d %d loc=%d\n",*(s+k),k,i,j,loc);
 
                    if (loc++ < maxx) *(img+loc+0) = R;
                    if (loc++ < maxx) *(img+loc+1) = G;
                    if (loc   < maxx) *(img+loc+2) = B;
-
+#if 0
                    if (loc++ < maxx) *(img+loc+0) = 0xff;
                    if (loc++ < maxx) *(img+loc+1) = 0xff;
                    if (loc   < maxx) *(img+loc+2) = 0xff;
-               }
 #endif
+               }
             }
         }
     }
