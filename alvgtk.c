@@ -8186,6 +8186,7 @@ gboolean zoom_out(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 
     size = khrend-khrstart;
     half=size/2;
+    if (half < 1) half = 1;
     khrend = khrend + half;
     khrstart = khrstart - half;
     sanity_khr();

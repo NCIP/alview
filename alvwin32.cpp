@@ -7303,8 +7303,8 @@ BOOL ALV_erasebackground(HWND hwnd, HWND /*hwndFocus*/, LPARAM /*lParam*/)
 
 void setup_xorea(int x, int w)       // x-pos and width
 {
-    int dots = 0;
     char m[1024];
+    int dots = 0;
     struct image_type im2;
 
     if (img)
@@ -7318,8 +7318,11 @@ void setup_xorea(int x, int w)       // x-pos and width
         im2.height = dih;
         if (w<4) ImageXRectangle2(&im2,x,0,x+4,dih,&dots);
         else     ImageXRectangle2(&im2,x,0,x+w,dih,&dots);
+
+#if 0
 snprintf(m,1022,"setup_xorea, x=%d w=%d xor=%d img2=%p s=%d e=%d dots=%d",x,w,xoron,img2,start_select_x, end_select_x,dots); jdebug(m);  
 msg(m);
+#endif
     }
     return;
 }
@@ -7769,6 +7772,10 @@ char m[1024];
 snprintf(m,1022,"zoom in \n"); jdebug(m); 
     size = khrend-khrstart;
     third=size/3;
+/*
+snprintf(m,1022,"zoom in, x=%d w=%d xor=%d img2=%p s=%d e=%d dots=%d",x,w,xoron,img2,start_select_x, end_select_x,dots); jdebug(m);  
+msg(m);
+*/
     khrend = khrend - third;
     khrstart = khrstart + third;
     sanity_khr();
@@ -7786,6 +7793,7 @@ void zoom_out(HWND hwnd, int id)
 
     size = khrend-khrstart;
     half=size/2;
+    if (half < 1) half = 1;
     khrend = khrend + half;
     khrstart = khrstart - half;
     sanity_khr();
