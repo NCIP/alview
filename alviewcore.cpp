@@ -3,6 +3,7 @@
 Written by Richard Finney, 2015, National Cancer Institute, National Institutes of Health 
 This file "alviewcore.cpp" contains the core alview routines.  
 This is *** MOSTLY ***  public domain ...  EXCEPTION: note GOTOH code by Peter Clote.  
+
 Clote's GOTOH (optimized Smith-Watterman) code is only for non-commercial users.  
 To deal with this : just keep keep #define GOTOH=0 to disable it OR re-engineer it if you are commercial outfit.
 Otherwise, do whatever you want!  NIH assumes no liabilities or responsibilities.  Use at your own risk.
@@ -154,8 +155,8 @@ gdImagePtr im;
 #define MAXBUFF 20000
 #define MAXSMALLBUFF 2000
 
-#ifdef CMD_LINE
 int snp_call_flag = 0;
+#ifdef CMD_LINE
 int snp_call_spot = 0; // genomic location 
 int snp_call_dnaat = 0;
 char snp_call_referece = ' ';
@@ -167,7 +168,6 @@ int snp_call_T_cnt = 0;
 int snp_call_Ins_cnt = 0;
 int snp_call_Del_cnt = 0;
 #else
-int snp_call_flag = 0;
 #endif
 
 int width,height;
@@ -377,6 +377,392 @@ off_t ftello(FILE *stream);
 #include "../lib/cbiit.h"
 
 #endif
+
+
+// --- SNP annotation track ...
+struct snp_type   // ****** input and output snp records as packed in this order !!!! >>> 
+{
+    unsigned int s;  // start 4 bytes 
+    unsigned int e;  // end 4 bytes 
+    unsigned char chrindex; // 1 char index - chromosome index 
+    char mask; // info on sift , bit 1 = is sift , bit2 = nsfp origin
+    char rs[12]; //  null terminated RS dbsnp string 
+};
+
+ /// add up the packed bytes in above struct ... get 22 bytes
+#define  SIZE_SNPTYPE 22
+
+static int snpcmp(const void *aarg, const void *barg)
+{
+     struct snp_type *a;
+     struct snp_type *b;
+
+     a = (struct snp_type *)aarg;
+     b = (struct snp_type *)barg;
+
+     if (a->chrindex < b->chrindex ) return -1;
+     else if (a->chrindex > b->chrindex ) return 1;
+
+     if (a->s <b->s ) return -1;
+     else if (a->s >b->s ) return 1;
+     return 0;
+}
+
+static long int last_snp_fseek_place;
+static struct snp_type temp_snp_space;
+static FILE *fp_snp = (FILE *)0;
+
+
+struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, long int hi)
+{
+    long int seekto;
+    long int mid;
+    int k;
+
+// fprintf(stderr," in binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
+
+    if (fp_snp == (void *)0) 
+    { 
+        fprintf(stderr,"ERROR: in binary_search_snp_file() - fp_snp is NULL\n"); 
+        return((struct snp_type *)0); 
+    } 
+
+// printf("dbg in binary_search_snp_file() chr=%s loc=%d last_snp_fseek_place=%ld lo=%ld hi=%ld\n",match_me->chr,match_me->s,last_snp_fseek_place,lo,hi); 
+
+    if (lo > hi) 
+    {
+//        fprintf(stderr,"ERROR: can't find [%s] cuz lo > hi %ld and %ld in binary_search_snp_file\n",match_me,lo,hi);
+        return (struct snp_type *)0;
+    }
+    if (lo==hi)
+    {
+        seekto = (SIZE_SNPTYPE * lo);
+        if (fseek(fp_snp,(size_t) seekto , SEEK_SET) < 0)
+        {
+            fprintf(stderr,"ERROR SEEK to %ld in binary_search_snp_file lo=%ld\n",seekto,lo);
+            return (struct snp_type *)0;
+        }
+
+        last_snp_fseek_place = seekto; 
+#if 0
+        fread(&temp_snp_space,1,SIZE_SNPTYPE,fp_snp);
+#else
+   // -- must make portable, regardless of struct packing 
+        fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start 
+        fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
+        fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex 
+        fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field 
+        fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
+#endif
+
+        if (snpcmp(&temp_snp_space,match_me) == 0) 
+        {
+// fprintf(stderr,"GOT binary_search_snp_file lo=%ld hi=%ld %s\n",lo,hi,temp_snp_space); fflush(stderr); 
+            return &temp_snp_space;
+        }
+        else 
+        {
+            return (struct snp_type *)0;
+        }
+    }
+    mid = (lo + hi) / 2 ;
+//printf("in search mid=%d \n",mid); fflush(stdout);
+
+    seekto = (SIZE_SNPTYPE * mid);
+//printf("in search seekto=%ld [ which is mid=%d * 2] \n",seekto,mid); fflush(stdout);
+
+    if (fseek(fp_snp,(size_t) seekto , SEEK_SET) < 0)
+    {
+        fprintf(stderr,"SEEK to %ld ERROR in binary_search_snp_file, mid=%ld\n",seekto,mid);
+        exit(0);
+    }
+    last_snp_fseek_place = seekto; 
+    fread( &temp_snp_space, 1 , SIZE_SNPTYPE , fp_snp );
+
+// printf("read at %ld %s %d %d \n",seekto, temp_snp_space.chr, temp_snp_space.s, temp_snp_space.e);
+
+
+// printf("dbg read in %s:%d-%d at last_snp_fseek_place =%ld \n",temp_snp_space.chr,temp_snp_space.txStart,temp_snp_space.txEnd,last_snp_fseek_place);
+    k = snpcmp(&temp_snp_space,match_me);
+// fprintf(stderr,"after snpcmp() k=%d \n",k);
+    if (k == 0)  // unlikely !!!
+    {
+//printf("in search found [%s]at %d   (2)\n",match_me,mid); fflush(stdout);
+        return &temp_snp_space;
+    }
+
+    // if (strcmp(temp_snp_space.chr,match_me->chr) == 0) 
+    if (temp_snp_space.chrindex == match_me->chrindex)
+    {
+        if ((match_me->s >= temp_snp_space.e) && (match_me->e < temp_snp_space.e))
+            return &temp_snp_space;
+    }
+    if (k > 0) 
+    {
+        return binary_search_snp_file(match_me, lo, mid-1);
+    }
+    else 
+    {
+        return binary_search_snp_file(match_me, mid+1, hi);
+    }
+}
+
+
+static long int snp_fixed_hi;
+static void setup_snp(char *input_flat_snp_file_name)
+{
+    int error;
+
+fprintf(stderr,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d \n",input_flat_snp_file_name,SIZE_SNPTYPE);
+    if (fp_snp) return; // already opened  
+  
+    fp_snp = fopen(input_flat_snp_file_name,"r");
+    error = errno;
+    if (fp_snp == (FILE *)0) 
+    { 
+        fprintf(stderr,"ERROR: input_flat_snp_file_name=\"%s\" in setup_snp(), errno=%d\n",input_flat_snp_file_name,errno); 
+        fflush(stderr); 
+        return;
+    }
+    fseek(fp_snp,(size_t) 0 , SEEK_END);
+    snp_fixed_hi = ftell(fp_snp)/SIZE_SNPTYPE;
+
+fprintf(stderr,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d END fpd = %p\n",input_flat_snp_file_name,SIZE_SNPTYPE,fp_snp);
+    return;
+}
+
+
+static void close_snp(void)
+{
+    if (fp_snp) fclose(fp_snp);
+    fp_snp = (FILE *)0;
+}
+
+
+
+static char prevchr[16] = "";
+static unsigned int prevsnpindex;
+static unsigned char chr2index(char *s)
+{
+    unsigned char ret = 0xff;
+    if (strcmp(s,prevchr) == 0) return prevsnpindex;
+
+    
+    if (strcmp(s,"1") == 0) { ret =  0; }  
+    else if (strcmp(s,"2") == 0) { ret =  1;  } 
+    else if (strcmp(s,"3") == 0) { ret =  2;  } 
+    else if (strcmp(s,"4") == 0) { ret =  3;  } 
+    else if (strcmp(s,"5") == 0) { ret =   4;  } 
+    else if (strcmp(s,"6") == 0) { ret =   5;  } 
+    else if (strcmp(s,"7") == 0) { ret =   6;  } 
+    else if (strcmp(s,"8") == 0) { ret =   7;  } 
+    else if (strcmp(s,"9") == 0) { ret =   8;  } 
+    else if (strcmp(s,"10") == 0) { ret =   9;  } 
+    else if (strcmp(s,"11") == 0) { ret =   10;  } 
+    else if (strcmp(s,"12") == 0) { ret =   11;  } 
+    else if (strcmp(s,"13") == 0) { ret =   12;  } 
+    else if (strcmp(s,"14") == 0) { ret =   13;  } 
+    else if (strcmp(s,"15") == 0) { ret =   14;  } 
+    else if (strcmp(s,"16") == 0) { ret =   15;  } 
+    else if (strcmp(s,"17") == 0) { ret =   16;  } 
+    else if (strcmp(s,"18") == 0) { ret =   17;  } 
+    else if (strcmp(s,"19") == 0) { ret =   18;  } 
+    else if (strcmp(s,"20") == 0) { ret =   19;  } 
+    else if (strcmp(s,"21") == 0) { ret =   20;  } 
+    else if (strcmp(s,"22") == 0) { ret =   21;  } 
+    else if (strcmp(s,"X") == 0) { ret =   22;  } 
+    else if (strcmp(s,"Y") == 0) { ret =   23;  } 
+    else if (strcmp(s,"M") == 0) { ret =   24;  } 
+    else if (strcmp(s,"chr1") == 0) { ret =   0;  } 
+    else if (strcmp(s,"chr2") == 0) { ret =   1;  } 
+    else if (strcmp(s,"chr3") == 0) { ret =   2;  } 
+    else if (strcmp(s,"chr4") == 0) { ret =   3;  } 
+    else if (strcmp(s,"chr5") == 0) { ret =   4;  } 
+    else if (strcmp(s,"chr6") == 0) { ret =   5;  } 
+    else if (strcmp(s,"chr7") == 0) { ret =   6;  } 
+    else if (strcmp(s,"chr8") == 0) { ret =   7;  } 
+    else if (strcmp(s,"chr9") == 0) { ret =   8;  } 
+    else if (strcmp(s,"chr10") == 0) { ret =   9;  } 
+    else if (strcmp(s,"chr11") == 0) { ret =   10;  } 
+    else if (strcmp(s,"chr12") == 0) { ret =   11;  } 
+    else if (strcmp(s,"chr13") == 0) { ret =   12;  } 
+    else if (strcmp(s,"chr14") == 0) { ret =   13;  } 
+    else if (strcmp(s,"chr15") == 0) { ret =   14;  } 
+    else if (strcmp(s,"chr16") == 0) { ret =   15;  } 
+    else if (strcmp(s,"chr17") == 0) { ret =   16;  } 
+    else if (strcmp(s,"chr18") == 0) { ret =   17;  } 
+    else if (strcmp(s,"chr19") == 0) { ret =   18;  } 
+    else if (strcmp(s,"chr20") == 0) { ret =   19;  } 
+    else if (strcmp(s,"chr21") == 0) { ret =   20;  } 
+    else if (strcmp(s,"chr22") == 0) { ret =   21;  } 
+    else if (strcmp(s,"chrX") == 0) { ret =   22;  } 
+    else if (strcmp(s,"chrY") == 0) { ret =   23;  } 
+    else if (strcmp(s,"chrM") == 0) { ret =   24;  } 
+    else 
+    {
+         fprintf(stderr,"ERROR - invalid chromosome [%s]\n",s);  
+         prevchr[0] = (char)0;
+         return 0xff;
+    }
+
+    strcpy(prevchr,s);
+    prevsnpindex = ret;
+    return ret;
+}
+
+static void index2chr(int idx, char *chr)
+{
+    if (idx == 0) { strcpy(chr,"chr1"); return; }
+    if (idx == 1) { strcpy(chr,"chr2"); return; }
+    if (idx == 2) { strcpy(chr,"chr3"); return; }
+    if (idx == 3) { strcpy(chr,"chr4"); return; }
+    if (idx == 4) { strcpy(chr,"chr5"); return; }
+    if (idx == 5) { strcpy(chr,"chr6"); return; }
+    if (idx == 6) { strcpy(chr,"chr7"); return; }
+    if (idx == 7) { strcpy(chr,"chr8"); return; }
+    if (idx == 8) { strcpy(chr,"chr9"); return; }
+    if (idx == 9) { strcpy(chr,"chr10"); return; }
+    if (idx == 10) { strcpy(chr,"chr11"); return; }
+    if (idx == 11) { strcpy(chr,"chr12"); return; }
+    if (idx == 12) { strcpy(chr,"chr13"); return; }
+    if (idx == 13) { strcpy(chr,"chr14"); return; }
+    if (idx == 14) { strcpy(chr,"chr15"); return; }
+    if (idx == 15) { strcpy(chr,"chr16"); return; }
+    if (idx == 16) { strcpy(chr,"chr17"); return; }
+    if (idx == 17) { strcpy(chr,"chr18"); return; }
+    if (idx == 18) { strcpy(chr,"chr19"); return; }
+    if (idx == 19) { strcpy(chr,"chr20"); return; }
+    if (idx == 20) { strcpy(chr,"chr21"); return; }
+    if (idx == 21) { strcpy(chr,"chr22"); return; }
+    if (idx == 22) { strcpy(chr,"chrX"); return; }
+    if (idx == 23) { strcpy(chr,"chrY"); return; }
+    if (idx == 24) { strcpy(chr,"chrM"); return; }
+    strcpy(chr,"ERR");
+    return;
+}
+
+
+static void snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
+{
+    unsigned char uc; 
+    int readcnt;
+    int kickout;
+    int stat;
+    long int spot;
+    struct snp_type f;
+    struct snp_type *z;
+    char chrlesschr[512];
+
+
+    strcpy(stuff,"unknown_snp");
+
+    memset(&f,0,sizeof(struct snp_type));
+// --- strip "chr" off
+    if (strncmp(khr,"chr",3) == 0)
+        strcpy(chrlesschr,&khr[3]);
+    else
+        strcpy(chrlesschr,khr);
+    uc = chr2index(chrlesschr);
+    if (uc == 0xff) return;
+
+    f.chrindex = uc;
+    f.s = loc1;
+    f.e = loc2;
+
+fprintf(stderr," in snp_annot, before  binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
+    z = binary_search_snp_file(&f,0,snp_fixed_hi);
+    if (z)
+    {
+fprintf(stderr,"HERE loc1 = %d , s = %d \n", loc1,z->s); 
+        // if ((strcmp(z->chr,khr) == 0) && ((loc1-1) == z->s))
+        if ((z->chrindex = uc) && (loc1 == z->s))
+        {
+// sprintf(stuff,"%s %s %s %s %s %10.5f",z->refNCBI,z->refUCSC,z->observed,z->name,z->func,z->avHet);
+            // return; NNNNNOOOOOOOO - we just want to get near it 
+        }
+    }
+
+fprintf(stderr,"in snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld \n",z,khr,loc1,last_snp_fseek_place);  fflush(stderr); 
+    spot = last_snp_fseek_place;
+// rewind a little;
+    spot = spot - 5000 * SIZE_SNPTYPE;
+    if (spot < 0) spot = 0;
+    fseek(fp_snp,spot,SEEK_SET);
+
+fprintf(stderr,"here loc1=%u loc2=%u \n",loc1,loc2); fflush(stderr); 
+    kickout = 0;
+    readcnt = 0;
+    while (1)
+    {
+        stat = fread(&temp_snp_space,SIZE_SNPTYPE ,1,fp_snp);
+        if (stat != 1) break;
+        readcnt++;
+
+// fprintf(stderr,"test %s %s \n",temp_snp_space.chr,chrlesschr); fflush(stderr); 
+        // if (strcmp(temp_snp_space.chr,chrlesschr) == 0) 
+        if (temp_snp_space.chrindex == uc)
+        {
+            if (temp_snp_space.e > loc2) break;
+            if (temp_snp_space.s >= loc1) 
+            {
+                char tmps[512];
+                index2chr(temp_snp_space.chrindex,tmps);
+fprintf(stderr,"%d %s %u %u %s\n", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); fflush(stderr); 
+            }
+        }
+// xxx 
+        if (kickout++ > 1000000) break;
+    }
+fprintf(stderr,"here2 kickout=%d , readcnt=%d\n",kickout,readcnt); fflush(stderr); 
+
+#if 0
+
+// fprintf(stderr,"MISSED %s %s %s %s %s %10.5f , spot = %ld\n",temp_snp_space.refNCBI,temp_snp_space.refUCSC,temp_snp_space.observed,temp_snp_space.name,temp_snp_space.func,temp_snp_space.avHet,spot);
+}
+// else fprintf(stderr,"MISSED loc1=%d %s %s %s %s %s %10.5f",loc1,z->refNCBI,z->refUCSC,z->observed,z->name,z->func,z->avHet);
+//
+    return;
+
+    if (spot < 0) spot = 0;
+// printf("in snp_annot() after binary_search_snp_file %s %d spot=%ld\n",khr,loc1,spot); 
+    j = 0;
+    while ((j<100)) 
+    {
+        stat = fread(&temp_snp_space,1,SIZE_SNP_REC,fp_snp);
+        if (stat < 1) break;
+// printf("wantchrloc=%s:%d  gotchr=%s gene?=%s gotloc=%d\n",khr,loc1,temp_snp_space.chr,temp_snp_space.geneName,temp_snp_space.txStart);
+        if (strcmp(temp_snp_space.chr,khr) == 0) 
+        {
+            if ((loc1 >= temp_snp_space.txStart) && (loc1 < temp_snp_space.txEnd)) 
+            {
+                strcpy(stuff,temp_snp_space.geneName);
+                *ingene = 1;
+// exonStarts is REALLY the seek spot for exonStart/exonEnds in overflow file
+                *inexon = is_in_exon(fp_snp_o,(long int)(temp_snp_space.exonStarts),temp_snp_space.exonCount, temp_snp_space.txStart);
+                if (*inexon) return; // kick out if got exon
+            }
+            if ((temp_snp_space.txStart > loc1) && (temp_snp_space.txEnd > loc1)) 
+                break;
+        }
+        j++;
+    }
+    fseek(fp_snp,0,SEEK_SET);
+#endif
+    return;
+}
+
+
+int drive_snps(char chr[], unsigned int uis, unsigned int uie)
+{
+    char stuff[5000];
+
+    setup_snp("hg19.snps.dat");
+    snp_annot( chr,uis,uie,stuff);
+    close_snp();
+
+    return 0;
+}
+
 
 
 // #define bam1_strand(b) (((b)->core.flag&BAM_FREVERSE) != 0)
@@ -10852,6 +11238,7 @@ void MyWrapSizerFrame::OnRemoveCheckbox(wxCommandEvent& WXUNUSED(event))
 }
 
 IMPLEMENT_APP(MyApp)
+
 #else
 
 #endif
