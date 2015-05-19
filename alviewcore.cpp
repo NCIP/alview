@@ -26,7 +26,7 @@ gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
 -I/h1/finneyr/samtools-1.0/htslib-1.0/htslib/ \
 -L/h1/finneyr/samtools-1.0/ \
 /h1/finneyr/samtools-1.0/libbam.a \
-/h1/finneyr/samtools-1.0//htslib-1.0/libhts.a \
+/h1/finneyr/samtools-1.0/htslib-1.0/libhts.a \
 -lbam -lm -lz -lgd -lpthread -lstdc++
 
 Compile for command line Using old samtools  - compile for command line on linux ...
@@ -167,7 +167,6 @@ int snp_call_G_cnt = 0;
 int snp_call_T_cnt = 0;
 int snp_call_Ins_cnt = 0;
 int snp_call_Del_cnt = 0;
-#else
 #endif
 
 int width,height;
@@ -196,6 +195,64 @@ char GENOMEDATADIR[512];  // eample /home/rfinney/MD/ALV/release/GENOMEDATA  wil
 
 void freedom_for_memory(void);
 void free_filez(void);
+
+#if WIN32
+void jdebug(const char *s)         // for use in debuging 
+{
+ // V--- if this set to zero then off, 
+#if 1
+ // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
+    static FILE *debugfp = (FILE *)0;
+    static int cnt = 0;
+    char fn[2048];
+//     int i = 0;
+//     char m[2048];
+
+    strcpy(fn,"x"); 
+    if (!debugfp) debugfp = fopen(fn,"a");
+    if (debugfp == (FILE *)0) { return; }
+    fprintf(debugfp,"%d:%s\n",cnt++,s);
+    fflush(debugfp); 
+//     fclose(debugfp);
+#endif
+    return;
+}
+#else
+
+void jdebug(const char *s) // for use in debuging on internet
+{
+#if 1
+// ^^^^ TO TURN OFF IF SET THIS TO ONE 
+// fprintf(stderr,"%s\n",s); fflush(stderr);
+#else
+    register int i;
+    time_t timer;
+    char fn[256];
+    char m[512];
+    FILE *fp;
+
+/* printf("DEBUG: in jdebug %s <br>\n",s); printf("%s\n",s); */
+
+#ifdef WEB_SERVER
+    strcpy(fn,"/tmp/x");
+#else
+    strcpy(fn,"x");
+#endif
+
+    fp = fopen(fn,"a");
+    if (fp == (FILE *)0) { return; }
+
+    timer=time(NULL);
+    sprintf(m,"%s",asctime(localtime(&timer)));
+    for (i=0;m[i];i++) if (m[i] == '\n') {m[i]=(char)0; break; }
+    fprintf(fp,"[%s]%s\n",m,s);
+    fclose(fp);
+
+    return;
+#endif
+}
+#endif
+
 
 #ifdef MAC
 //strlcpy already defined
@@ -379,6 +436,188 @@ off_t ftello(FILE *stream);
 #endif
 
 
+int black, white, green, red, blue, orange, gray, yellow, purple,pink, lightgreen,lightgray, lightpink, lightblue, lightbrown,cyan;
+int maroon;
+int verylightgray;
+int grays[10];
+int grays2[10];
+int schemered;
+int schemecyan;
+int schemeblue;
+int schemegreen;
+int schemeyellow;
+int schemewhite;
+int schemepurple;
+int dna_a ;
+int dna_c ;
+int dna_g ;
+int dna_t ;
+char  dna_a_s[24];
+char  dna_c_s[24];
+char  dna_g_s[24];
+char  dna_t_s[24];
+char  dna_I_s[24]; // insert
+char  dna_D_s[24]; // delete
+
+void ImageColorAllocate(int *color,unsigned char R,unsigned char G,unsigned char B)
+{
+    unsigned char *z;
+    z = (unsigned char *)color;
+    *(z+0) = R;
+    *(z+1) = G;
+    *(z+2) = B;
+    return;
+}
+
+
+void init_colors(void)
+{
+#if 0 // USE_GD 
+    if (inited_colors_flag == 0) 
+    {
+        red   = gdImageColorAllocate(im, 255,    0,   0);
+        green = gdImageColorAllocate(im,   0,  255,   0);
+        blue =  gdImageColorAllocate(im,   0,    0, 255);
+        cyan =  gdImageColorAllocate(im, 0x5, 0xeb,0xf9); // 05ebf9
+
+        lightgreen = gdImageColorAllocate(im, 64, 125, 64);
+        black  = gdImageColorAllocate(im, 0, 0, 0);
+        purple = gdImageColorAllocate(im, 150, 0, 255);
+        orange = gdImageColorAllocate(im, 255, 100 , 0  );
+
+// 9f005f ff5f00 bfff00 003fbf
+strcpy(dna_a_s,"9f005f");  
+strcpy(dna_c_s,"ff5f00");  
+strcpy(dna_g_s,"bfff00");  
+strcpy(dna_t_s,"003fbf"); 
+strcpy(dna_I_s,"00ffff");  // cyan insert
+strcpy(dna_D_s,"ffb000");  // yellow  delete
+
+        dna_a = gdImageColorAllocate(im,0x9f,0x00,0x5f );
+        dna_c = gdImageColorAllocate(im,0xff,0x5f,0x00 );
+        dna_g = gdImageColorAllocate(im,0xbf,0xff,0x00 );
+        dna_t = gdImageColorAllocate(im,0x00,0x3f,0xbf );
+
+        pink = gdImageColorAllocate(im, 0xfd, 0x8b , 0xe9  ); // pink = gdImageColorAllocate(im, 200, 100 , 100  );
+        lightblue = gdImageColorAllocate(im, 170, 170, 255);
+        lightbrown = gdImageColorAllocate(im, 0xEE, 0xC5, 0x91); // A67D3D = 166 , 125, 61 //  EEC591
+        white = gdImageColorAllocate(im, 255, 255, 255);
+        gray = gdImageColorAllocate(im, 0xc0,0xc0,0xc0);
+        lightgray = gdImageColorAllocate(im, 0xd0,0xd0,0xd0);
+        lightpink = gdImageColorAllocate(im, 0xf1,0xcd,0xee); // f1cdee
+        yellow = gdImageColorAllocate(im, 0xff, 0xb0 , 0x00  );//  fffb00
+        maroon = gdImageColorAllocate(im, 0xd1, 0x34 , 0x00  );
+        schemepurple =   gdImageColorAllocate(im, 0xea, 0xc7 , 0xeb  );
+        schemewhite =   gdImageColorAllocate(im, 0xff, 0xff , 0xff  );
+        schemered =    gdImageColorAllocate(im, 0xFF, 0x00 , 0x00  );
+        schemecyan =   gdImageColorAllocate(im, 0x00, 0xff , 0xf0  );
+        schemeblue =   gdImageColorAllocate(im, 0x00, 0xce , 0xf3  );
+        schemegreen =  gdImageColorAllocate(im, 0x39, 0xe6 , 0x00  );
+        schemeyellow = gdImageColorAllocate(im, 0xff, 0xb0 , 0x00  );//  fffb00
+
+        verylightgray = gdImageColorAllocate(im, 0xf8,0xf8,0xf8);
+        grays[0] = gdImageColorAllocate(im, 0xff,0xff,0xff);
+        grays[1] = gdImageColorAllocate(im, 0xe0,0xe0,0xe0);
+        grays[2] = gdImageColorAllocate(im, 0xc0,0xc0,0xc0);
+        grays[3] = gdImageColorAllocate(im, 0xa0,0xa0,0xa0);
+        grays[4] = gdImageColorAllocate(im, 0x80,0x80,0x80);
+
+        grays[5] = gdImageColorAllocate(im, 0x60,0x60,0x60);
+        grays[6] = gdImageColorAllocate(im, 0x40,0x40,0x40);
+        grays[7] = gdImageColorAllocate(im, 0x20,0x20,0x20);
+        grays[8] = gdImageColorAllocate(im, 0x10,0x10,0x10);
+        grays[9] = gdImageColorAllocate(im, 0x00,0x00,0x00);
+
+        grays2[0] = gdImageColorAllocate(im, 255,255,255);
+        grays2[1] = gdImageColorAllocate(im, 245,245,245);
+        grays2[2] = gdImageColorAllocate(im, 235,235,235);
+        grays2[3] = gdImageColorAllocate(im, 225,225,225);
+        grays2[4] = gdImageColorAllocate(im, 215,215,215);
+        grays2[5] = gdImageColorAllocate(im, 205,205,205);
+        grays2[6] = gdImageColorAllocate(im, 195,195,195);
+        grays2[7] = gdImageColorAllocate(im, 185,185,185);
+        grays2[8] = gdImageColorAllocate(im, 175,175,175);
+        grays2[9] = gdImageColorAllocate(im, 165,165,165);
+
+        inited_colors_flag = 1; 
+    }
+#endif
+
+// our own custom implemention that does not use GD graphics library, but uses our custom implementation  ...
+    if (inited_colors_flag == 0) 
+    {
+        ImageColorAllocate(&red, 255,    0,   0);
+        ImageColorAllocate(&green,   0,  255,   0);
+        ImageColorAllocate(&blue,   0,    0, 255);
+        ImageColorAllocate(&cyan, 0x5, 0xeb,0xf9); // 05ebf9
+
+        ImageColorAllocate( &lightgreen,64, 125, 64);
+        ImageColorAllocate( &black,0, 0, 0);
+        ImageColorAllocate( &purple,150, 0, 255);
+        ImageColorAllocate( &orange, 255, 100 , 0  );
+
+// 9f005f ff5f00 bfff00 003fbf
+strcpy(dna_a_s,"9f005f");   // nucleotides acgt ...
+strcpy(dna_c_s,"ff5f00");  
+strcpy(dna_g_s,"bfff00");  
+strcpy(dna_t_s,"003fbf"); 
+strcpy(dna_I_s,"00ffff");  // cyan insert
+strcpy(dna_D_s,"ffb000");  // yellow  delete
+
+        ImageColorAllocate(&dna_a,0x9f,0x00,0x5f );
+        ImageColorAllocate(&dna_c,0xff,0x5f,0x00 );
+        ImageColorAllocate(&dna_g,0xbf,0xff,0x00 );
+        ImageColorAllocate(&dna_t,0x00,0x3f,0xbf );
+
+        ImageColorAllocate(&pink, 0xfd, 0x8b , 0xe9  ); // pink = ImageColorAllocate( 200, 100 , 100  );
+        ImageColorAllocate(&lightblue, 170, 170, 255);
+        ImageColorAllocate(&lightbrown, 0xEE, 0xC5, 0x91); // A67D3D = 166 , 125, 61 //  EEC591
+        ImageColorAllocate(& white, 255, 255, 255);
+        ImageColorAllocate(& gray, 0xc0,0xc0,0xc0);
+        ImageColorAllocate(& lightgray, 0xd0,0xd0,0xd0);
+        ImageColorAllocate(& lightpink, 0xf1,0xcd,0xee); // f1cdee
+        ImageColorAllocate(& yellow, 0xff, 0xb0 , 0x00  );//  fffb00
+        ImageColorAllocate(& maroon, 0xd1, 0x34 , 0x00  );
+        ImageColorAllocate(& schemepurple, 0xea, 0xc7 , 0xeb  );
+        ImageColorAllocate(&schemewhite , 0xff, 0xff , 0xff  );
+        ImageColorAllocate(&schemered  ,0xFF, 0x00 , 0x00  );
+        ImageColorAllocate(&schemecyan  ,0x00, 0xff , 0xf0  );
+        ImageColorAllocate(&schemeblue  ,0x00, 0xce , 0xf3  );
+        ImageColorAllocate(&schemegreen  ,0x39, 0xe6 , 0x00  );
+        ImageColorAllocate(&schemeyellow  ,0xff, 0xb0 , 0x00  );//  fffb00
+
+        ImageColorAllocate(&verylightgray,  0xf8,0xf8,0xf8);
+        ImageColorAllocate(& grays[0] , 0xff,0xff,0xff);
+        ImageColorAllocate(& grays[1] , 0xe0,0xe0,0xe0);
+        ImageColorAllocate(& grays[2] , 0xc0,0xc0,0xc0);
+        ImageColorAllocate(& grays[3] , 0xa0,0xa0,0xa0);
+        ImageColorAllocate(& grays[4] , 0x80,0x80,0x80);
+        ImageColorAllocate(& grays[5] , 0x60,0x60,0x60);
+        ImageColorAllocate(& grays[6] , 0x40,0x40,0x40);
+        ImageColorAllocate(& grays[7] , 0x20,0x20,0x20);
+        ImageColorAllocate(& grays[8] , 0x10,0x10,0x10);
+        ImageColorAllocate(& grays[9] , 0x00,0x00,0x00);
+
+        ImageColorAllocate(&grays2[0],  255,255,255);
+        ImageColorAllocate(&grays2[1],  245,245,245);
+        ImageColorAllocate(&grays2[2],  235,235,235);
+        ImageColorAllocate(&grays2[3],  225,225,225);
+        ImageColorAllocate(&grays2[4],  215,215,215);
+        ImageColorAllocate(&grays2[5],  205,205,205);
+        ImageColorAllocate(&grays2[6],  195,195,195);
+        ImageColorAllocate(&grays2[7],  185,185,185);
+        ImageColorAllocate(&grays2[8],  175,175,175);
+        ImageColorAllocate(&grays2[9],  165,165,165);
+
+        inited_colors_flag = 1; 
+    }
+    return;
+}
+
+char refflat_d_fn[FILENAME_MAX];
+char refflat_o_fn[FILENAME_MAX];
+char snp_fn[FILENAME_MAX];
+
 // --- SNP annotation track ...
 struct snp_type   // ****** input and output snp records as packed in this order !!!! >>> 
 {
@@ -419,8 +658,8 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
     long int mid;
     int k;
 
-// fprintf(stderr," in binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
 
+// fprintf(stderr," in binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
     if (fp_snp == (void *)0) 
     { 
         fprintf(stderr,"ERROR: in binary_search_snp_file() - fp_snp is NULL\n"); 
@@ -509,25 +748,27 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
 
 
 static long int snp_fixed_hi;
-static void setup_snp(char *input_flat_snp_file_name)
+static void setup_snp(char *blds)
 {
     int error;
+    char m[1024];
 
-fprintf(stderr,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d \n",input_flat_snp_file_name,SIZE_SNPTYPE);
+sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,SIZE_SNPTYPE,blds); jdebug(m); 
+// xxxxx
     if (fp_snp) return; // already opened  
   
-    fp_snp = fopen(input_flat_snp_file_name,"r");
+    fp_snp = fopen(snp_fn,"r");
     error = errno;
     if (fp_snp == (FILE *)0) 
     { 
-        fprintf(stderr,"ERROR: input_flat_snp_file_name=\"%s\" in setup_snp(), errno=%d\n",input_flat_snp_file_name,errno); 
-        fflush(stderr); 
+        sprintf(m,"ERROR: snp_fn=\"%s\" in setup_snp(), errno=%d",snp_fn,errno); 
+        jdebug(m); 
         return;
     }
     fseek(fp_snp,(size_t) 0 , SEEK_END);
     snp_fixed_hi = ftell(fp_snp)/SIZE_SNPTYPE;
 
-fprintf(stderr,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d END fpd = %p\n",input_flat_snp_file_name,SIZE_SNPTYPE,fp_snp);
+sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d END fpd = %p\n",snp_fn,SIZE_SNPTYPE,fp_snp); jdebug(m); 
     return;
 }
 
@@ -642,8 +883,12 @@ static void index2chr(int idx, char *chr)
 }
 
 
-static void snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
+static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
+    int x1,x2;
+    int y1,y2;
+    int len;
+    double local_pxwidth;
     unsigned char uc; 
     int readcnt;
     int kickout;
@@ -651,11 +896,26 @@ static void snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , cha
     long int spot;
     struct snp_type f;
     struct snp_type *z;
-    char chrlesschr[512];
+    int yoffset = 1;
+    char chrlesschr[2048];
+    char m[2048];
 
+    stuff[0] = (char)0;
+    if (fp_snp == (FILE *)0)
+    {
+       sprintf(m,"ERROR - in paint_snp_annot() - snp file is not initialized"); jdebug(m); 
+       return;
+    }
+sprintf(m,"in paint_snp_annot %s %u %u, fp_snp = %p",khr,loc1,loc2,fp_snp); jdebug(m); 
+
+    y1 = ih-3-yoffset;
+    y2 = ih-7-yoffset;
+    len = loc2 - loc1;
+    local_pxwidth = (double)iw /(double)(len);
 
     strcpy(stuff,"unknown_snp");
 
+sprintf(m,"in paint_snp_annot - here 1"); jdebug(m); 
     memset(&f,0,sizeof(struct snp_type));
 // --- strip "chr" off
     if (strncmp(khr,"chr",3) == 0)
@@ -669,36 +929,44 @@ static void snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , cha
     f.s = loc1;
     f.e = loc2;
 
-fprintf(stderr," in snp_annot, before  binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
+sprintf(m," in paint_snp_annot, before  binary_search_snp_file() - start - fp_snp is %p",fp_snp); jdebug(m); 
     z = binary_search_snp_file(&f,0,snp_fixed_hi);
     if (z)
     {
-fprintf(stderr,"HERE loc1 = %d , s = %d \n", loc1,z->s); 
         // if ((strcmp(z->chr,khr) == 0) && ((loc1-1) == z->s))
         if ((z->chrindex = uc) && (loc1 == z->s))
         {
-// sprintf(stuff,"%s %s %s %s %s %10.5f",z->refNCBI,z->refUCSC,z->observed,z->name,z->func,z->avHet);
-            // return; NNNNNOOOOOOOO - we just want to get near it 
+            // return; NNNNNOOOOOOOO  ... do NOT return. We just want to get near it 
         }
     }
 
-fprintf(stderr,"in snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld \n",z,khr,loc1,last_snp_fseek_place);  fflush(stderr); 
+sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld\n",z,khr,loc1,last_snp_fseek_place);  jdebug(m); 
     spot = last_snp_fseek_place;
+
 // rewind a little;
     spot = spot - 5000 * SIZE_SNPTYPE;
     if (spot < 0) spot = 0;
     fseek(fp_snp,spot,SEEK_SET);
 
-fprintf(stderr,"here loc1=%u loc2=%u \n",loc1,loc2); fflush(stderr); 
+sprintf(m,"here loc1=%u loc2=%u",loc1,loc2); jdebug(m);
     kickout = 0;
     readcnt = 0;
     while (1)
     {
-        stat = fread(&temp_snp_space,SIZE_SNPTYPE ,1,fp_snp);
+                       // -- must make portable, regardless of struct packing
+        stat = fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
         if (stat != 1) break;
+        stat = fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
+        if (stat != 1) break;
+        stat = fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex
+        if (stat != 1) break;
+        stat = fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field
+        if (stat != 1) break;
+        stat = fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
+        if (stat != 1) break;
+
         readcnt++;
 
-// fprintf(stderr,"test %s %s \n",temp_snp_space.chr,chrlesschr); fflush(stderr); 
         // if (strcmp(temp_snp_space.chr,chrlesschr) == 0) 
         if (temp_snp_space.chrindex == uc)
         {
@@ -706,30 +974,60 @@ fprintf(stderr,"here loc1=%u loc2=%u \n",loc1,loc2); fflush(stderr);
             if (temp_snp_space.s >= loc1) 
             {
                 char tmps[512];
-                index2chr(temp_snp_space.chrindex,tmps);
-fprintf(stderr,"%d %s %u %u %s\n", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); fflush(stderr); 
+//                 index2chr(temp_snp_space.chrindex,tmps);
+sprintf(m,"%d %s %u %u %s", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); jdebug(m);
+
+              if (( (loc1 >= temp_snp_space.s ) && (loc1 <= temp_snp_space.e )) ||   // start within 
+                   ( (loc2 >= temp_snp_space.s ) && (loc2 <= temp_snp_space.e )) ||   // end within 
+                   ( (loc1 <= temp_snp_space.s ) && (loc2 > temp_snp_space.e )) )      // spans
+              {
+// xxx 
+                  x1 = (int)(local_pxwidth * (double)(loc1 - temp_snp_space.s)); 
+                  x2 = (int)(local_pxwidth * (double)(loc2 - temp_snp_space.e)); 
+                  if (x2==x1) x2 = x1 + 1;
+                  if ((x1<0) && (x2 < 0)) continue;
+                  if ((x1>=iw) && (x2 >= iw)) continue;
+                  if (x1 < 0) x1 = 0;
+                  if (x1>=iw) x1 = iw-1;;
+                  if (x2 < 0) x2 = 0;
+                  if (x2>=iw) x2 = iw-1;;
+                  ImageFilledRectangle(im,x1,y1,x2,y2,black);
+sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
+                }
             }
         }
-// xxx 
         if (kickout++ > 1000000) break;
     }
-fprintf(stderr,"here2 kickout=%d , readcnt=%d\n",kickout,readcnt); fflush(stderr); 
+sprintf(m,"here2 kickout=%d , readcnt=%d",kickout,readcnt); jdebug(m);
 
 #if 0
 
 // fprintf(stderr,"MISSED %s %s %s %s %s %10.5f , spot = %ld\n",temp_snp_space.refNCBI,temp_snp_space.refUCSC,temp_snp_space.observed,temp_snp_space.name,temp_snp_space.func,temp_snp_space.avHet,spot);
-}
 // else fprintf(stderr,"MISSED loc1=%d %s %s %s %s %s %10.5f",loc1,z->refNCBI,z->refUCSC,z->observed,z->name,z->func,z->avHet);
 //
     return;
 
     if (spot < 0) spot = 0;
-// printf("in snp_annot() after binary_search_snp_file %s %d spot=%ld\n",khr,loc1,spot); 
+// printf("in paint_snp_annot() after binary_search_snp_file %s %d spot=%ld\n",khr,loc1,spot); 
     j = 0;
     while ((j<100)) 
     {
+#if 0
         stat = fread(&temp_snp_space,1,SIZE_SNP_REC,fp_snp);
         if (stat < 1) break;
+#else
+   // -- must make portable, regardless of struct packing
+        stat = fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
+        if (stat < 1) break;
+        stat = fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
+        if (stat < 1) break;
+        stat = fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex
+        if (stat < 1) break;
+        stat = fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field
+        if (stat < 1) break;
+        stat = fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
+        if (stat < 1) break;
+#endif
 // printf("wantchrloc=%s:%d  gotchr=%s gene?=%s gotloc=%d\n",khr,loc1,temp_snp_space.chr,temp_snp_space.geneName,temp_snp_space.txStart);
         if (strcmp(temp_snp_space.chr,khr) == 0) 
         {
@@ -755,9 +1053,12 @@ fprintf(stderr,"here2 kickout=%d , readcnt=%d\n",kickout,readcnt); fflush(stderr
 int drive_snps(char chr[], unsigned int uis, unsigned int uie)
 {
     char stuff[5000];
+    char m[5000];
 
-    setup_snp("hg19.snps.dat");
-    snp_annot( chr,uis,uie,stuff);
+    setup_snp(blds);
+sprintf(m,"in drive_snps() before paint_snp_annot %s %u %u",chr,uis,uie); jdebug(m); 
+    paint_snp_annot( chr,uis,uie,stuff);
+sprintf(m,"in drive_snps() after paint_snp_annot %s %u %u",chr,uis,uie); jdebug(m); 
     close_snp();
 
     return 0;
@@ -794,64 +1095,6 @@ struct disease_type
     {(char *)"Thyroid carcinoma", (char *)"THCA" } , 
     {(char *)0, (char *)0 } 
 };
-
-
-#if WIN32
-void jdebug(const char *s)         // for use in debuging 
-{
- // V--- if this set to zero then off, 
-#if 0
- // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
-    static FILE *debugfp = (FILE *)0;
-    static int cnt = 0;
-    char fn[2048];
-//     int i = 0;
-//     char m[2048];
-
-    strcpy(fn,"x"); 
-    if (!debugfp) debugfp = fopen(fn,"a");
-    if (debugfp == (FILE *)0) { return; }
-    fprintf(debugfp,"%d:%s\n",cnt++,s);
-    fflush(debugfp); 
-//     fclose(debugfp);
-#endif
-    return;
-}
-#else
-
-void jdebug(const char *s) // for use in debuging on internet
-{
-#if 1
-// ^^^^ TO TURN OFF IF SET THIS TO ONE 
-// fprintf(stderr,"%s\n",s); fflush(stderr);
-#else
-    register int i;
-    time_t timer;
-    char fn[256];
-    char m[512];
-    FILE *fp;
-
-/* printf("DEBUG: in jdebug %s <br>\n",s); printf("%s\n",s); */
-
-#ifdef WEB_SERVER
-    strcpy(fn,"/tmp/x");
-#else
-    strcpy(fn,"x");
-#endif
-
-    fp = fopen(fn,"a");
-    if (fp == (FILE *)0) { return; }
-
-    timer=time(NULL);
-    sprintf(m,"%s",asctime(localtime(&timer)));
-    for (i=0;m[i];i++) if (m[i] == '\n') {m[i]=(char)0; break; }
-    fprintf(fp,"[%s]%s\n",m,s);
-    fclose(fp);
-
-    return;
-#endif
-}
-#endif
 
 
 int samoption = 0; 
@@ -1048,8 +1291,6 @@ struct flattype           /* "Alignment" type */
     unsigned int strand; // '+' = positive, '-' = negative   as integer !!!
 };
 
-char refflat_d_fn[FILENAME_MAX];
-char refflat_o_fn[FILENAME_MAX];
 void fix_up_support_file_paths(void)
 {
     char m[2048];
@@ -1065,12 +1306,14 @@ sprintf(m,"ERROR: in fix_up_support_file_paths(), blds is null "); jdebug(m);
           return;
     }
 
+    strcpy(snp_fn,""); 
     strcpy(refflat_d_fn,""); 
     strcpy(refflat_o_fn,""); 
 
     if (GENOMEDATADIR[0] ) // let user specify the directory 
     {
         strcpy(binary_refflat_prefix,GENOMEDATADIR);
+
 #ifdef WIN32
         strcat(binary_refflat_prefix,"\\"); // does windows work this way ?
         strcat(binary_refflat_prefix,blds);
@@ -1081,13 +1324,24 @@ sprintf(m,"ERROR: in fix_up_support_file_paths(), blds is null "); jdebug(m);
         strcat(binary_refflat_prefix,blds);
         strcat(binary_refflat_prefix,"/"); 
 #endif
+        strcpy(snp_fn,binary_refflat_prefix); 
         strcat(binary_refflat_prefix,blds);
+
         strcat(binary_refflat_prefix,".refflat");
         strcpy(refflat_d_fn,binary_refflat_prefix); 
         strcat(refflat_d_fn,".dat"); 
         strcpy(refflat_o_fn,binary_refflat_prefix); 
         strcat(refflat_o_fn,".dao");   // o not t
 sprintf(m,"in fix_up_support_file_paths fns = %s %s",refflat_d_fn,refflat_o_fn);  jdebug(m); 
+
+#if WIN32
+        strcat(snp_fn,"\\"); 
+#else
+        strcat(snp_fn,"/"); 
+#endif
+        strcat(snp_fn,blds); 
+        strcat(snp_fn,".snps.dat"); 
+sprintf(m,"in fix_up_support_file_paths snp_fn = %s",snp_fn);  jdebug(m); 
     }
     else
     {
@@ -1095,7 +1349,6 @@ sprintf(m,"in fix_up_support_file_paths fns = %s %s",refflat_d_fn,refflat_o_fn);
     sprintf(binary_refflat_prefix,"%s\\%s.refflat",blds,blds);
     sprintf(refflat_d_fn,"%s\\GENOMEDATA\\%s.dat",hacked_ced_for_sprintf,binary_refflat_prefix);
     sprintf(refflat_o_fn,"%s\\GENOMEDATA\\%s.dao",hacked_ced_for_sprintf,binary_refflat_prefix);
-
 #else
     sprintf(binary_refflat_prefix,"%s/%s.refflat",blds,blds);
     sprintf(refflat_d_fn,"%s/GENOMEDATA/%s.dat",ced,binary_refflat_prefix);
@@ -2783,186 +3036,6 @@ sprintf(m,"end spitfile "); jdebug(m);
   return 0;
 }
 #endif
-
-
-int black, white, green, red, blue, orange, gray, yellow, purple,pink, lightgreen,lightgray, lightpink, lightblue, lightbrown,cyan;
-int maroon;
-int verylightgray;
-int grays[10];
-int grays2[10];
-int schemered;
-int schemecyan;
-int schemeblue;
-int schemegreen;
-int schemeyellow;
-int schemewhite;
-int schemepurple;
-int dna_a ;
-int dna_c ;
-int dna_g ;
-int dna_t ;
-char  dna_a_s[24];
-char  dna_c_s[24];
-char  dna_g_s[24];
-char  dna_t_s[24];
-char  dna_I_s[24]; // insert
-char  dna_D_s[24]; // delete
-
-void ImageColorAllocate(int *color,unsigned char R,unsigned char G,unsigned char B)
-{
-    unsigned char *z;
-    z = (unsigned char *)color;
-    *(z+0) = R;
-    *(z+1) = G;
-    *(z+2) = B;
-    return;
-}
-
-
-void init_colors(void)
-{
-#if 0 // USE_GD 
-    if (inited_colors_flag == 0) 
-    {
-        red   = gdImageColorAllocate(im, 255,    0,   0);
-        green = gdImageColorAllocate(im,   0,  255,   0);
-        blue =  gdImageColorAllocate(im,   0,    0, 255);
-        cyan =  gdImageColorAllocate(im, 0x5, 0xeb,0xf9); // 05ebf9
-
-        lightgreen = gdImageColorAllocate(im, 64, 125, 64);
-        black  = gdImageColorAllocate(im, 0, 0, 0);
-        purple = gdImageColorAllocate(im, 150, 0, 255);
-        orange = gdImageColorAllocate(im, 255, 100 , 0  );
-
-// 9f005f ff5f00 bfff00 003fbf
-strcpy(dna_a_s,"9f005f");  
-strcpy(dna_c_s,"ff5f00");  
-strcpy(dna_g_s,"bfff00");  
-strcpy(dna_t_s,"003fbf"); 
-strcpy(dna_I_s,"00ffff");  // cyan insert
-strcpy(dna_D_s,"ffb000");  // yellow  delete
-
-        dna_a = gdImageColorAllocate(im,0x9f,0x00,0x5f );
-        dna_c = gdImageColorAllocate(im,0xff,0x5f,0x00 );
-        dna_g = gdImageColorAllocate(im,0xbf,0xff,0x00 );
-        dna_t = gdImageColorAllocate(im,0x00,0x3f,0xbf );
-
-        pink = gdImageColorAllocate(im, 0xfd, 0x8b , 0xe9  ); // pink = gdImageColorAllocate(im, 200, 100 , 100  );
-        lightblue = gdImageColorAllocate(im, 170, 170, 255);
-        lightbrown = gdImageColorAllocate(im, 0xEE, 0xC5, 0x91); // A67D3D = 166 , 125, 61 //  EEC591
-        white = gdImageColorAllocate(im, 255, 255, 255);
-        gray = gdImageColorAllocate(im, 0xc0,0xc0,0xc0);
-        lightgray = gdImageColorAllocate(im, 0xd0,0xd0,0xd0);
-        lightpink = gdImageColorAllocate(im, 0xf1,0xcd,0xee); // f1cdee
-        yellow = gdImageColorAllocate(im, 0xff, 0xb0 , 0x00  );//  fffb00
-        maroon = gdImageColorAllocate(im, 0xd1, 0x34 , 0x00  );
-        schemepurple =   gdImageColorAllocate(im, 0xea, 0xc7 , 0xeb  );
-        schemewhite =   gdImageColorAllocate(im, 0xff, 0xff , 0xff  );
-        schemered =    gdImageColorAllocate(im, 0xFF, 0x00 , 0x00  );
-        schemecyan =   gdImageColorAllocate(im, 0x00, 0xff , 0xf0  );
-        schemeblue =   gdImageColorAllocate(im, 0x00, 0xce , 0xf3  );
-        schemegreen =  gdImageColorAllocate(im, 0x39, 0xe6 , 0x00  );
-        schemeyellow = gdImageColorAllocate(im, 0xff, 0xb0 , 0x00  );//  fffb00
-
-        verylightgray = gdImageColorAllocate(im, 0xf8,0xf8,0xf8);
-        grays[0] = gdImageColorAllocate(im, 0xff,0xff,0xff);
-        grays[1] = gdImageColorAllocate(im, 0xe0,0xe0,0xe0);
-        grays[2] = gdImageColorAllocate(im, 0xc0,0xc0,0xc0);
-        grays[3] = gdImageColorAllocate(im, 0xa0,0xa0,0xa0);
-        grays[4] = gdImageColorAllocate(im, 0x80,0x80,0x80);
-
-        grays[5] = gdImageColorAllocate(im, 0x60,0x60,0x60);
-        grays[6] = gdImageColorAllocate(im, 0x40,0x40,0x40);
-        grays[7] = gdImageColorAllocate(im, 0x20,0x20,0x20);
-        grays[8] = gdImageColorAllocate(im, 0x10,0x10,0x10);
-        grays[9] = gdImageColorAllocate(im, 0x00,0x00,0x00);
-
-        grays2[0] = gdImageColorAllocate(im, 255,255,255);
-        grays2[1] = gdImageColorAllocate(im, 245,245,245);
-        grays2[2] = gdImageColorAllocate(im, 235,235,235);
-        grays2[3] = gdImageColorAllocate(im, 225,225,225);
-        grays2[4] = gdImageColorAllocate(im, 215,215,215);
-        grays2[5] = gdImageColorAllocate(im, 205,205,205);
-        grays2[6] = gdImageColorAllocate(im, 195,195,195);
-        grays2[7] = gdImageColorAllocate(im, 185,185,185);
-        grays2[8] = gdImageColorAllocate(im, 175,175,175);
-        grays2[9] = gdImageColorAllocate(im, 165,165,165);
-
-        inited_colors_flag = 1; 
-    }
-#endif
-
-// our own custom implemention that does not use GD graphics library, but uses our custom implementation  ...
-    if (inited_colors_flag == 0) 
-    {
-        ImageColorAllocate(&red, 255,    0,   0);
-        ImageColorAllocate(&green,   0,  255,   0);
-        ImageColorAllocate(&blue,   0,    0, 255);
-        ImageColorAllocate(&cyan, 0x5, 0xeb,0xf9); // 05ebf9
-
-        ImageColorAllocate( &lightgreen,64, 125, 64);
-        ImageColorAllocate( &black,0, 0, 0);
-        ImageColorAllocate( &purple,150, 0, 255);
-        ImageColorAllocate( &orange, 255, 100 , 0  );
-
-// 9f005f ff5f00 bfff00 003fbf
-strcpy(dna_a_s,"9f005f");   // nucleotides acgt ...
-strcpy(dna_c_s,"ff5f00");  
-strcpy(dna_g_s,"bfff00");  
-strcpy(dna_t_s,"003fbf"); 
-strcpy(dna_I_s,"00ffff");  // cyan insert
-strcpy(dna_D_s,"ffb000");  // yellow  delete
-
-        ImageColorAllocate(&dna_a,0x9f,0x00,0x5f );
-        ImageColorAllocate(&dna_c,0xff,0x5f,0x00 );
-        ImageColorAllocate(&dna_g,0xbf,0xff,0x00 );
-        ImageColorAllocate(&dna_t,0x00,0x3f,0xbf );
-
-        ImageColorAllocate(&pink, 0xfd, 0x8b , 0xe9  ); // pink = ImageColorAllocate( 200, 100 , 100  );
-        ImageColorAllocate(&lightblue, 170, 170, 255);
-        ImageColorAllocate(&lightbrown, 0xEE, 0xC5, 0x91); // A67D3D = 166 , 125, 61 //  EEC591
-        ImageColorAllocate(& white, 255, 255, 255);
-        ImageColorAllocate(& gray, 0xc0,0xc0,0xc0);
-        ImageColorAllocate(& lightgray, 0xd0,0xd0,0xd0);
-        ImageColorAllocate(& lightpink, 0xf1,0xcd,0xee); // f1cdee
-        ImageColorAllocate(& yellow, 0xff, 0xb0 , 0x00  );//  fffb00
-        ImageColorAllocate(& maroon, 0xd1, 0x34 , 0x00  );
-        ImageColorAllocate(& schemepurple, 0xea, 0xc7 , 0xeb  );
-        ImageColorAllocate(&schemewhite , 0xff, 0xff , 0xff  );
-        ImageColorAllocate(&schemered  ,0xFF, 0x00 , 0x00  );
-        ImageColorAllocate(&schemecyan  ,0x00, 0xff , 0xf0  );
-        ImageColorAllocate(&schemeblue  ,0x00, 0xce , 0xf3  );
-        ImageColorAllocate(&schemegreen  ,0x39, 0xe6 , 0x00  );
-        ImageColorAllocate(&schemeyellow  ,0xff, 0xb0 , 0x00  );//  fffb00
-
-        ImageColorAllocate(&verylightgray,  0xf8,0xf8,0xf8);
-        ImageColorAllocate(& grays[0] , 0xff,0xff,0xff);
-        ImageColorAllocate(& grays[1] , 0xe0,0xe0,0xe0);
-        ImageColorAllocate(& grays[2] , 0xc0,0xc0,0xc0);
-        ImageColorAllocate(& grays[3] , 0xa0,0xa0,0xa0);
-        ImageColorAllocate(& grays[4] , 0x80,0x80,0x80);
-        ImageColorAllocate(& grays[5] , 0x60,0x60,0x60);
-        ImageColorAllocate(& grays[6] , 0x40,0x40,0x40);
-        ImageColorAllocate(& grays[7] , 0x20,0x20,0x20);
-        ImageColorAllocate(& grays[8] , 0x10,0x10,0x10);
-        ImageColorAllocate(& grays[9] , 0x00,0x00,0x00);
-
-        ImageColorAllocate(&grays2[0],  255,255,255);
-        ImageColorAllocate(&grays2[1],  245,245,245);
-        ImageColorAllocate(&grays2[2],  235,235,235);
-        ImageColorAllocate(&grays2[3],  225,225,225);
-        ImageColorAllocate(&grays2[4],  215,215,215);
-        ImageColorAllocate(&grays2[5],  205,205,205);
-        ImageColorAllocate(&grays2[6],  195,195,195);
-        ImageColorAllocate(&grays2[7],  185,185,185);
-        ImageColorAllocate(&grays2[8],  175,175,175);
-        ImageColorAllocate(&grays2[9],  165,165,165);
-
-        inited_colors_flag = 1; 
-    }
-    return;
-}
-
 
 
 #if 0
@@ -7316,41 +7389,32 @@ sprintf(m,"start imgen() iw=%d ih=%d pxw=%f file=%s",iw,ih,pxwidth,shortfilename
     dobam(fn_bam,chrom_index,gs,ge,chr);
 
     draw_dnacnts_and_dnamms(chr,gs,ge,24);
+sprintf(m,"in imgen() here 1\n"); jdebug(m); 
     if (geneannot_flag == 1) 
     {
 // sprintf(m,"in imgen() before paint_gene_annot() ");  jdebug(m); 
         paint_gene_annot(chrchr,gs,ge);
 // sprintf(m,"in imgen() after paint_gene_annot() ");  jdebug(m); 
     }
+sprintf(m,"in imgen() here 2\n"); jdebug(m); 
 
 //    old start_do_cov(fn_bam, s,e);
 
+sprintf(m,"in imgen() here 3\n"); jdebug(m); 
+#if 1 // do snps instead of mapability 
+sprintf(m,"in imgen() before drive_snps() ");  jdebug(m); 
+    drive_snps(chr, gs , ge);
+#else
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,36,1);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,50,2);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,75,3);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,100,4);
-// sprintf(m,"in imgen() after draw_mapability_lines_at_bottom2's ");  jdebug(m); 
+#endif
 
 // put notch in middle
-#if 0 // USE_GD
-    gdImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
-#endif
     ImageFilledRectangle(im, (iw/2)-2, ih-4, (iw/2)+2, ih-1, red);
 
-sprintf(m,"in imgen() in imgen() after gdImageFilledRectangle");  jdebug(m); 
-
-#if 0 // QT_GUI
-    strcpy(shortfilename,"tmp.png");
-#ifdef WIN32
-    sprintf(fn,"%s\\%s",cwd,shortfilename);   // NOTE NOT URL STYLE, DOS STYLE
-    _unlink(fn);
-#else
-    sprintf(fn,"%s/%s",cwd,shortfilename);
-    unlink(fn);
-#endif
-
-#endif
-
+sprintf(m,"in imgen() in imgen() after ImageFilledRectangle for notch");  jdebug(m); 
 
 #if WEB_SERVER
 #ifdef WIN32
@@ -7560,11 +7624,17 @@ jdebug(m);
 
 //    old start_do_cov(fn_bam, s,e);
 
+#if 1
+sprintf(m,"in imgen() before drive_snps()");  jdebug(m); 
+    drive_snps(chr, gs , ge);
+sprintf(m,"in imgen() after drive_snps()");  jdebug(m); 
+#else
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,36,1);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,50,2);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,75,3);
     draw_mapability_lines_at_bottom2(chrom_index,gs,ge,chr,gs,ge,100,4);
 sprintf(m,"in imgen() after draw_mapability_lines_at_bottom2's ");  jdebug(m); 
+#endif
 
 // put notch in middle
 #if 0 // USE_GD
@@ -11257,5 +11327,4 @@ void freedom_for_memory(void)
     if (ppp) free(ppp);
     ppp = (unsigned char *)0;
 }
-
 
