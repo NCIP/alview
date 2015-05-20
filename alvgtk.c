@@ -8271,7 +8271,7 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
     gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
-fprintf(stderr,"in on_button_move END movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
+// fprintf(stderr,"in on_button_move END movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
 
     return TRUE;
 }
@@ -8280,7 +8280,7 @@ fprintf(stderr,"in on_button_move END movek=%d , khrstart = %d khrend = %d diw=%
 gboolean button1(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
     int movek = GPOINTER_TO_INT(user_data);
-fprintf(stderr,"in button one movek = %d \n",movek); fflush(stderr); 
+// fprintf(stderr,"in button one movek = %d \n",movek); fflush(stderr); 
     return on_button_move(widget, event, 1);
 }
 

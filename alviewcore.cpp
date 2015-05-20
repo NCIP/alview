@@ -221,8 +221,8 @@ void jdebug(const char *s)         // for use in debuging
 
 void jdebug(const char *s) // for use in debuging on internet
 {
-#if 1
-// ^^^^ TO TURN OFF IF SET THIS TO ONE 
+#if 0
+//  ^^^ TO TURN OFF IF SET THIS TO ONE 
 // fprintf(stderr,"%s\n",s); fflush(stderr);
 #else
     register int i;
@@ -885,6 +885,7 @@ static void index2chr(int idx, char *chr)
 
 static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
+    double d;
     int x1,x2;
     int y1,y2;
     int len;
@@ -906,16 +907,16 @@ static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2
        sprintf(m,"ERROR - in paint_snp_annot() - snp file is not initialized"); jdebug(m); 
        return;
     }
-sprintf(m,"in paint_snp_annot %s %u %u, fp_snp = %p",khr,loc1,loc2,fp_snp); jdebug(m); 
 
-    y1 = ih-3-yoffset;
-    y2 = ih-7-yoffset;
+    y1 = ih - 3 - yoffset;
+    y2 = ih - 7 - yoffset;
     len = loc2 - loc1;
     local_pxwidth = (double)iw /(double)(len);
+sprintf(m,"in paint_snp_annot %s %u %u, fp_snp = %p , len=%d",khr,loc1,loc2,fp_snp,len); jdebug(m); 
 
     strcpy(stuff,"unknown_snp");
 
-sprintf(m,"in paint_snp_annot - here 1"); jdebug(m); 
+sprintf(m,"in paint_snp_annot "); jdebug(m); 
     memset(&f,0,sizeof(struct snp_type));
 // --- strip "chr" off
     if (strncmp(khr,"chr",3) == 0)
@@ -948,7 +949,7 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=
     if (spot < 0) spot = 0;
     fseek(fp_snp,spot,SEEK_SET);
 
-sprintf(m,"here loc1=%u loc2=%u",loc1,loc2); jdebug(m);
+sprintf(m,"before while loc1=%u loc2=%u",loc1,loc2); jdebug(m);
     kickout = 0;
     readcnt = 0;
     while (1)
@@ -974,16 +975,18 @@ sprintf(m,"here loc1=%u loc2=%u",loc1,loc2); jdebug(m);
             if (temp_snp_space.s >= loc1) 
             {
                 char tmps[512];
-//                 index2chr(temp_snp_space.chrindex,tmps);
-sprintf(m,"%d %s %u %u %s", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); jdebug(m);
+                index2chr(temp_snp_space.chrindex,tmps);
+sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); jdebug(m);
 
               if (( (loc1 >= temp_snp_space.s ) && (loc1 <= temp_snp_space.e )) ||   // start within 
-                   ( (loc2 >= temp_snp_space.s ) && (loc2 <= temp_snp_space.e )) ||   // end within 
-                   ( (loc1 <= temp_snp_space.s ) && (loc2 > temp_snp_space.e )) )      // spans
+                   ( (loc2 >= temp_snp_space.s ) && (loc2 <= temp_snp_space.e )) ||  // end within 
+                   ( (loc1 <= temp_snp_space.s ) && (loc2 > temp_snp_space.e )) )    // spans
               {
 // xxx 
-                  x1 = (int)(local_pxwidth * (double)(loc1 - temp_snp_space.s)); 
-                  x2 = (int)(local_pxwidth * (double)(loc2 - temp_snp_space.e)); 
+                  d = (double)((int)temp_snp_space.s -loc1); 
+                  x1 = (int)(local_pxwidth * d);
+                  d = (double)((int)temp_snp_space.e -loc1); 
+                  x2 = (int)(local_pxwidth * d);
                   if (x2==x1) x2 = x1 + 1;
                   if ((x1<0) && (x2 < 0)) continue;
                   if ((x1>=iw) && (x2 >= iw)) continue;
@@ -991,8 +994,10 @@ sprintf(m,"%d %s %u %u %s", temp_snp_space.chrindex, tmps, temp_snp_space.s, tem
                   if (x1>=iw) x1 = iw-1;;
                   if (x2 < 0) x2 = 0;
                   if (x2>=iw) x2 = iw-1;;
-                  ImageFilledRectangle(im,x1,y1,x2,y2,black);
-sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
+                  ImageFilledRectangle(im,x1,y2,x2,y1,black);
+                  if ((temp_snp_space.rs[0]) == 'r') 
+                      ImageFilledRectangle(im,x1,y2-5,x2,y1-5,red);
+// sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
                 }
             }
         }
@@ -4233,8 +4238,8 @@ sprintf(m,"in paint_gene_annot() after binary_search_refflat_file khr=%s  spot=%
                 read_status = fread(&start,sizeof(unsigned int),1,fp_refflat_o); if (read_status != 1) break;
                 read_status = fread(&end,sizeof(unsigned int),1,fp_refflat_o); if (read_status != 1) break;
 
-                x1 = (int)(local_pxwidth * (double)(start -s)); 
-                x2 = (int)(local_pxwidth * (double)(end -s)); 
+                x1 = (int)(local_pxwidth * (double)(start - s)); 
+                x2 = (int)(local_pxwidth * (double)(end - s)); 
                 if (x2==x1) x2 = x1 + 1;
 // sprintf(m,"in paint_gene_annot() -- looping %d , x1 = %d , x2 = %d ,iw = %d ",jj,x1,x2,iw);  jdebug(m);
                 if ((x1<0) && (x2 < 0)) continue;
@@ -6745,18 +6750,18 @@ sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m);
             ret = 1;
             goto view_end;
         }
-sprintf(m,"in bamtest. after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
+sprintf(m,"in dobam_fasta. after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
 
         bam_parse_region(in->header, region , &tid, &beg, &end); // parse a region in the format like `chr2:100-200'
         if (tid < 0)
         {
-//sprintf(m,"in bamtest after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
+//sprintf(m,"in dobam_fasta after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
             bam_parse_region(in->header, region2 , &tid, &beg, &end); // parse a region in the format like `2:100-200'
-sprintf(m,"in bamtest after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
+sprintf(m,"in dobam_fasta after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
         }
         else
         {
-sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
+sprintf(m,"in dobam_fasta after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
         }
 
         if (tid < 0) { // reference name is not found
@@ -6863,7 +6868,7 @@ sprintf(m,"in dobam_sam() START func, region=%s",region); jdebug(m);
 sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m); 
 
 
-// sprintf(m,"in bamtest . convert part "); jdebug(m); 
+// sprintf(m,"in dobam_sam . convert part "); jdebug(m); 
         if (is_bamin) idx = bam_index_load(fn); // load BAM index - load 
 
         if (idx == 0) { // index is unavailable
@@ -6872,18 +6877,18 @@ sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m);
             ret = 1;
             goto view_end;
         }
-// sprintf(m,"in bamtest. after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
+// sprintf(m,"in dobam_sam . after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
 
         bam_parse_region(in->header, region , &tid, &beg, &end); // parse a region in the format like `chr2:100-200'
         if (tid < 0)
         {
-//sprintf(m,"in bamtest after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
+//sprintf(m,"in dobam_sam after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
             bam_parse_region(in->header, region2 , &tid, &beg, &end); // parse a region in the format like `2:100-200'
-sprintf(m,"in bamtest after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
+sprintf(m,"in dobam_sam after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
         }
         else
         {
-sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
+sprintf(m,"in dobam_sam after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
         }
 
         if (tid < 0) { // reference name is not found
@@ -7004,7 +7009,7 @@ sprintf(m,"fail to open [%s] ",fn); jdebug(m);
     if (is_header_only) goto view_end; // no need to print alignments
 sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m); 
 
-// sprintf(m,"in bamtest . convert part "); jdebug(m); 
+// sprintf(m,"in dobam. convert part "); jdebug(m); 
         if (is_bamin) idx = bam_index_load(fn); // load BAM index - load 
 
         if (idx == 0) { // index is unavailable
@@ -7013,22 +7018,22 @@ sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m);
             ret = 1;
             goto view_end;
         }
-// sprintf(m,"in bamtest. after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
+// sprintf(m,"in dobam. after bam_index_load , index is %p, region = [%s]",idx,region); jdebug(m); 
 
         bam_parse_region(in->header, region , &tid, &beg, &end); // parse a region in the format like `chr2:100-200'
         if (tid < 0)
         {
-//sprintf(m,"in bamtest after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
+//sprintf(m,"in dobam after bam_parse_region1 BAD , tid=%d from %s",tid,region); jdebug(m); 
             bam_parse_region(in->header, region2 , &tid, &beg, &end); // parse a region in the format like `2:100-200'
             if (tid < 0)
             {
                 bam_parse_region(in->header, region3 , &tid, &beg, &end); //parse a region in the format like `2:100-200'
             }
-sprintf(m,"in bamtest after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
+sprintf(m,"in dobama after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
         }
         else
         {
-sprintf(m,"in bamtest after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
+sprintf(m,"in dobama  after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
         }
 
         if (tid < 0) { // reference name is not found
