@@ -1,4 +1,5 @@
 
+
 #if 0
 vi +1711  x2.c ; gcc -g -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN  -Wall -o x2 x2.c -lz 2> joke2 ; head joke2
 vi +179 party3rd.c ; gcc -DHAVE_CONFIG_H -DPIC -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.13' -DPNG_BUILDING_SYMBOL_TABLE -DPNG_NO_USE_READ_MACROS -DSYMBOL_PREFIX='' -Wall -o party3rd party3rd.c 2> joke2 ; head -30 joke2
@@ -866,6 +867,7 @@ buffersize: size of the buffer to write
 filename: the path to the file to save to
 return value: error code (0 means ok)
 */
+
 unsigned lodepng_save_file(const unsigned char* buffer, size_t buffersize, const char* filename);
 #endif /*LODEPNG_COMPILE_DISK*/
 
@@ -8047,6 +8049,15 @@ color,x,y,x1,y1,width,height,R,G,B); fflush(stderr);
         }
     }
     return;
+}
+
+
+unsigned ImageSaveAsPNG(struct image_type *im, char *fn)
+{
+     unsigned status;
+     status = ALVIEWWRAP_lodepng_encode_file(fn,im->data,im->width,im->height);
+
+     return status;
 }
 
 
@@ -20157,7 +20168,3 @@ return 0;
 #endif
 
 
-#if 0 // in alviewcore.cpp 
-int width;
-int height;
-#endif

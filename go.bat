@@ -9,6 +9,6 @@ cl -Ox /MD -c -DWIN32=1 -UUNIX -I sam01832/ -I zlib32/ -I . alviewcore.cpp
 cl -Ox /MD -c -I . alvwin32.cpp 
 :: cl /Wall /MD -c -I . alvwin32.cpp 
 :: rm alview.exe
-link /MACHINE:x86 alview.res StdAfx.obj alvmisc.obj alviewcore.obj alvwin32.obj user32.lib gdi32.lib comdlg32.lib sam01832/my.lib zlib32/zlib.lib
-
+:: Shell32.lib required for external browser calls 
+link /MACHINE:x86 alview.res StdAfx.obj alvmisc.obj alviewcore.obj alvwin32.obj user32.lib gdi32.lib comdlg32.lib shell32.lib sam01832/my.lib zlib32/zlib.lib
 

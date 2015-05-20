@@ -169,6 +169,22 @@ int snp_call_Ins_cnt = 0;
 int snp_call_Del_cnt = 0;
 #endif
 
+char gchr[MAXBUFF]; // global chromsome string 
+int gs; // global start genomic cooordinate 
+int ge; // global end genomic cooordinate 
+int gdiff;   // start - end  = gs - ge
+
+int menu; // main menu
+int pickmenu;
+char pickmenustring[MAXBUFF];
+char menustring[MAXBUFF];
+char forcefilecgiarg[MAXBUFF];
+char pickq[MAXBUFF];
+char bamname[MAXBUFF];
+char filecgiarg[MAXBUFF];
+char jutlfn[MAXBUFF]; // "just use this long file name"
+char position[MAXBUFF];
+char op[MAXBUFF];
 int width,height;
 struct image_type image;
 struct image_type *im; //  = &image;
@@ -199,8 +215,8 @@ void free_filez(void);
 #if WIN32
 void jdebug(const char *s)         // for use in debuging 
 {
- // V--- if this set to zero then off, 
-#if 1
+ // V--- if this set to 0 (zero) to turn off debug
+#if 0
  // ^--- this thing here  - if it is set to 1, then it writes to a file called "x"
     static FILE *debugfp = (FILE *)0;
     static int cnt = 0;
@@ -221,7 +237,7 @@ void jdebug(const char *s)         // for use in debuging
 
 void jdebug(const char *s) // for use in debuging on internet
 {
-#if 0
+#if 1
 //  ^^^ TO TURN OFF IF SET THIS TO ONE 
 // fprintf(stderr,"%s\n",s); fflush(stderr);
 #else
@@ -716,12 +732,7 @@ sprintf(m," in binary_search_snp_file() - start - fp_snp is %p, lo=%ld , hi=%ld"
     last_snp_fseek_place = seekto; 
     fread( &temp_snp_space, 1 , SIZE_SNPTYPE , fp_snp );
 
-// printf("read at %ld %s %d %d \n",seekto, temp_snp_space.chr, temp_snp_space.s, temp_snp_space.e);
-
-
-// printf("dbg read in %s:%d-%d at last_snp_fseek_place =%ld \n",temp_snp_space.chr,temp_snp_space.txStart,temp_snp_space.txEnd,last_snp_fseek_place);
     k = snpcmp(&temp_snp_space,match_me);
-// fprintf(stderr,"after snpcmp() k=%d \n",k);
     if (k == 0)  // unlikely !!!
     {
 //printf("in search found [%s]at %d   (2)\n",match_me,mid); fflush(stdout);
@@ -755,7 +766,11 @@ sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,S
 // xxxxx
     if (fp_snp) return; // already opened  
   
+#ifdef WIN32
+    fp_snp = fopen(snp_fn,"rb");
+#else
     fp_snp = fopen(snp_fn,"r");
+#endif
     error = errno;
     if (fp_snp == (FILE *)0) 
     { 
@@ -849,39 +864,39 @@ static unsigned char chr2index(char *s)
     return ret;
 }
 
-static void index2chr(int idx, char *chr)
+static void index2chr(int idx, char *chrarg)
 {
-    if (idx == 0) { strcpy(chr,"chr1"); return; }
-    if (idx == 1) { strcpy(chr,"chr2"); return; }
-    if (idx == 2) { strcpy(chr,"chr3"); return; }
-    if (idx == 3) { strcpy(chr,"chr4"); return; }
-    if (idx == 4) { strcpy(chr,"chr5"); return; }
-    if (idx == 5) { strcpy(chr,"chr6"); return; }
-    if (idx == 6) { strcpy(chr,"chr7"); return; }
-    if (idx == 7) { strcpy(chr,"chr8"); return; }
-    if (idx == 8) { strcpy(chr,"chr9"); return; }
-    if (idx == 9) { strcpy(chr,"chr10"); return; }
-    if (idx == 10) { strcpy(chr,"chr11"); return; }
-    if (idx == 11) { strcpy(chr,"chr12"); return; }
-    if (idx == 12) { strcpy(chr,"chr13"); return; }
-    if (idx == 13) { strcpy(chr,"chr14"); return; }
-    if (idx == 14) { strcpy(chr,"chr15"); return; }
-    if (idx == 15) { strcpy(chr,"chr16"); return; }
-    if (idx == 16) { strcpy(chr,"chr17"); return; }
-    if (idx == 17) { strcpy(chr,"chr18"); return; }
-    if (idx == 18) { strcpy(chr,"chr19"); return; }
-    if (idx == 19) { strcpy(chr,"chr20"); return; }
-    if (idx == 20) { strcpy(chr,"chr21"); return; }
-    if (idx == 21) { strcpy(chr,"chr22"); return; }
-    if (idx == 22) { strcpy(chr,"chrX"); return; }
-    if (idx == 23) { strcpy(chr,"chrY"); return; }
-    if (idx == 24) { strcpy(chr,"chrM"); return; }
-    strcpy(chr,"ERR");
+    if (idx == 0) { strcpy(chrarg,"chr1"); return; }
+    if (idx == 1) { strcpy(chrarg,"chr2"); return; }
+    if (idx == 2) { strcpy(chrarg,"chr3"); return; }
+    if (idx == 3) { strcpy(chrarg,"chr4"); return; }
+    if (idx == 4) { strcpy(chrarg,"chr5"); return; }
+    if (idx == 5) { strcpy(chrarg,"chr6"); return; }
+    if (idx == 6) { strcpy(chrarg,"chr7"); return; }
+    if (idx == 7) { strcpy(chrarg,"chr8"); return; }
+    if (idx == 8) { strcpy(chrarg,"chr9"); return; }
+    if (idx == 9) { strcpy(chrarg,"chr10"); return; }
+    if (idx == 10) { strcpy(chrarg,"chr11"); return; }
+    if (idx == 11) { strcpy(chrarg,"chr12"); return; }
+    if (idx == 12) { strcpy(chrarg,"chr13"); return; }
+    if (idx == 13) { strcpy(chrarg,"chr14"); return; }
+    if (idx == 14) { strcpy(chrarg,"chr15"); return; }
+    if (idx == 15) { strcpy(chrarg,"chr16"); return; }
+    if (idx == 16) { strcpy(chrarg,"chr17"); return; }
+    if (idx == 17) { strcpy(chrarg,"chr18"); return; }
+    if (idx == 18) { strcpy(chrarg,"chr19"); return; }
+    if (idx == 19) { strcpy(chrarg,"chr20"); return; }
+    if (idx == 20) { strcpy(chrarg,"chr21"); return; }
+    if (idx == 21) { strcpy(chrarg,"chr22"); return; }
+    if (idx == 22) { strcpy(chrarg,"chrX"); return; }
+    if (idx == 23) { strcpy(chrarg,"chrY"); return; }
+    if (idx == 24) { strcpy(chrarg,"chrM"); return; }
+    strcpy(chrarg,"ERR");
     return;
 }
 
 
-static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
+static void paint_snp_annot( char khrarg[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
     struct snp_type ss;
     int error;
@@ -913,16 +928,16 @@ static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2
     y2 = ih - 7 - yoffset;
     len = loc2 - loc1;
     local_pxwidth = (double)iw /(double)(len);
-sprintf(m,"in paint_snp_annot START: khr=%s loc1=%u loc2=%u, fp_snp = %p , len=%d",khr,loc1,loc2,fp_snp,len); jdebug(m); 
+sprintf(m,"in paint_snp_annot START: khrarg=%s loc1=%u loc2=%u, fp_snp = %p , len=%d",khrarg,loc1,loc2,fp_snp,len); jdebug(m); 
 
     strcpy(stuff,"unknown_snp");
 
     memset(&f,0,sizeof(struct snp_type));
 // --- strip "chr" off
-    if (strncmp(khr,"chr",3) == 0)
-        strcpy(chrlesschr,&khr[3]);
+    if (strncmp(khrarg,"chr",3) == 0)
+        strcpy(chrlesschr,&khrarg[3]);
     else
-        strcpy(chrlesschr,khr);
+        strcpy(chrlesschr,khrarg);
     uc = chr2index(chrlesschr);
     if (uc == 0xff) return;
 
@@ -934,14 +949,14 @@ sprintf(m," in paint_snp_annot, before binary_search_snp_file() - start - fp_snp
     z = binary_search_snp_file(&f,0,snp_fixed_hi);
     if (z)
     {
-        // if ((strcmp(z->chr,khr) == 0) && ((loc1-1) == z->s))
+        // if ((strcmp(z->chr,khrarg) == 0) && ((loc1-1) == z->s))
         if ((z->chrindex = uc) && (loc1 == z->s))
         {
             // return; NNNNNOOOOOOOO  ... do NOT return. We just want to get near it 
         }
     }
 
-sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld",z,khr,loc1,last_snp_fseek_place);  jdebug(m); 
+sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s loc=%d last_snp_fseek_place=%ld",z,khrarg,loc1,last_snp_fseek_place);  jdebug(m); 
     spot = last_snp_fseek_place;
 
 // rewind a little;
@@ -949,18 +964,20 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=
     if (spot < 0) spot = 0;
     fseek(fp_snp,spot,SEEK_SET);
 
-sprintf(m,"before while loc1=%u loc2=%u, spot=%ld, last_snp_fseek_place=%ld",loc1,loc2,spot,last_snp_fseek_place); jdebug(m);
+// sprintf(m,"before while loc1=%u loc2=%u, spot=%ld, last_snp_fseek_place=%ld",loc1,loc2,spot,last_snp_fseek_place); jdebug(m);
 
     kickout = readcnt = 0;
     while (1)
     {
                        // -- must make portable, regardless of struct packing
-sprintf(m,"before fread s, a=%p fp_snp=%p",&ss.s, fp_snp);  jdebug(m);
+// sprintf(m,"before fread s, a=%p fp_snp=%p",&ss.s, fp_snp);  jdebug(m);
+// sprintf(m,"before fread e, a=%p fp_snp=%p", &ss.e, fp_snp);  jdebug(m);
+#if 0
+// need some debug 
         stat = fread(&ss.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
         error = errno;
         if (stat != 1) { sprintf(m,"ERROR: cant read s errno=%d",error); jdebug(m); break; }
 
-sprintf(m,"before fread e, a=%p fp_snp=%p", &ss.e, fp_snp);  jdebug(m);
         stat = fread(&ss.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
         error = errno;
         if (stat != 1) { sprintf(m,"ERROR: cant read e errno=%d   %p,%ld,1,%p",error,&ss.e,sizeof(unsigned int),fp_snp); jdebug(m); break; }
@@ -976,29 +993,43 @@ sprintf(m,"before fread e, a=%p fp_snp=%p", &ss.e, fp_snp);  jdebug(m);
         stat = fread(&ss.rs,12,1,fp_snp); // 12  bytes - rs with null termination
         error = errno;
         if (stat != 1) { sprintf(m,"ERROR: cant read rs errno=%d",error); jdebug(m); break; }
-sprintf(m,"after freads");  jdebug(m);
+// sprintf(m,"after freads");  jdebug(m);
+#else
+// __________ WARNING ON WINDOWS !!!!   file must be open binary or Bill Gates will overflow your buffer and make your program in Visual Basic
 
+        stat = fread(&ss.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
+        if (stat != 1) break;
+
+        stat = fread(&ss.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
+        if (stat != 1) break;
+
+        stat = fread(&ss.chrindex,1,1,fp_snp); // 1 bytes - chrindex
+        if (stat != 1) break;
+
+        stat = fread(&ss.mask,1,1,fp_snp); // 1  bytes - mask field
+        if (stat != 1) break;
+
+        stat = fread(&ss.rs,12,1,fp_snp); // 12  bytes - rs with null termination
+        if (stat != 1) break;
+#endif
         readcnt++;
 
-        // if (strcmp(ss.chr,chrlesschr) == 0) 
         if (ss.chrindex == uc)
         {
             if (ss.e > loc2) 
             {
-sprintf(m,"breakin becuase e> loc2  %u > %u \n",ss.e,loc2); jdebug(m);
+// sprintf(m,"breakin becuase e> loc2  %u > %u \n",ss.e,loc2); jdebug(m);
                 break;
             }
             if (ss.s >= loc1) 
             {
                 index2chr(ss.chrindex,tmps);
-sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s loc1=%d loc2=%d, kickout=%d", 
-      ss.chrindex, tmps, ss.s, ss.mask, ss.rs,loc1,loc2,kickout); jdebug(m);
+// sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s loc1=%d loc2=%d, kickout=%d", ss.chrindex, tmps, ss.s, ss.mask, ss.rs,loc1,loc2,kickout); jdebug(m);
 
               if (( (loc1 >= ss.s ) && (loc1 <= ss.e )) ||   // start within 
                    ( (loc2 >= ss.s ) && (loc2 <= ss.e )) ||  // end within 
                    ( (loc1 <= ss.s ) && (loc2 > ss.e )) )    // spans
               {
-// xxx 
                   d = (double)((int)ss.s -loc1); 
                   x1 = (int)(local_pxwidth * d);
                   d = (double)((int)ss.e -loc1); 
@@ -1010,16 +1041,22 @@ sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s loc1=%d loc2=%d, kickout=
                   if (x1>=iw) x1 = iw-1;;
                   if (x2 < 0) x2 = 0;
                   if (x2>=iw) x2 = iw-1;;
-                  ImageFilledRectangle(im,x1,y2,x2,y1,black);
+                  if (ss.mask & 0x01) 
+                      ImageFilledRectangle(im,x1,y2,x2,y1,blue);
+                  else
+                      ImageFilledRectangle(im,x1,y2,x2,y1,green);
+// xxx 
+    // char mask; // info on sift , bit 1 = is sift , bit2 = nsfp origin
+    // char rs[12]; //  null terminated RS dbsnp string 
                   if ((ss.rs[0]) == 'r') 
                       ImageFilledRectangle(im,x1,y2-5,x2,y1-5,red);
-sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
+// sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
                 }
             }
         }
         if (kickout++ > 10000) break;
     }
-sprintf(m,"in paint_snp_annot() , readcnt = %d , kickout=%d ",readcnt,kickout); jdebug(m);
+// sprintf(m,"in paint_snp_annot() , readcnt = %d , kickout=%d ",readcnt,kickout); jdebug(m);
 
     fseek(fp_snp,0,SEEK_SET);
     return;
@@ -1076,7 +1113,6 @@ struct disease_type
 int samoption = 0; 
 int global_code = 0;
 int global_fastafastq_option = 0; // 0=fasta,1=fastq
-char global_khr[126];
 
 
 // cat /h1/finneyr/WIGZ/bamf | awk '{FS="/"}{print $NF" "$0}'  |sort | awk '{print $2}' | awk '{print "    \""$0"\" , "}'
@@ -1742,25 +1778,6 @@ static char FEHTMLRELDIR[256];   /* fe/ */
 static char FECGI[256];          /* cgi-bin/ */
 static char FEBASEDIR[256];
 #endif
-
-
-
-int gs; // global start genomic cooordinate 
-int ge; // global end genomic cooordinate 
-int gdiff;   // start - end  = gs - ge
-int menu; // main menu
-int pickmenu;
-char pickmenustring[MAXBUFF];
-char menustring[MAXBUFF];
-char forcefilecgiarg[MAXBUFF];
-char pickq[MAXBUFF];
-char bamname[MAXBUFF];
-char filecgiarg[MAXBUFF];
-char jutlfn[MAXBUFF]; // "just use this long file name"
-char position[MAXBUFF];
-char op[MAXBUFF];
-char chr[MAXBUFF];
-
 
 
 
@@ -4293,7 +4310,7 @@ sprintf(m,"after twobit() fn=%s %s %d %d ptr=%p, status=%d ",fn,khr,s,e,ptr,stat
 }
 
 
-   /* draw reference geneome region as colorful "rainbow" on bottom of image */
+   /* draw reference geneome region as colorful dna "rainbow" on bottom of image */
 static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
 {
     double local_pxwidth;
@@ -4323,7 +4340,7 @@ static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
     lastx1 = lastx2 = 0;
     y1 = ih-3-yoffset;
     y2 = ih-7-yoffset;
-// sprintf(m,"in rainbow(), got dnaspace  %p len=%d y1=%d y2=%d ih=%d off=%d",dnaspace,slice_len_in_bases,y1,y2,ih,yoffset); jdebug(m);
+// sprintf(m,"in setup_reference_dna(), dnaspace %p len=%d y1=%d y2=%d ih=%d off=%d",dnaspace,slice_len_in_bases,y1,y2,ih,yoffset); jdebug(m);
     for (i=0 ; i<slice_len_in_bases ; i++)
     {
         x1 = (int)(local_pxwidth * (double)(i)); 
@@ -4356,6 +4373,7 @@ static void setup_reference_dna(char khr[], int s, int e,int paint_it_flag)
     }
     return;
 }
+
 
 
 static void draw_dnacnts_and_dnamms(char khr[], int s, int e, int offset)
@@ -6388,7 +6406,7 @@ static char *rpf_format_fasta(const bam_header_t *header, const bam1_t *b)
 #if GOTOH
                     else // if (global_code == 2)  gotoh 
                     {
-                        chkhit3(global_khr, c->pos, seq,i,bam1_qname(b));
+                        chkhit3(gchr, c->pos, seq,i,bam1_qname(b));
                     }
 #endif
                 }
@@ -6906,7 +6924,7 @@ sprintf(m,"end dobam_sam %d",ret); jdebug(m);
 }
 
 
-int dobam(char fn[],int khroffset,int s, int e,char chr[])
+int dobam(char fn[],int khroffset,int s, int e,char chrarg[])
 {
     bam_index_t *idx = 0;
     int errornumber; // holds errno
@@ -6922,7 +6940,7 @@ int dobam(char fn[],int khroffset,int s, int e,char chr[])
 //     int numrecs = 0; not used
 //     int searcht = 0; not used
 
-// debug fprintf(stderr,"in dobam(file=%s) %s %d %d",fn,chr,s,e);  fflush(stderr); 
+// debug fprintf(stderr,"in dobam(file=%s) %s %d %d",fn,chrarg,s,e);  fflush(stderr); 
 
     globalreadscount = 0;
     memset(line,0,5000);
@@ -6933,8 +6951,9 @@ sprintf(m,"in dobam 0.1, before setregions %d %d",gs,ge);  jdebug(m);
 
     gs = s;
     ge = e;
+    strcpy(gchr,chrarg);
     if (ge<=gs) ge = gs+1;
-    setregions(chr,gs,ge);
+    setregions(chrarg,gs,ge);
 // sprintf(m,"in dobam 0.2");  jdebug(m); 
 
     pxwidth = (double)iw / (double)gdiff;
@@ -7048,7 +7067,7 @@ sprintf(m,"in dobam , after samclose in dobam() (before unlink()?) "); jdebug(m)
 }
 
 
-int do_fasta( int start ,int end, int image_type, char shortfilename[],char chr[],int khrstart, int khrend)
+int do_fasta( int start ,int end, int image_type, char shortfilename[],char chrarg[],int khrstart, int khrend)
 {
     int ki;
     int status;
@@ -7056,25 +7075,25 @@ int do_fasta( int start ,int end, int image_type, char shortfilename[],char chr[
     int s = 0;
     char m[2048];
 
-sprintf(m,"in do_fasta chr=%s start=%d end=%d",chr,start,end); jdebug(m); 
+sprintf(m,"in do_fasta chrarg=%s start=%d end=%d",chrarg,start,end); jdebug(m); 
     s = start;
     e = end;
-    status = get_chr_lo_hi(chr,&s,&e,&ki);
+    status = get_chr_lo_hi(chrarg,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_fasta()",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_fasta()",chrarg,start,end); 
         jdebug(m);
         return -1;
     }
 
-    dobam_fasta(fn_bam,ki,s,e,chr,start,end,1);
+    dobam_fasta(fn_bam,ki,s,e,chrarg,start,end,1);
 
 sprintf(m,"end do_fasta (fn_bam=%s)",fn_bam);  jdebug(m); 
     return 0;
 }
 
 
-int do_sam( int start ,int end, int image_type, char shortfilename[],char chr[],int khrstart, int khrend)
+int do_sam( int start ,int end, int image_type, char shortfilename[],char chrarg[],int khrstart, int khrend)
 {
     int ki;
     int status;
@@ -7082,26 +7101,26 @@ int do_sam( int start ,int end, int image_type, char shortfilename[],char chr[],
     int s = 0;
     char m[2048];
 
-sprintf(m,"in do_sam chr=%s start=%d end=%d",chr,start,end); jdebug(m); 
+sprintf(m,"in do_sam chrarg=%s start=%d end=%d",chrarg,start,end); jdebug(m); 
 
     s = start;
     e = end;
-    status = get_chr_lo_hi(chr,&s,&e,&ki);
+    status = get_chr_lo_hi(chrarg,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_sam()",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in do_sam()",chrarg,start,end); 
         jdebug(m);
         return -1;
     }
 
-    dobam_sam(fn_bam,ki,s,e,chr,start,end,1);
+    dobam_sam(fn_bam,ki,s,e,chrarg,start,end,1);
 
 sprintf(m,"end do_sam (fn_bam=%s)",fn_bam);  jdebug(m); 
     return 0;
 }
 
 
-int do_gotoh( int start ,int end, int image_type, char shortfilename[],char chr[],int khrstart, int khrend)
+int do_gotoh( int start ,int end, int image_type, char shortfilename[],char chrarg[],int khrstart, int khrend)
 {
     int ki;
     int status;
@@ -7109,26 +7128,26 @@ int do_gotoh( int start ,int end, int image_type, char shortfilename[],char chr[
     int s = 0;
     char m[2048];
 
-sprintf(m,"in do_gotoh chr=%s start=%d end=%d",chr,start,end); jdebug(m); 
+sprintf(m,"in do_gotoh chrarg=%s start=%d end=%d",chrarg,start,end); jdebug(m); 
 
     s = start;
     e = end;
-    status = get_chr_lo_hi(chr,&s,&e,&ki);
+    status = get_chr_lo_hi(chrarg,&s,&e,&ki);
     if (status == -1)
     {
-        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in go_gotoh()",chr,start,end); 
+        sprintf(m,"ERROR: Can not get location from get_chr_lo_hi for %s %d %d in go_gotoh()",chrarg,start,end); 
         jdebug(m);
         return -1;
     }
 
-    dobam_fasta(fn_bam,ki,s,e,chr,start,end,2);
+    dobam_fasta(fn_bam,ki,s,e,chrarg,start,end,2);
 
 sprintf(m,"end do_gotoh (fn_bam=%s)",fn_bam);  jdebug(m); 
     return 0;
 }
 
 
-void draw_mapability_lines_at_bottom(int khroffset,int s, int e,char chr[],int kstart, int kend, int readlen, 
+void draw_mapability_lines_at_bottom(int khroffset,int s, int e,char chrarg[],int kstart, int kend, int readlen, 
                   int yoffset, int kolor1,  int kolor2)
 {
     int x1,x2;
@@ -7142,11 +7161,11 @@ void draw_mapability_lines_at_bottom(int khroffset,int s, int e,char chr[],int k
     char m[1024];
     char fn[1024]; // filename
 
-sprintf(m,"in draw_mapability_lines_at_bottom() 000 , khroffset=%u s=%d e=%d chr=%s kstart=%d kend=%d",khroffset,s,e,chr,kstart,kend); jdebug(m);
+sprintf(m,"in draw_mapability_lines_at_bottom() 000 , khroffset=%u s=%d e=%d chrarg=%s kstart=%d kend=%d",khroffset,s,e,chrarg,kstart,kend); jdebug(m);
     diff = e - s;
     pxwidth = (double)iw/(double)diff;
 
-    sprintf(fn,"/app1/cgwb-shortread/COV/%s.all.%d",chr,readlen);
+    sprintf(fn,"/app1/cgwb-shortread/COV/%s.all.%d",chrarg,readlen);
     fp = fopen(fn,"rb");
     if (fp == (FILE *)0) 
     {
@@ -7194,7 +7213,7 @@ sprintf(m,"end draw_mapability_lines_at_bottom() 999 "); jdebug(m);
 }
 
 
-void draw_mapability_lines_at_bottom2(int khroffset,int s, int e,char chr[],int kstart, int kend, int readlen, 
+void draw_mapability_lines_at_bottom2(int khroffset,int s, int e,char chrarg[],int kstart, int kend, int readlen, 
                   int yoffset)
 {
     int y1,y2;
@@ -7213,7 +7232,7 @@ void draw_mapability_lines_at_bottom2(int khroffset,int s, int e,char chr[],int 
     diff = e - s;
     pxwidth = (double)iw/(double)diff;
 
-    sprintf(fn,"/app1/cgwb-shortread/COV/%s.all.%d",chr,readlen);
+    sprintf(fn,"/app1/cgwb-shortread/COV/%s.all.%d",chrarg,readlen);
     fp = fopen(fn,"rb");
     if (fp == (FILE *)0) 
     {
@@ -7256,34 +7275,34 @@ void draw_mapability_lines_at_bottom2(int khroffset,int s, int e,char chr[],int 
 }
 
 
-void fix_num_to_chrstyle(char chr[],char chrchr[]) 
+void fix_num_to_chrstyle(char chrarg[],char chrchr[]) 
 {
-    if (strcmp(chr,"1")== 0) strcpy(chrchr,"chr1"); 
-    else if (strcmp(chr,"2")== 0) strcpy(chrchr,"chr2"); 
-    else if (strcmp(chr,"3")== 0) strcpy(chrchr,"chr3"); 
-    else if (strcmp(chr,"4")== 0) strcpy(chrchr,"chr4"); 
-    else if (strcmp(chr,"5")== 0) strcpy(chrchr,"chr5"); 
-    else if (strcmp(chr,"6")== 0) strcpy(chrchr,"chr6"); 
-    else if (strcmp(chr,"7")== 0) strcpy(chrchr,"chr7"); 
-    else if (strcmp(chr,"8")== 0) strcpy(chrchr,"chr8"); 
-    else if (strcmp(chr,"9")== 0) strcpy(chrchr,"chr9"); 
-    else if (strcmp(chr,"10")== 0) strcpy(chrchr,"chr10"); 
-    else if (strcmp(chr,"11")== 0) strcpy(chrchr,"chk11"); 
-    else if (strcmp(chr,"12")== 0) strcpy(chrchr,"chr12"); 
-    else if (strcmp(chr,"13")== 0) strcpy(chrchr,"chr13"); 
-    else if (strcmp(chr,"14")== 0) strcpy(chrchr,"chr14"); 
-    else if (strcmp(chr,"15")== 0) strcpy(chrchr,"chr15"); 
-    else if (strcmp(chr,"16")== 0) strcpy(chrchr,"chr16"); 
-    else if (strcmp(chr,"17")== 0) strcpy(chrchr,"chr17"); 
-    else if (strcmp(chr,"18")== 0) strcpy(chrchr,"chr18"); 
-    else if (strcmp(chr,"19")== 0) strcpy(chrchr,"chr19"); 
-    else if (strcmp(chr,"20")== 0) strcpy(chrchr,"chr20"); 
-    else if (strcmp(chr,"21")== 0) strcpy(chrchr,"chr21"); 
-    else if (strcmp(chr,"22")== 0) strcpy(chrchr,"chr22"); 
-    else if (strcmp(chr,"X")== 0) strcpy(chrchr,"chrX"); 
-    else if (strcmp(chr,"Y")== 0) strcpy(chrchr,"chrY"); 
-    else if (strcmp(chr,"M")== 0) strcpy(chrchr,"chrM"); 
-    else if (strcmp(chr,"MT")== 0) strcpy(chrchr,"chrM"); 
+    if (strcmp(chrarg,"1")== 0) strcpy(chrchr,"chr1"); 
+    else if (strcmp(chrarg,"2")== 0) strcpy(chrchr,"chr2"); 
+    else if (strcmp(chrarg,"3")== 0) strcpy(chrchr,"chr3"); 
+    else if (strcmp(chrarg,"4")== 0) strcpy(chrchr,"chr4"); 
+    else if (strcmp(chrarg,"5")== 0) strcpy(chrchr,"chr5"); 
+    else if (strcmp(chrarg,"6")== 0) strcpy(chrchr,"chr6"); 
+    else if (strcmp(chrarg,"7")== 0) strcpy(chrchr,"chr7"); 
+    else if (strcmp(chrarg,"8")== 0) strcpy(chrchr,"chr8"); 
+    else if (strcmp(chrarg,"9")== 0) strcpy(chrchr,"chr9"); 
+    else if (strcmp(chrarg,"10")== 0) strcpy(chrchr,"chr10"); 
+    else if (strcmp(chrarg,"11")== 0) strcpy(chrchr,"chk11"); 
+    else if (strcmp(chrarg,"12")== 0) strcpy(chrchr,"chr12"); 
+    else if (strcmp(chrarg,"13")== 0) strcpy(chrchr,"chr13"); 
+    else if (strcmp(chrarg,"14")== 0) strcpy(chrchr,"chr14"); 
+    else if (strcmp(chrarg,"15")== 0) strcpy(chrchr,"chr15"); 
+    else if (strcmp(chrarg,"16")== 0) strcpy(chrchr,"chr16"); 
+    else if (strcmp(chrarg,"17")== 0) strcpy(chrchr,"chr17"); 
+    else if (strcmp(chrarg,"18")== 0) strcpy(chrchr,"chr18"); 
+    else if (strcmp(chrarg,"19")== 0) strcpy(chrchr,"chr19"); 
+    else if (strcmp(chrarg,"20")== 0) strcpy(chrchr,"chr20"); 
+    else if (strcmp(chrarg,"21")== 0) strcpy(chrchr,"chr21"); 
+    else if (strcmp(chrarg,"22")== 0) strcpy(chrchr,"chr22"); 
+    else if (strcmp(chrarg,"X")== 0) strcpy(chrchr,"chrX"); 
+    else if (strcmp(chrarg,"Y")== 0) strcpy(chrchr,"chrY"); 
+    else if (strcmp(chrarg,"M")== 0) strcpy(chrchr,"chrM"); 
+    else if (strcmp(chrarg,"MT")== 0) strcpy(chrchr,"chrM"); 
 }
 
 
@@ -9358,7 +9377,7 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
         int ki;
 
         sprintf(long_image_filename,"images/tmpalview.%d.%d.png",rand(),getpid());
-        global_khr[0] = (char)0;
+        gchr[0] = (char)0;
 
         if (strncmp(position,"chr",3) == 0) 
         {
@@ -9370,7 +9389,7 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
             do_by_gene_name_from_refflat(position,chr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
 // sprintf(m,"after do_by_gene_name_from_refflat %d %d",alv_start,alv_end);  jdebug(m); 
         }
-        strcpy(global_khr,chr); 
+        strcpy(gchr,chr); 
 
         if (alv_end <= 0) 
         {
@@ -11302,5 +11321,33 @@ void freedom_for_memory(void)
     dnamms = (unsigned short int *)0;
     if (ppp) free(ppp);
     ppp = (unsigned char *)0;
+}
+
+
+// --- call URL stuff ...
+#ifdef _WIN32
+#include <shellapi.h>
+#endif
+
+void set_ucsc_url(char *url) // ,char *blds,char *chr, int s, int e)
+{
+   // sprintf(url,"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=%s&position=%s:%d-%d\" target=\"_blank\">UCSC Link</a> | \n",blds,tmp_chr,alv_start,alv_end);
+   sprintf(url,"http://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=%s&position=%s:%d-%d",blds,gchr,gs,ge);
+   return;
+}
+
+void open_url(char *url)
+{
+#ifdef _WIN32
+     windows_call_url(url); // ShellExecute(GetActiveWindow(), "open", url, NULL, NULL, SW_SHOWNORMAL);
+#endif
+#ifdef UNIX
+     linux_call_url(url); // calls gtk_link_button_new() stuff
+#endif
+#ifdef MAC
+     cocoa_call_url(url); // [[NSWorkspace sharedWorkspace] openFile:mad:"http://www.mylink.com"];
+#endif
+
+
 }
 

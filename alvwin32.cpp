@@ -9,6 +9,7 @@ language='*'\"")
 #include <string.h> 
 #include <Commdlg.h>
 #include "alview.h"
+#include <shellapi.h> 
 
 // rpf NO #include <tchar.h>
 
@@ -64,6 +65,34 @@ extern char hacked_ced_for_sprintf[];
 void msg(char *s)
 {
     if (global_hwnddlg) SetWindowText(GetDlgItem(global_hwnddlg, IDC_STATIC1), s);
+}
+
+
+void windows_call_url(char *url) 
+{
+    ShellExecute(GetActiveWindow(), "open", url, NULL, NULL, SW_SHOWNORMAL);
+    return;
+}
+
+
+void windows_save_file(void) 
+{
+    char m[1024];
+    char fn[FILENAME_MAX];
+    int dots = 0;
+    struct image_type im3;
+
+
+    strcpy(fn,"tmp.png");
+    if (img)
+    {
+        im3.data = img;
+        im3.width = diw;
+        im3.height = dih;
+        ImageSaveAsPNG(&im3, fn);
+sprintf(m,"in windows_save_file %p %s \n",&im3,fn); jdebug(m); 
+    }
+    return;
 }
 
 
@@ -7436,7 +7465,7 @@ void get_image_and_draw(HWND hwnd, int id, char bamfn_arg[])
 // snprintf(m,1022,"xxx before do_by_gene_name_from_refflat in deal_with_pos pos=[%s], blds=[%s]",tmps,blds); jdebug(m); 
         do_by_gene_name_from_refflat(tmps,khr,&khrstart,&khrend); 
         sanity_khr();
-snprintf(m,1022,"xxx after do_by_gene_name_from_refflat in deal_with_pos(%s:%d-%d) ",khr,khrstart,khrend); jdebug(m); 
+// snprintf(m,1022,"xxx after do_by_gene_name_from_refflat in deal_with_pos(%s:%d-%d) ",khr,khrstart,khrend); jdebug(m); 
         snprintf(pos,1022,"%s:%d-%d",khr,khrstart,khrend);
     }
     SetWindowText(GetDlgItem(hwnd,IDC_EDIT1), pos);
@@ -7769,13 +7798,8 @@ void zoom_in(HWND hwnd, int id)
     int third;
 char m[1024];
 
-snprintf(m,1022,"zoom in \n"); jdebug(m); 
     size = khrend-khrstart;
     third=size/3;
-/*
-snprintf(m,1022,"zoom in, x=%d w=%d xor=%d img2=%p s=%d e=%d dots=%d",x,w,xoron,img2,start_select_x, end_select_x,dots); jdebug(m);  
-msg(m);
-*/
     khrend = khrend - third;
     khrstart = khrstart + third;
     sanity_khr();
@@ -7941,9 +7965,19 @@ sprintf(m,"endDailog on id =0x%x ( %d ) ",id,id);  jdebug(m);
     {                   
        zoom_base(hwnd, id);
     }                   
-    else if (id == IDC_BUTTON15) // open 
+    else if (id == IDC_BUTTON15) // open  
     {                   
         popupopenbam(hwnd,id);
+    }
+    else if (id == IDC_BUTTON16)     // ucsc external call 
+    {                   
+       char url[2048];
+       set_ucsc_url(url);
+       windows_call_url(url);// invoke URL using your system's default(?) browser, 
+    }                   
+    else if (id == IDC_BUTTON17)     //
+    {
+       windows_save_file(); 
     }
     if (hwnd == hBitmap)
     {
@@ -8408,3 +8442,4 @@ int WINAPI WinMain(
 
     return 0;
 }
+
