@@ -647,9 +647,10 @@ static int snpcmp(const void *aarg, const void *barg)
      return 0;
 }
 
+static FILE *fp_snp = (FILE *)0;
 static long int last_snp_fseek_place;
 static struct snp_type temp_snp_space;
-static FILE *fp_snp = (FILE *)0;
+char junque[512];
 
 
 struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, long int hi)
@@ -658,8 +659,9 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
     long int mid;
     int k;
 
+char m[5120];
 
-// fprintf(stderr," in binary_search_snp_file() - start - fp_snp is %p\n",fp_snp);  fflush(stderr);
+sprintf(m," in binary_search_snp_file() - start - fp_snp is %p, lo=%ld , hi=%ld",fp_snp,lo,hi);  jdebug(m);
     if (fp_snp == (void *)0) 
     { 
         fprintf(stderr,"ERROR: in binary_search_snp_file() - fp_snp is NULL\n"); 
@@ -683,16 +685,12 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
         }
 
         last_snp_fseek_place = seekto; 
-#if 0
-        fread(&temp_snp_space,1,SIZE_SNPTYPE,fp_snp);
-#else
    // -- must make portable, regardless of struct packing 
         fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start 
         fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
         fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex 
         fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field 
         fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
-#endif
 
         if (snpcmp(&temp_snp_space,match_me) == 0) 
         {
@@ -768,7 +766,7 @@ sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,S
     fseek(fp_snp,(size_t) 0 , SEEK_END);
     snp_fixed_hi = ftell(fp_snp)/SIZE_SNPTYPE;
 
-sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d END fpd = %p\n",snp_fn,SIZE_SNPTYPE,fp_snp); jdebug(m); 
+sprintf(m,"END setup_snp filename=[%s], SIZE_SNPTYPE=%d fpd=%p, snp_fixed_hi=%ld",snp_fn,SIZE_SNPTYPE,fp_snp,snp_fixed_hi); jdebug(m); 
     return;
 }
 
@@ -885,15 +883,18 @@ static void index2chr(int idx, char *chr)
 
 static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
+    struct snp_type ss;
+    int error;
+    char tmps[512];
     double d;
     int x1,x2;
     int y1,y2;
     int len;
     double local_pxwidth;
     unsigned char uc; 
-    int readcnt;
-    int kickout;
-    int stat;
+    int readcnt = 0;
+    int kickout = 0;
+    size_t stat;
     long int spot;
     struct snp_type f;
     struct snp_type *z;
@@ -912,11 +913,10 @@ static void paint_snp_annot( char khr[] , unsigned int loc1 ,  unsigned int loc2
     y2 = ih - 7 - yoffset;
     len = loc2 - loc1;
     local_pxwidth = (double)iw /(double)(len);
-sprintf(m,"in paint_snp_annot %s %u %u, fp_snp = %p , len=%d",khr,loc1,loc2,fp_snp,len); jdebug(m); 
+sprintf(m,"in paint_snp_annot START: khr=%s loc1=%u loc2=%u, fp_snp = %p , len=%d",khr,loc1,loc2,fp_snp,len); jdebug(m); 
 
     strcpy(stuff,"unknown_snp");
 
-sprintf(m,"in paint_snp_annot "); jdebug(m); 
     memset(&f,0,sizeof(struct snp_type));
 // --- strip "chr" off
     if (strncmp(khr,"chr",3) == 0)
@@ -930,7 +930,7 @@ sprintf(m,"in paint_snp_annot "); jdebug(m);
     f.s = loc1;
     f.e = loc2;
 
-sprintf(m," in paint_snp_annot, before  binary_search_snp_file() - start - fp_snp is %p",fp_snp); jdebug(m); 
+sprintf(m," in paint_snp_annot, before binary_search_snp_file() - start - fp_snp is %p , lo=0, hi=",fp_snp,snp_fixed_hi); jdebug(m); 
     z = binary_search_snp_file(&f,0,snp_fixed_hi);
     if (z)
     {
@@ -941,51 +941,67 @@ sprintf(m," in paint_snp_annot, before  binary_search_snp_file() - start - fp_sn
         }
     }
 
-sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld\n",z,khr,loc1,last_snp_fseek_place);  jdebug(m); 
+sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khr=%s loc=%d last_snp_fseek_place=%ld",z,khr,loc1,last_snp_fseek_place);  jdebug(m); 
     spot = last_snp_fseek_place;
 
 // rewind a little;
-    spot = spot - 5000 * SIZE_SNPTYPE;
+    spot = spot - (100 * SIZE_SNPTYPE);
     if (spot < 0) spot = 0;
     fseek(fp_snp,spot,SEEK_SET);
 
-sprintf(m,"before while loc1=%u loc2=%u",loc1,loc2); jdebug(m);
-    kickout = 0;
-    readcnt = 0;
+sprintf(m,"before while loc1=%u loc2=%u, spot=%ld, last_snp_fseek_place=%ld",loc1,loc2,spot,last_snp_fseek_place); jdebug(m);
+
+    kickout = readcnt = 0;
     while (1)
     {
                        // -- must make portable, regardless of struct packing
-        stat = fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
-        if (stat != 1) break;
-        stat = fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
-        if (stat != 1) break;
-        stat = fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex
-        if (stat != 1) break;
-        stat = fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field
-        if (stat != 1) break;
-        stat = fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
-        if (stat != 1) break;
+sprintf(m,"before fread s, a=%p fp_snp=%p",&ss.s, fp_snp);  jdebug(m);
+        stat = fread(&ss.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
+        error = errno;
+        if (stat != 1) { sprintf(m,"ERROR: cant read s errno=%d",error); jdebug(m); break; }
+
+sprintf(m,"before fread e, a=%p fp_snp=%p", &ss.e, fp_snp);  jdebug(m);
+        stat = fread(&ss.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
+        error = errno;
+        if (stat != 1) { sprintf(m,"ERROR: cant read e errno=%d   %p,%ld,1,%p",error,&ss.e,sizeof(unsigned int),fp_snp); jdebug(m); break; }
+
+        stat = fread(&ss.chrindex,1,1,fp_snp); // 1 bytes - chrindex
+        error = errno;
+        if (stat != 1) { sprintf(m,"ERROR: cant read chrindex errno=%d",error); jdebug(m); break; }
+
+        stat = fread(&ss.mask,1,1,fp_snp); // 1  bytes - mask field
+        error = errno;
+        if (stat != 1) { sprintf(m,"ERROR: cant read mask errno=%d",error); jdebug(m); break; }
+
+        stat = fread(&ss.rs,12,1,fp_snp); // 12  bytes - rs with null termination
+        error = errno;
+        if (stat != 1) { sprintf(m,"ERROR: cant read rs errno=%d",error); jdebug(m); break; }
+sprintf(m,"after freads");  jdebug(m);
 
         readcnt++;
 
-        // if (strcmp(temp_snp_space.chr,chrlesschr) == 0) 
-        if (temp_snp_space.chrindex == uc)
+        // if (strcmp(ss.chr,chrlesschr) == 0) 
+        if (ss.chrindex == uc)
         {
-            if (temp_snp_space.e > loc2) break;
-            if (temp_snp_space.s >= loc1) 
+            if (ss.e > loc2) 
             {
-                char tmps[512];
-                index2chr(temp_snp_space.chrindex,tmps);
-sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s", temp_snp_space.chrindex, tmps, temp_snp_space.s, temp_snp_space.mask, temp_snp_space.rs); jdebug(m);
+sprintf(m,"breakin becuase e> loc2  %u > %u \n",ss.e,loc2); jdebug(m);
+                break;
+            }
+            if (ss.s >= loc1) 
+            {
+                index2chr(ss.chrindex,tmps);
+sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s loc1=%d loc2=%d, kickout=%d", 
+      ss.chrindex, tmps, ss.s, ss.mask, ss.rs,loc1,loc2,kickout); jdebug(m);
 
-              if (( (loc1 >= temp_snp_space.s ) && (loc1 <= temp_snp_space.e )) ||   // start within 
-                   ( (loc2 >= temp_snp_space.s ) && (loc2 <= temp_snp_space.e )) ||  // end within 
-                   ( (loc1 <= temp_snp_space.s ) && (loc2 > temp_snp_space.e )) )    // spans
+              if (( (loc1 >= ss.s ) && (loc1 <= ss.e )) ||   // start within 
+                   ( (loc2 >= ss.s ) && (loc2 <= ss.e )) ||  // end within 
+                   ( (loc1 <= ss.s ) && (loc2 > ss.e )) )    // spans
               {
 // xxx 
-                  d = (double)((int)temp_snp_space.s -loc1); 
+                  d = (double)((int)ss.s -loc1); 
                   x1 = (int)(local_pxwidth * d);
-                  d = (double)((int)temp_snp_space.e -loc1); 
+                  d = (double)((int)ss.e -loc1); 
                   x2 = (int)(local_pxwidth * d);
                   if (x2==x1) x2 = x1 + 1;
                   if ((x1<0) && (x2 < 0)) continue;
@@ -995,62 +1011,17 @@ sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s", temp_snp_space.chrindex
                   if (x2 < 0) x2 = 0;
                   if (x2>=iw) x2 = iw-1;;
                   ImageFilledRectangle(im,x1,y2,x2,y1,black);
-                  if ((temp_snp_space.rs[0]) == 'r') 
+                  if ((ss.rs[0]) == 'r') 
                       ImageFilledRectangle(im,x1,y2-5,x2,y1-5,red);
-// sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
+sprintf(m,"snp tried to ImageFilledRectangle %d %d %d %d",x1,y1,x2,y2); jdebug(m);
                 }
             }
         }
-        if (kickout++ > 1000000) break;
+        if (kickout++ > 10000) break;
     }
-sprintf(m,"here2 kickout=%d , readcnt=%d",kickout,readcnt); jdebug(m);
+sprintf(m,"in paint_snp_annot() , readcnt = %d , kickout=%d ",readcnt,kickout); jdebug(m);
 
-#if 0
-
-// fprintf(stderr,"MISSED %s %s %s %s %s %10.5f , spot = %ld\n",temp_snp_space.refNCBI,temp_snp_space.refUCSC,temp_snp_space.observed,temp_snp_space.name,temp_snp_space.func,temp_snp_space.avHet,spot);
-// else fprintf(stderr,"MISSED loc1=%d %s %s %s %s %s %10.5f",loc1,z->refNCBI,z->refUCSC,z->observed,z->name,z->func,z->avHet);
-//
-    return;
-
-    if (spot < 0) spot = 0;
-// printf("in paint_snp_annot() after binary_search_snp_file %s %d spot=%ld\n",khr,loc1,spot); 
-    j = 0;
-    while ((j<100)) 
-    {
-#if 0
-        stat = fread(&temp_snp_space,1,SIZE_SNP_REC,fp_snp);
-        if (stat < 1) break;
-#else
-   // -- must make portable, regardless of struct packing
-        stat = fread(&temp_snp_space.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
-        if (stat < 1) break;
-        stat = fread(&temp_snp_space.e,sizeof(unsigned int ),1,fp_snp); // 4  bytes - end
-        if (stat < 1) break;
-        stat = fread(&temp_snp_space.chrindex,1,1,fp_snp); // 1 bytes - chrindex
-        if (stat < 1) break;
-        stat = fread(&temp_snp_space.mask,1,1,fp_snp); // 1  bytes - mask field
-        if (stat < 1) break;
-        stat = fread(&temp_snp_space.rs,12,1,fp_snp); // 12  bytes - rs with null termination
-        if (stat < 1) break;
-#endif
-// printf("wantchrloc=%s:%d  gotchr=%s gene?=%s gotloc=%d\n",khr,loc1,temp_snp_space.chr,temp_snp_space.geneName,temp_snp_space.txStart);
-        if (strcmp(temp_snp_space.chr,khr) == 0) 
-        {
-            if ((loc1 >= temp_snp_space.txStart) && (loc1 < temp_snp_space.txEnd)) 
-            {
-                strcpy(stuff,temp_snp_space.geneName);
-                *ingene = 1;
-// exonStarts is REALLY the seek spot for exonStart/exonEnds in overflow file
-                *inexon = is_in_exon(fp_snp_o,(long int)(temp_snp_space.exonStarts),temp_snp_space.exonCount, temp_snp_space.txStart);
-                if (*inexon) return; // kick out if got exon
-            }
-            if ((temp_snp_space.txStart > loc1) && (temp_snp_space.txEnd > loc1)) 
-                break;
-        }
-        j++;
-    }
     fseek(fp_snp,0,SEEK_SET);
-#endif
     return;
 }
 
@@ -1324,7 +1295,7 @@ sprintf(m,"ERROR: in fix_up_support_file_paths(), blds is null "); jdebug(m);
         strcat(binary_refflat_prefix,blds);
         strcat(binary_refflat_prefix,"\\"); 
 #else
-// linux and osx
+// linux and mac-osx
         strcat(binary_refflat_prefix,"/");
         strcat(binary_refflat_prefix,blds);
         strcat(binary_refflat_prefix,"/"); 
@@ -1415,6 +1386,7 @@ sprintf(m,"in setup_refflat FILE=%p ",fp_refflat_d);  jdebug(m);
        fp_refflat_d = (FILE *)0;
        return -2;
     }
+
 /// --- SETUP the starting max for a binary search 
     refflat_fixed_hi = ftell(fp_refflat_d) / SIZE_REFFLAT_REC;
 sprintf(m,"in setup_refflat refflat_fixed_hi=%ld ",refflat_fixed_hi); jdebug(m);
@@ -1451,13 +1423,12 @@ sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,b
         strcpy(chr,"chr1");
         *start = 1 ; 
         *end = 18915;
-sprintf(m,"ERROR: after setup_refflat() - in do_by_gene_name_from_refflat");  jdebug(m);
+sprintf(m,"ERROR: in do_by_gene_name_from_refflat() from call to setup_refflat() - setting to okay chr:loc");  jdebug(m);
         return -1;
     }
 sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",refflat_d_fn,fp_refflat_d);  jdebug(m); 
     if (fp_refflat_d == (FILE *)0)
-    {
-// try and open it 
+    {                                                 // try and open it 
         fp_refflat_d = fopen(refflat_d_fn,"rb");
         if (!fp_refflat_d) 
         { 
@@ -7029,11 +7000,11 @@ sprintf(m,"opened %s %s %s",fn_list,bai_fn,fn_out);  jdebug(m);
             {
                 bam_parse_region(in->header, region3 , &tid, &beg, &end); //parse a region in the format like `2:100-200'
             }
-sprintf(m,"in dobama after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
+sprintf(m,"in dobam after bam_parse_region2 ???, tid=%d from %s",tid,region2); jdebug(m); 
         }
         else
         {
-sprintf(m,"in dobama  after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
+sprintf(m,"in dobam  after bam_parse_region1 GOOD , tid=%d from %s",tid,region); jdebug(m); 
         }
 
         if (tid < 0) { // reference name is not found
