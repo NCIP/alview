@@ -54,6 +54,7 @@
 #define BTN_TEST 9001
 #define STC_BMP  9002
 #define BMP_TEST 9003 
+#define STC_BMP2 9004 
 	
 
 

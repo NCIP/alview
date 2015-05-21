@@ -674,10 +674,9 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
     long int seekto;
     long int mid;
     int k;
-
 char m[5120];
 
-sprintf(m," in binary_search_snp_file() - start - fp_snp is %p, lo=%ld , hi=%ld",fp_snp,lo,hi);  jdebug(m);
+// sprintf(m," in binary_search_snp_file() - start - fp_snp is %p, lo=%ld , hi=%ld",fp_snp,lo,hi);  jdebug(m);
     if (fp_snp == (void *)0) 
     { 
         fprintf(stderr,"ERROR: in binary_search_snp_file() - fp_snp is NULL\n"); 
@@ -995,7 +994,7 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s l
         if (stat != 1) { sprintf(m,"ERROR: cant read rs errno=%d",error); jdebug(m); break; }
 // sprintf(m,"after freads");  jdebug(m);
 #else
-// __________ WARNING ON WINDOWS !!!!   file must be open binary or Bill Gates will overflow your buffer and make your program in Visual Basic
+// __________ WARNING ON WINDOWS !!!!   file must be open binary or Bill Gates will overflow your buffer and *** make you program in Visual Basic ***
 
         stat = fread(&ss.s,sizeof(unsigned int ),1,fp_snp); // 4  bytes - start
         if (stat != 1) break;
@@ -1025,6 +1024,12 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s l
             {
                 index2chr(ss.chrindex,tmps);
 // sprintf(m,"uc is good id=%d tmps=%s s=%u mask=%u rs=%s loc1=%d loc2=%d, kickout=%d", ss.chrindex, tmps, ss.s, ss.mask, ss.rs,loc1,loc2,kickout); jdebug(m);
+#if 1
+// big hack
+// appear to be off by one
+        ss.s++;
+        ss.e++;
+#endif
 
               if (( (loc1 >= ss.s ) && (loc1 <= ss.e )) ||   // start within 
                    ( (loc2 >= ss.s ) && (loc2 <= ss.e )) ||  // end within 
@@ -1443,12 +1448,11 @@ sprintf(m,"end  setup_refflat refflat_fixed_hi=%ld , returning 0(==good)",reffla
 }
 
 
-int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
+int do_by_gene_name_from_refflat_nitty_gritty(const char gene[],char chr[],int *start,int *end)
 {
     char m[5120];
     struct flattype f;
     int rec_cnt = 0;
-
 
 // -- just blitz through flat file, not using index (cuz not sorted by name) to find match on "gene" parameter
 sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,blds);  jdebug(m); 
@@ -1523,6 +1527,29 @@ sprintf(m,"do_by_gene_name_from_refflat here 999 , rec_cnt = %d",rec_cnt);  jdeb
     *end = 4043;
 
     return -1;
+}
+
+int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
+{
+    char m[2048];
+    char UPPER[2048];
+    int i;
+    int status = 0;
+
+    status = do_by_gene_name_from_refflat_nitty_gritty(gene,chr,start,end); 
+
+//  sprintf(m,"in do_by_gene_name_from_refflat , after 1s, status = %d , gene=[%s]",status,gene); jdebug(m); 
+
+    if (status == 0) return 0; // got it, good.
+
+//--- try upper case ...
+    strcpy(UPPER,gene);
+    for (i=0;UPPER[i];i++)
+        UPPER[i] = toupper(UPPER[i]); 
+    status = do_by_gene_name_from_refflat_nitty_gritty(UPPER,chr,start,end); 
+
+//  sprintf(m,"in do_by_gene_name_from_refflat , after 2nd, status = %d , UPPER = [%s]",status,UPPER); jdebug(m); 
+    return status;
 }
 
 
@@ -11347,8 +11374,6 @@ void open_url(char *url)
 #ifdef MAC
      cocoa_call_url(url); // [[NSWorkspace sharedWorkspace] openFile:mad:"http://www.mylink.com"];
 #endif
-
-
 }
 
 void gtk_set_atcg_info_label(char s[])
@@ -11357,25 +11382,22 @@ void gtk_set_atcg_info_label(char s[])
 
 // <span font=\"14\" color=\"red\">" "<b>\t\tRed: %d</b>" "</span>",
 sprintf(s,"mismatch: <span color=\"#%s\">A </span> <span color=\"#%s\">C </span> <span color=\"#%s\">G </span> <span color=\"#%s\">T </span> <span color=\"#%s\">Ins </span> <span color=\"#%s\">Del </span>",
-    dna_a_s,  // 9f005f   // nucleotides acgt ...
+    dna_a_s,   // 9f005f   // nucleotides acgt ...
     dna_c_s,   // ff5f00  
-    dna_g_s,   //bfff00  
+    dna_g_s,   // bfff00  
     dna_t_s,   // 003fbf 
     dna_I_s,   // 00ffff  // cyan insert
-    dna_D_s   // ffb000  // yellow  delete
+    dna_D_s    // ffb000  // yellow  delete
 );
 #if 0
  sprintf(s,"mismatch: <span color=\"#%s\">A </span><span color=\"#%s\">C </span><span color=\"#%s\">G </span><span color=#%s>T </span> <span color=3%s>Ins </span><span color=#%s>Del</span>",
-    dna_a_s,   // 9f005f   // nucleotides acgt ...
-    dna_c_s,   // ff5f00  
-    dna_g_s,   //bfff00  
-    dna_t_s,   // 003fbf 
-    dna_I_s,   // 00ffff  // cyan insert
+    dna_a_s,  // 9f005f   // nucleotides acgt ...
+    dna_c_s,  // ff5f00  
+    dna_g_s,  // bfff00  
+    dna_t_s,  // 003fbf 
+    dna_I_s,  // 00ffff  // cyan insert
     dna_D_s   // ffb000  // yellow  delete
 );
-#endif
-
-#if 0
     strcpy(dna_a_s,"9f005f");   // nucleotides acgt ...
     strcpy(dna_c_s,"ff5f00");  
     strcpy(dna_g_s,"bfff00");  
