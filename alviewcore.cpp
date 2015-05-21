@@ -11351,3 +11351,37 @@ void open_url(char *url)
 
 }
 
+void gtk_set_atcg_info_label(char s[])
+{
+    init_colors();
+
+// <span font=\"14\" color=\"red\">" "<b>\t\tRed: %d</b>" "</span>",
+sprintf(s,"mismatch: <span color=\"#%s\">A </span> <span color=\"#%s\">C </span> <span color=\"#%s\">G </span> <span color=\"#%s\">T </span> <span color=\"#%s\">Ins </span> <span color=\"#%s\">Del </span>",
+    dna_a_s,  // 9f005f   // nucleotides acgt ...
+    dna_c_s,   // ff5f00  
+    dna_g_s,   //bfff00  
+    dna_t_s,   // 003fbf 
+    dna_I_s,   // 00ffff  // cyan insert
+    dna_D_s   // ffb000  // yellow  delete
+);
+#if 0
+ sprintf(s,"mismatch: <span color=\"#%s\">A </span><span color=\"#%s\">C </span><span color=\"#%s\">G </span><span color=#%s>T </span> <span color=3%s>Ins </span><span color=#%s>Del</span>",
+    dna_a_s,   // 9f005f   // nucleotides acgt ...
+    dna_c_s,   // ff5f00  
+    dna_g_s,   //bfff00  
+    dna_t_s,   // 003fbf 
+    dna_I_s,   // 00ffff  // cyan insert
+    dna_D_s   // ffb000  // yellow  delete
+);
+#endif
+
+#if 0
+    strcpy(dna_a_s,"9f005f");   // nucleotides acgt ...
+    strcpy(dna_c_s,"ff5f00");  
+    strcpy(dna_g_s,"bfff00");  
+    strcpy(dna_t_s,"003fbf"); 
+    strcpy(dna_I_s,"00ffff");  // cyan insert
+    strcpy(dna_D_s,"ffb000");  // yellow  delete
+#endif
+}
+

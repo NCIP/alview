@@ -30,4 +30,7 @@ void windows_call_url(char *url);
 
 unsigned int ALVIEWWRAP_lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
 unsigned int lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
+void gtk_set_atcg_info_label(char s[]);
+
+void init_colors(void);
 

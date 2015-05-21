@@ -128,7 +128,6 @@ fprintf(stderr,"file name = %s \n", filename);  fflush(stderr);
 #endif
     if (filename) strcpy(fn_bam,(char *)filename); 
 
-// xxx 
     if (khr[0] == (char)0)
     {
          strcpy(khr,"chr1"); 
@@ -8010,11 +8009,11 @@ gboolean unix_draw_image (GtkWidget *widget)
 {
     unsigned char *ptr;
 
-// fprintf(stderr,"xxx in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
+// fprintf(stderr,"in unix_draw_image() w=%d h=%d\n",diw,dih); fflush(stderr); 
     if (darea_on == 1)           // flag, means RGB image is loaded in "im"
     {
         if (!im) return TRUE;
-// fprintf(stderr,"xxx in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
+// fprintf(stderr,"in unix_draw_image doing rgb at im->data=%p, h=%d w=%d before gdk_draw_rgb_image\n",im->data,dih,diw); fflush(stderr); 
         gtk_widget_set_size_request (widget,(gint)diw,(gint)dih);
         if (xoron) { ptr = img2; if (ptr == (unsigned char *)0) return TRUE; }
         else       ptr = im->data;
@@ -8022,7 +8021,7 @@ gboolean unix_draw_image (GtkWidget *widget)
 // fprintf(stderr,"in unix_draw_image here 1\n"); fflush(stderr); 
         gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
                 0, 0, diw /* IMAGE_WIDTH*/, dih /*IMAGE_HEIGHT*/, GDK_RGB_DITHER_MAX, ptr, diw * 3);
-// fprintf(stderr,"xxx in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
+// fprintf(stderr,"in unix_draw_image doing rgb after gdk_draw_rgb_image\n"); fflush(stderr); 
     }
     else
     {
@@ -8107,7 +8106,6 @@ gboolean darea_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpo
 //  fprintf(stderr,"xor %d %d %d %d , gc=%p\n",clip_rect.x,clip_rect.y,clip_rect.width,clip_rect.height,gc); fflush(stderr); 
         setup_xorea(&clip_rect);
         if (darea) gtk_widget_queue_draw(darea);
-// xxx
     }
     }
     else
@@ -8485,6 +8483,7 @@ gboolean gettextentry(GtkWidget *widget)
 
 int alv_gtk_main(int argc, char *argv[])
 {
+    char atcgID_label[2048];
     char tmps[5012];
 //    GtkWidget *filemenu = (void *)0;
 //    GtkWidget *file = (void *)0;
@@ -8670,7 +8669,6 @@ button = gtk_button_new_with_label ("<10000");
     gtk_widget_show (button);
     g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_10000), GINT_TO_POINTER (-10000));
 
-// xxx 
 buttonx = gtk_button_new_with_label (">10000");
     gtk_box_pack_start (GTK_BOX (hbox), buttonx, FALSE, FALSE, 2);
     gtk_widget_show (buttonx);
@@ -8708,7 +8706,28 @@ button = gtk_button_new_with_label ("PNG Save");
     gtk_widget_show (button);
     g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_png), GINT_TO_POINTER (-1));
 
+//    char *str = g_strdup_printf ("<span font=\"14\" color=\"red\">" "<b>\t\tRed: %d</b>" "</span>", value);
+#if 0
+const char *format = "<span style=\"italic\">\%s</span>";
+char *markup;
+markup = g_markup_printf_escaped (format, str);
+gtk_label_set_markup (GTK_LABEL (label), markup);
+g_free (markup);
+#endif
+// xxx 
+char *markup;
+    gtk_set_atcg_info_label(atcgID_label); // formats html style, we wrote this function
+    char *atcg_str = &atcgID_label[0];
+// debug fprintf(stderr,"%s",atcgID_label); 
+    label = gtk_label_new ("Alview");
+    markup = g_markup_printf_escaped (atcgID_label);
+    gtk_label_set_markup (GTK_LABEL (label), markup);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+    g_free (markup);
+//    gtk_label_set_markup (GTK_LABEL (labelRed), str);
 
+// --- 
     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2); // add this line to main vbox
     gtk_widget_show (hbox);
 
