@@ -9713,10 +9713,9 @@ int setup_and_do_fast_snp_caller(char fnbam[])
         fprintf(stderr,"ERROR, must set up GENOMEDATADIR in configure file \"alview.conf\"\n");
         exit(0);
     }
-    status = parse_position(position,chr,&s,&e);
+    status = parse_position(position,gchr,&s,&e);
 
-
-    status = fast_snp_call(fnbam,chr,s,e);
+    status = fast_snp_call(fnbam,gchr,s,e);
     if ((status) || (global_bamerr > 0) )
     {
         fprintf(stderr,"Error- in setup_and_do_fast_snp_caller() after fast_snp_call() status=%d ",status);
@@ -9801,11 +9800,11 @@ int command_line_main(int argc,char *argv[])
         fprintf(stderr,"ERROR, must set up GENOMEDATADIR in configure file \"alview.conf\"\n");
         exit(0);
     }
-    status = parse_position(position,chr,&s,&e);
+    status = parse_position(position,gchr,&s,&e);
 
-fprintf(stderr,"command_line_main() chr=[%s] start=%d end=%d position=[%s] \n",chr,s,e,position); 
+fprintf(stderr,"command_line_main() chr=[%s] start=%d end=%d position=[%s] \n",gchr,s,e,position); 
 
-    status = imgen(outimg,chr,s,e,0);
+    status = imgen(outimg,gchr,s,e,0);
     if ((status) || (global_bamerr > 0) )
     {
         fprintf(stderr,"Error- command_line_main() probably can not generate image. imgen failed %s, status=%d , global_bamerr=%d",outimg,status,global_bamerr);
@@ -11363,6 +11362,7 @@ void set_ucsc_url(char *url) // ,char *blds,char *chr, int s, int e)
    return;
 }
 
+#if 0
 void open_url(char *url)
 {
 #ifdef _WIN32
@@ -11375,6 +11375,7 @@ void open_url(char *url)
      cocoa_call_url(url); // [[NSWorkspace sharedWorkspace] openFile:mad:"http://www.mylink.com"];
 #endif
 }
+#endif
 
 void gtk_set_atcg_info_label(char s[])
 {
