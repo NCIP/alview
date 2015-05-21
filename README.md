@@ -4,7 +4,7 @@ March 24, 2015
 <p>The Alview WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
 <p>Installers for Mac/Windows/Linux are here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
 <p>User's Manual is here : <a href="https://raw.githubusercontent.com/NCIP/alview/master/ALVIEW_USERS_MANUAL.txt">
- https://raw.githubusercontent.com/NCIP/alview/master/ALVIEW_USERS_MANUAL.txt . </p>
+ https://raw.githubusercontent.com/NCIP/alview/master/ALVIEW_USERS_MANUAL.txt</a> . </p>
  
 Current hg18 and hg19 are supported.  More genomes are coming.
 
