@@ -17,7 +17,7 @@ void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int c
 int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end);
 
 void set_ucsc_url(char *url); // ,char *blds,char *chr, int s, int e);
-void open_url(const char *url); // invoke URL using your system's default(?) browser
+void open_url(char *url); // invoke URL using your system's default(?) browser
 #ifdef UNIX
 void linux_call_url(char *url); // calls gtk_link_button_new() stuff
 #endif

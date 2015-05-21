@@ -945,7 +945,7 @@ sprintf(m,"in paint_snp_annot START: khrarg=%s loc1=%u loc2=%u, fp_snp = %p , le
     f.s = loc1;
     f.e = loc2;
 
-sprintf(m," in paint_snp_annot, before binary_search_snp_file() - start - fp_snp is %p , lo=0, hi=",fp_snp,snp_fixed_hi); jdebug(m); 
+// sprintf(m," in paint_snp_annot, before binary_search_snp_file() - start - fp_snp is %p , lo=0, hi=",fp_snp,snp_fixed_hi); jdebug(m); 
     z = binary_search_snp_file(&f,0,snp_fixed_hi);
     if (z)
     {

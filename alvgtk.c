@@ -18,6 +18,50 @@ void freedom_for_memory(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status) ;
 
+char rfc3986[256] = {0};
+char html5[256] = {0};
+
+void url_encoder_rfc_tables_init(){
+
+    int i;
+
+    for (i = 0; i < 256; i++){
+
+        rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
+        html5[i] = isalnum( i) || i == '*' || i == '-' || i == '.' || i == '_' ? i : (i == ' ') ? '+' : 0;
+    }
+}
+
+char *url_encode( char *table, unsigned char *s, char *enc){
+
+    for (; *s; s++){
+
+        if (table[*s]) sprintf( enc, "%c", table[*s]);
+        else sprintf( enc, "%%%02X", *s);
+        while (*++enc);
+    }
+
+    return( enc);
+}
+
+
+
+void linux_call_url(char *url) // calls gtk_link_button_new() stuff
+{
+#if 1
+   char cmd[2048];
+   sprintf(cmd ,"firefox \"%s\"",url);
+   system(cmd);
+#else
+   char cmd[8000];
+   char url_encoded [8048];
+   url_encoder_rfc_tables_init();
+   url_encode( html5, url, url_encoded);
+   sprintf(cmd ,"firefox %s",url_encoded);
+   system(cmd);
+#endif
+}
+
 int start_select_x = 0;
 int end_select_x = 0;
 int xoron = 0;
@@ -8277,6 +8321,22 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
 }
 
 
+gboolean on_button_ucsc(GtkWidget *widget, GdkEventExpose *event, int user_data)
+{
+    char url[2048];
+    set_ucsc_url(url);
+// debug fprintf(stderr,"\"%s\"\n",url); 
+    linux_call_url(url); // calls gtk_link_button_new() stuff
+
+    return TRUE;
+}
+
+gboolean on_button_png(GtkWidget *widget, GdkEventExpose *event, int user_data)
+{
+    return TRUE;
+}
+
+
 gboolean button1(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
     int movek = GPOINTER_TO_INT(user_data);
@@ -8336,6 +8396,19 @@ gboolean button_10000(GtkWidget *widget, GdkEventExpose *event, gpointer user_da
 //    int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, -10000);
 }
+
+gboolean button_ucsc(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
+{
+//    int movek = GPOINTER_TO_INT(user_data);
+    return on_button_ucsc(widget, event, -10000);
+}
+
+gboolean button_png(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
+{
+//    int movek = GPOINTER_TO_INT(user_data);
+    return on_button_png(widget, event, -10000);
+}
+
 
 
 void delete_callback (GtkButton * button,gpointer   data)
@@ -8624,6 +8697,17 @@ button = gtk_button_new_with_label ("base");
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
     gtk_widget_show (button);
     g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (zoom_base), GINT_TO_POINTER (-1));
+
+button = gtk_button_new_with_label ("UCSC link");
+    gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
+    gtk_widget_show (button);
+    g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_ucsc), GINT_TO_POINTER (-1));
+
+button = gtk_button_new_with_label ("PNG Save");
+    gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
+    gtk_widget_show (button);
+    g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_png), GINT_TO_POINTER (-1));
+
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2); // add this line to main vbox
     gtk_widget_show (hbox);
