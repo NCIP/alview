@@ -15,12 +15,13 @@ int end_select_x = 0;
 int start_select_x = 0;
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status) ;
 int xoron = 0;
+
 void freedom_for_memory(void);
 void alview_init(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
-int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end);
+int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end);
 
-// horror  !!!  - can't get it to eat unsigned this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
+// horror  !!!  - can't get it to eat unsigned in this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
 
 
 extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
@@ -136,7 +137,7 @@ struct my_text_type
 };
 
 struct my_text_type texts[] =
-{       // xxx
+{     
  { 100  ,  10 , 65 , 70, 20,      70 , 65 , 170, 20 , "Position:" ,    "chr1:11778-15130"} ,
  { 101  , 320 , 65 , 50, 20,     362 , 65 , 50,  20 , "Width:"  ,      "900" } ,
  { 112  , 422 , 65 , 50, 20,     470 , 65 , 50,  20 , "Height:"  ,     "400" } ,
@@ -227,7 +228,6 @@ void do_img_and_draw(char *fn, char khr[], int s, int e, int arg)
 #if 0
 printf("mac: in do_img_and_draw() before imgen_mem %s %d %d %d %d\n",khr,khrstart,khrend,dih,diw);  fflush(stdout); 
 #endif
-
     img = (void *)imgen_mem(fn_bam,khr,khrstart,khrend,dih, diw,&status);
 #if 0
 printf("mac: in do_img_and_draw after imgen_mem() img =%p, status=%d \n",img,status); fflush(stdout); 
@@ -256,7 +256,7 @@ void get_params_and_draw(int arg)
 
     NSString *userinput = [texts[0].object stringValue];
     sptr = (char *)[userinput UTF8String];
-// printf("xxx in get_params_and_draw() - sptr=[%s]\n",sptr); 
+// printf("in get_params_and_draw() - sptr=[%s]\n",sptr); 
     strcpy(pos,sptr);
     NSString *userinput2 = [texts[1].object stringValue];
     sptr = (char *)[userinput2 UTF8String];
@@ -265,7 +265,7 @@ void get_params_and_draw(int arg)
     sptr = (char *)[userinput3 UTF8String];
     dih = atoi(sptr);
 
-// printf("xxx in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
+// printf("in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
 #if 0
     status = parse_position(pos,khr,&khrstart,&khrend); 
 #endif
@@ -279,7 +279,7 @@ void get_params_and_draw(int arg)
          do_by_gene_name_from_refflat(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
 // fprintf(stderr,"in gettextentry() after do_by_gene_name_from_refflat(): %s %d %d\n",khr,khrstart,khrend); fflush(stderr); 
      }
-// printf("xxx in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
+// printf("in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
 
 // put pos back to screen
     NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
@@ -371,7 +371,6 @@ printf("mac: in on_button_moveSTART movek=%d , khrstart = %d khrend = %d diw=%d 
     NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
     [texts[0].object setStringValue:defval];
 
-// xxx
 // printf("mac: onmove before get_params,, pos = [%s]\n",pos); fflush(stdout);  
     get_params_and_draw(1);
     return 0;
@@ -456,6 +455,9 @@ struct my_button_type buttons[] =
  { 16 ,  430 ,140,  60, 30, ">10000" } ,
  { 17 ,  490 ,140,  60, 30, "<100000" } ,
  { 18 ,  550 ,140,  60, 30, ">100000" } ,
+ { 19 ,  620 ,140,  80, 30, "UCSC Link" } ,
+ { 20 ,  700 ,140,  80, 30, "PNG Save" } ,
+ { 21 ,  780 ,140,  80, 30, "Help" } ,
  { -1 ,   -1 , -1,  -1, -1, "ERRoverflow" } 
 };
 
@@ -490,7 +492,6 @@ int myid;
 
     if (self->myid == 1) // submit button 
     {
-// xxx
         get_params_and_draw(1);
 // debug printf("in mousedown after get_params_and_drawpos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
     }
@@ -613,7 +614,59 @@ int myid;
     {
         status = on_button_move(100000);
     }
+    else if (self->myid == 19)  // "UCSC Link"
+    {
+       NSString *str;
+       char url[2048];
+       set_ucsc_url(url);
+       str = [NSString stringWithCString:url encoding:NSASCIIStringEncoding];
+       [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
+    }
+    else if (self->myid == 20)  // save png
+    { // xxx 
+        struct image_type im3;
+        if (img)
+        {
+            char fn_png[2048];
+            NSSavePanel *panel = [NSSavePanel savePanel];
+            NSString *fileName=nil;
+            fileName=@"untitled.png";
+            [panel setMessage:@"Please select a path where to save the image."]; // Message inside modal window
+            NSArray  * fileTypes = [NSArray arrayWithObjects:@"png",nil];
+            [panel setAllowedFileTypes:fileTypes];
+//            [panel setAllowedFileTypes:[NSArray initWithObjects:@"png",nil]];
+            // [panel setAllowsOtherFileTypes:YES];
+            [panel setAllowsOtherFileTypes:NO];
+            [panel setExtensionHidden:YES];
+            [panel setCanCreateDirectories:YES];
+            [panel setNameFieldStringValue:fileName];
+            [panel setTitle:@"Saving PNG file..."]; // Window title
+//            [panel setAccessoryView:accessoryView1];
+            NSInteger result = [panel runModal];
+            if (result == NSOKButton) {     
+                NSString *path0 = [[panel URL] path];
+                const char *cfilename=[path0 UTF8String];
+                im3.data = img;
+                im3.width = diw;
+                im3.height = dih;
+                strcpy(fn_png,cfilename);
+                ImageSaveAsPNG(&im3,fn_png);
+            }
+        }
+    }
+    else if (self->myid == 21)  // help
+    { // xxx 
+    }
+
+#if 0
+ Position: Width: Height:    Splice Only On:   BaseColor:   Uniq:   Quality:
+  7571199-7572901 , mismatch A  C  G  T  Ins  Del  mainmenu ins=0 del=0 tot=71 blds=hg19
+Using Dataset:0 Position : chr17 7571199 7572901
+Get DNA | Range is chr17 7571199 7572901 (1702 base pairs)
+CGWB Link | UCSC Link | bambino | sam | sam1 | sam2 | fasta | FQ | align | blat | P | N | Pl | Nl | For ALVIEW Main Page, click here. 
+NCBI: TP53 | all |
 // printf("mac: end mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
+#endif
     [super mouseDown:theEvent];
 }
 @end
@@ -799,7 +852,7 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
     [superview addSubview:tfhead];
 
     for (i=0;texts[i].id != -1 ; i++)
-    { // xxx 
+    {
         NSTextField *tf = create_label(texts[i].label,
                      texts[i].x,superframe.size.height - texts[i].y,texts[i].w,texts[i].h);
         [superview addSubview:tf];
