@@ -674,7 +674,7 @@ struct snp_type *binary_search_snp_file(struct snp_type *match_me, long int lo, 
     long int seekto;
     long int mid;
     int k;
-char m[5120];
+// char m[5120];
 
 // sprintf(m," in binary_search_snp_file() - start - fp_snp is %p, lo=%ld , hi=%ld",fp_snp,lo,hi);  jdebug(m);
     if (fp_snp == (void *)0) 
@@ -898,7 +898,7 @@ static void index2chr(int idx, char *chrarg)
 static void paint_snp_annot( char khrarg[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
     struct snp_type ss;
-    int error;
+//     int error;
     char tmps[512];
     double d;
     int x1,x2;
@@ -1531,7 +1531,7 @@ sprintf(m,"do_by_gene_name_from_refflat here 999 , rec_cnt = %d",rec_cnt);  jdeb
 
 int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
 {
-    char m[2048];
+//    char m[2048];
     char UPPER[2048];
     int i;
     int status = 0;

@@ -18,48 +18,12 @@ void freedom_for_memory(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status) ;
 
-char rfc3986[256] = {0};
-char html5[256] = {0};
-
-void url_encoder_rfc_tables_init(){
-
-    int i;
-
-    for (i = 0; i < 256; i++){
-
-        rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
-        html5[i] = isalnum( i) || i == '*' || i == '-' || i == '.' || i == '_' ? i : (i == ' ') ? '+' : 0;
-    }
-}
-
-char *url_encode( char *table, unsigned char *s, char *enc){
-
-    for (; *s; s++){
-
-        if (table[*s]) sprintf( enc, "%c", table[*s]);
-        else sprintf( enc, "%%%02X", *s);
-        while (*++enc);
-    }
-
-    return( enc);
-}
-
-
 
 void linux_call_url(char *url) 
 {
-#if 1
    char cmd[2048];
    sprintf(cmd ,"firefox \"%s\"",url);
    system(cmd);
-#else
-   char cmd[8000];
-   char url_encoded [8048];
-   url_encoder_rfc_tables_init();
-   url_encode( html5, url, url_encoded);
-   sprintf(cmd ,"firefox %s",url_encoded);
-   system(cmd);
-#endif
 }
 
 int start_select_x = 0;
@@ -8348,9 +8312,6 @@ static void pngsave( GtkWidget *w, gpointer   data )
     gchar *fn=NULL; // from user dialog 
     char filename_png_c[2048];
     GtkWidget *dialog;
-    int height = dih; // height
-    int width = diw ; // width
-    int status;
      
 
     if (img)
@@ -8381,7 +8342,7 @@ gboolean on_button_png(GtkWidget *widget, GdkEventExpose *event, int user_data)
 
 gboolean button1(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    int movek = GPOINTER_TO_INT(user_data);
+    // int movek = GPOINTER_TO_INT(user_data);
     return on_button_move(widget, event, 1);
 }
 
@@ -8782,7 +8743,7 @@ g_free (markup);
 // xxx 
 char *markup;
     gtk_set_atcg_info_label(atcgID_label); // formats html style, we wrote this function
-    char *atcg_str = &atcgID_label[0];
+//     char *atcg_str = &atcgID_label[0];
 // debug fprintf(stderr,"%s",atcgID_label); 
     label = gtk_label_new ("Alview");
     markup = g_markup_printf_escaped (atcgID_label);
@@ -8891,7 +8852,6 @@ int main( int   argc, char *argv[] )
     alv_gtk_main(argc,argv);
     return 0;
 }
-
 
 
 
