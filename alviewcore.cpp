@@ -11355,25 +11355,23 @@ void freedom_for_memory(void)
 #include <shellapi.h>
 #endif
 
-void set_ucsc_url(char *url) // ,char *blds,char *chr, int s, int e)
+void set_blat_url(char *url) 
 {
-   // sprintf(url,"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=%s&position=%s:%d-%d\" target=\"_blank\">UCSC Link</a> | \n",blds,tmp_chr,alv_start,alv_end);
+   strcpy(url,"http://genome.ucsc.edu/cgi-bin/hgBlat");
+   return;
+}
+
+void set_ucsc_url(char *url) // this func will use blds,chr, start, end
+{
    sprintf(url,"http://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=%s&position=%s:%d-%d",blds,gchr,gs,ge);
    return;
 }
 
-#if 0
-void open_url(char *url)
+void set_alviewhelp_url(char *url) 
 {
-#ifdef _WIN32
-     windows_call_url(url); // ShellExecute(GetActiveWindow(), "open", url, NULL, NULL, SW_SHOWNORMAL);
-#endif
-#if 0
-     linux_call_url(url); // calls gtk_link_button_new() stuff
-     cocoa_call_url(url); // [[NSWorkspace sharedWorkspace] openFile:mad:"http://www.mylink.com"];
-#endif
+   strcpy(url,"http://45.56.125.191/help.html");
+   return;
 }
-#endif
 
 void gtk_set_atcg_info_label(char s[])
 {
@@ -11388,21 +11386,5 @@ sprintf(s,"mismatch: <span color=\"#%s\">A </span> <span color=\"#%s\">C </span>
     dna_I_s,   // 00ffff  // cyan insert
     dna_D_s    // ffb000  // yellow  delete
 );
-#if 0
- sprintf(s,"mismatch: <span color=\"#%s\">A </span><span color=\"#%s\">C </span><span color=\"#%s\">G </span><span color=#%s>T </span> <span color=3%s>Ins </span><span color=#%s>Del</span>",
-    dna_a_s,  // 9f005f   // nucleotides acgt ...
-    dna_c_s,  // ff5f00  
-    dna_g_s,  // bfff00  
-    dna_t_s,  // 003fbf 
-    dna_I_s,  // 00ffff  // cyan insert
-    dna_D_s   // ffb000  // yellow  delete
-);
-    strcpy(dna_a_s,"9f005f");   // nucleotides acgt ...
-    strcpy(dna_c_s,"ff5f00");  
-    strcpy(dna_g_s,"bfff00");  
-    strcpy(dna_t_s,"003fbf"); 
-    strcpy(dna_I_s,"00ffff");  // cyan insert
-    strcpy(dna_D_s,"ffb000");  // yellow  delete
-#endif
 }
 

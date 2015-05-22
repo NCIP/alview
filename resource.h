@@ -37,10 +37,10 @@
 #define IDC_BUTTON14                    1053
 #define IDC_BUTTON15                    1054
 #define IDC_BUTTON16                    1055
-// future ..
 #define IDC_BUTTON17                    1056
 #define IDC_BUTTON18                    1057
 #define IDC_BUTTON19                    1058
+// future ..
 #define IDC_BUTTON20                    1059
 #define IDC_BUTTON21                    1060
 

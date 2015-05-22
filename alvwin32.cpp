@@ -8524,6 +8524,18 @@ sprintf(m,"endDailog on id =0x%x ( %d ) ",id,id);  jdebug(m);
        popopenoutputfilepng(hwnd, id, fn_png);
        windows_save_file(fn_png); 
     }
+    else if (id == IDC_BUTTON18)     // blat
+    {                   
+       char url[2048];
+       set_blat_url(url);
+       windows_call_url(url);   // invoke URL using your system's default(?) browser, 
+    }                   
+    else if (id == IDC_BUTTON19)     // ucsc external call 
+    {                   
+       char url[2048];
+       set_alviewhelp_url(url);
+       windows_call_url(url);
+    }                   
     if (hwnd == hBitmap)
     {
         // SendMessage(hBitmap,STM_SETIMAGE,(WPARAM)IMAGE_BITMAP,(LPARAM)hBMP);
@@ -9063,15 +9075,13 @@ int WINAPI WinMain(
     int /*nShowCmd*/)
 {
     hInst = hInstance;
-
 #if 0 // does not work
     HWND hwnd;
     hwnd = GetDesktopWindow();
     CreateMainMenu(hwnd);
     ShowWindow(hwnd,SW_SHOW);
 #endif
-
-    alview_init();  // loads config file, figures out current working directory and current executing directory
+    alview_init();            // loads config file, figures out current working directory and current executing directory
     check_if_exits_genomedatadir(); 
 
     DialogBox( hInstance, 
