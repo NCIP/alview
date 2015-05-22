@@ -46,7 +46,7 @@ char *url_encode( char *table, unsigned char *s, char *enc){
 
 
 
-void linux_call_url(char *url) // calls gtk_link_button_new() stuff
+void linux_call_url(char *url) 
 {
 #if 1
    char cmd[2048];
@@ -163,6 +163,7 @@ fprintf(stderr,"ERROR: imgdata is null , no lode\n"); fflush(stderr);
 fprintf(stderr,"ERROR: darea is nul \n"); fflush(stderr); 
     }
 }
+
 
 
 /* For the check button */
@@ -8313,7 +8314,6 @@ gboolean on_button_move(GtkWidget *widget, GdkEventExpose *event, int user_data)
     }
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
     gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
-// fprintf(stderr,"in on_button_move END movek=%d , khrstart = %d khrend = %d diw=%d dih=%d fn=%s\n",movek,khrstart,khrend,diw,dih,filename); fflush(stderr);  
 
     return TRUE;
 }
@@ -8323,10 +8323,54 @@ gboolean on_button_ucsc(GtkWidget *widget, GdkEventExpose *event, int user_data)
 {
     char url[2048];
     set_ucsc_url(url);
-// debug fprintf(stderr,"\"%s\"\n",url); 
-    linux_call_url(url); // calls gtk_link_button_new() stuff
-
+    linux_call_url(url);
     return TRUE;
+}
+
+gboolean on_button_blat(GtkWidget *widget, GdkEventExpose *event, int user_data)
+{
+    char url[2048];
+    set_blat_url(url);
+    linux_call_url(url);
+    return TRUE;
+}
+gboolean on_button_help(GtkWidget *widget, GdkEventExpose *event, int user_data)
+{
+    char url[2048];
+    set_alviewhelp_url(url);
+    linux_call_url(url);
+    return TRUE;
+}
+
+static void pngsave( GtkWidget *w, gpointer   data )
+{
+    struct image_type im3;
+    gchar *fn=NULL; // from user dialog 
+    char filename_png_c[2048];
+    GtkWidget *dialog;
+    int height = dih; // height
+    int width = diw ; // width
+    int status;
+     
+
+    if (img)
+    {
+       dialog = gtk_file_chooser_dialog_new ("Pick/Set Save PNG file name...", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, 
+                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+       gtk_dialog_run (GTK_DIALOG (dialog));
+       fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+       gtk_widget_destroy(dialog);
+       if (fn == (void *)0) return;
+       strcpy(filename_png_c,fn); 
+#if 0
+fprintf(stderr,"file name = %p \n", filename_png_c);  fflush(stderr); 
+#endif
+        im3.data = img;
+        im3.width = diw;
+        im3.height = dih;
+        ImageSaveAsPNG(&im3, filename_png_c);
+    }
+    return;
 }
 
 gboolean on_button_png(GtkWidget *widget, GdkEventExpose *event, int user_data)
@@ -8338,7 +8382,6 @@ gboolean on_button_png(GtkWidget *widget, GdkEventExpose *event, int user_data)
 gboolean button1(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
     int movek = GPOINTER_TO_INT(user_data);
-// fprintf(stderr,"in button one movek = %d \n",movek); fflush(stderr); 
     return on_button_move(widget, event, 1);
 }
 
@@ -8405,6 +8448,16 @@ gboolean button_png(GtkWidget *widget, GdkEventExpose *event, gpointer user_data
 {
 //    int movek = GPOINTER_TO_INT(user_data);
     return on_button_png(widget, event, -10000);
+}
+gboolean button_blat(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
+{
+//    int movek = GPOINTER_TO_INT(user_data);
+    return on_button_ucsc(widget, event, -10000);
+}
+gboolean button_help(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
+{
+//    int movek = GPOINTER_TO_INT(user_data);
+    return on_button_help(widget, event, -10000);
 }
 
 
@@ -8705,6 +8758,18 @@ button = gtk_button_new_with_label ("PNG Save");
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
     gtk_widget_show (button);
     g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_png), GINT_TO_POINTER (-1));
+
+button = gtk_button_new_with_label ("Blat");
+    gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
+    gtk_widget_show (button);
+    g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_blat), GINT_TO_POINTER (-1));
+
+
+button = gtk_button_new_with_label ("Help");
+    gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 2);
+    gtk_widget_show (button);
+    g_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (button_help), GINT_TO_POINTER (-1));
+
 
 //    char *str = g_strdup_printf ("<span font=\"14\" color=\"red\">" "<b>\t\tRed: %d</b>" "</span>", value);
 #if 0
