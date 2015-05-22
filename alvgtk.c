@@ -8306,7 +8306,7 @@ gboolean on_button_help(GtkWidget *widget, GdkEventExpose *event, int user_data)
     return TRUE;
 }
 
-static void pngsave( GtkWidget *w, gpointer   data )
+static void pngsave( GtkWidget *w)
 {
     struct image_type im3;
     gchar *fn=NULL; // from user dialog 
@@ -8336,6 +8336,7 @@ fprintf(stderr,"file name = %p \n", filename_png_c);  fflush(stderr);
 
 gboolean on_button_png(GtkWidget *widget, GdkEventExpose *event, int user_data)
 {
+    pngsave(widget);
     return TRUE;
 }
 
@@ -8413,7 +8414,7 @@ gboolean button_png(GtkWidget *widget, GdkEventExpose *event, gpointer user_data
 gboolean button_blat(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 //    int movek = GPOINTER_TO_INT(user_data);
-    return on_button_ucsc(widget, event, -10000);
+    return on_button_blat(widget, event, -10000);
 }
 gboolean button_help(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
