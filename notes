@@ -52,6 +52,8 @@ git push https://github.com/NCIP/alview.git --force
 
 #force command line not gtk/X on linux ...
 unset SSH_ASKPASS
+#windows refuses to respect execute permisstion fix ... (test this more)
+git update-index --chmod=+x   go
 
 ___
 final checklist

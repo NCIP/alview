@@ -1,17 +1,26 @@
 
+Better documentation for slideshow.
+Discuss Annotation Creation.
+Document zygosity track.
+Back button.
+Filter by tag.
+
 fix linux save png
-      Help Files
-      Add ATCG colors
-      Discuss IGV
-      Improve Documentation - add discusssion of HTDOCDIR in server setup
+ o    Help Files
+ o    Add ATCG colors
+ o    Discuss IGV
+ o    Improve Documentation - add discusssion of HTDOCDIR in server setup
  w    Save as PNG
  wl   Export Image
  ok   Base level zoom
  ok   Add ATCG to reference - add little atcg
  ok   Find good place to park when starting new bam.
+ done Memory usage Discussion in User's Manual
  nc   Need slideshow - Slidewhow mode
  nc   Make sure only valid BAMS load;
  nc   Multi-image - need now.
  nc   Slots method to lower memory usage
  no   Add linux 32 bit edition
 
+Session scripting.
+Large indel marking.

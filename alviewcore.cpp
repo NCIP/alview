@@ -761,6 +761,7 @@ static void setup_snp(char *blds)
     int error;
     char m[1024];
 
+
 sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,SIZE_SNPTYPE,blds); jdebug(m); 
 // xxxxx
     if (fp_snp) return; // already opened  
@@ -895,10 +896,10 @@ static void index2chr(int idx, char *chrarg)
 }
 
 
+
 static void paint_snp_annot( char khrarg[] , unsigned int loc1 ,  unsigned int loc2 , char stuff[])
 {
     struct snp_type ss;
-//     int error;
     char tmps[512];
     double d;
     int x1,x2;
@@ -954,6 +955,7 @@ sprintf(m,"in paint_snp_annot START: khrarg=%s loc1=%u loc2=%u, fp_snp = %p , le
             // return; NNNNNOOOOOOOO  ... do NOT return. We just want to get near it 
         }
     }
+
 
 sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s loc=%d last_snp_fseek_place=%ld",z,khrarg,loc1,last_snp_fseek_place);  jdebug(m); 
     spot = last_snp_fseek_place;
@@ -1045,7 +1047,8 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s l
                   if (x1 < 0) x1 = 0;
                   if (x1>=iw) x1 = iw-1;;
                   if (x2 < 0) x2 = 0;
-                  if (x2>=iw) x2 = iw-1;;
+                  if (x2>=iw) x2 = iw-1;; 
+// mask : info on sift , bit 1 = is sift , bit2 = nsfp origin
                   if (ss.mask & 0x01) 
                       ImageFilledRectangle(im,x1,y2,x2,y1,blue);
                   else
@@ -1061,6 +1064,7 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s l
         }
         if (kickout++ > 10000) break;
     }
+
 // sprintf(m,"in paint_snp_annot() , readcnt = %d , kickout=%d ",readcnt,kickout); jdebug(m);
 
     fseek(fp_snp,0,SEEK_SET);
@@ -4448,9 +4452,6 @@ static void draw_dnacnts_and_dnamms(char khr[], int s, int e, int offset)
             if (x1==x2) x2++;
             if (x1>=iw) break;
             if (x2>=iw) break;
-#if 0 // USE_GD
-            gdImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
-#endif
             ImageFilledRectangle(im,x1,y2,x2,y1,xcolor);
 
         }
@@ -6634,6 +6635,7 @@ sprintf(m,"ERROR: cant read %s in fopen_and_read_cov_OLD()",fullfn); jdebug(m);
 }
 
 
+#if 0
 void start_do_cov(char bamfn[], unsigned int circ_genome_s, unsigned int circ_genome_e)
 {
     int px,py;
@@ -6648,7 +6650,7 @@ void start_do_cov(char bamfn[], unsigned int circ_genome_s, unsigned int circ_ge
         // strcpy(khr,chromName); circ_genome_s = seqStart;  get_circ_genome_addr(khr,&cir_genome_s);
         // strcpy(khr,chromName); circ_genome_3 = seqEnd;  get_circ_genome_addr(khr,&cir_genome_e);
         cov_len = (size_t)(circ_genome_e - circ_genome_s); 
-        gg1 = (int *)malloc(cov_len*2); if (gg1 == (void *)0)  // gg1
+        gg1 = (int *)malloc(cov_len*2); // if (gg1 == (void *)0)  // gg1
         if (!gg1)
         { 
              sprintf(m,"cant malloc %ld bytes\n",cov_len);
@@ -6682,6 +6684,7 @@ void start_do_cov(char bamfn[], unsigned int circ_genome_s, unsigned int circ_ge
     }
     return;
 }
+#endif
 #endif
 
 
@@ -7419,7 +7422,6 @@ sprintf(m,"in imgen() here 1\n"); jdebug(m);
 // sprintf(m,"in imgen() after paint_gene_annot() ");  jdebug(m); 
     }
 sprintf(m,"in imgen() here 2\n"); jdebug(m); 
-
 //    old start_do_cov(fn_bam, s,e);
 
 sprintf(m,"in imgen() here 3\n"); jdebug(m); 

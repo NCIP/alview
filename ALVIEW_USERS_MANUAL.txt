@@ -12,6 +12,7 @@ V.    Operation as Command Line Utility
 VI.   Operation as Web Server
 VII.  General Operation
 VIII. "alview.conf" text configuration file
+IX.   FAQs - Frequently Asked Questions.
 
 I. Introduction.
 Alview is a fast computer program for viewing BAM files.  Various
@@ -145,14 +146,14 @@ Windows: run the Windows version installer from http://45.56.125.191/ .
 
 APPLE MAC GUI: Download DMG file, click on it.  A Mac tarball is also available.
 Alternately, you can hand install on MAC: 
-    Download the "alvmac" binary executable file.
+    Download the "alvmac" (alview mac) binary executable file.
     Download GENOMEDATADIR data
     Edit alview.conf
     Check permission, run "alvmac".
 
 Linux: A 64bit Linux version made on an old system is available, so it ~should~ run on
 later 64 bit Linux versions. Download, untar , set permissions, edit 
-"alview.conf", run alvgtk.  Hand install is this ...
+"alview.conf", run alvgtk (alview linux).  Hand install is this ...
     Download the "alvgtk" binary executable file.
     Download GENOMEDATADIR data
     Edit alview.conf
@@ -209,7 +210,7 @@ Running alview command line ...
         arg2 outimg = output file name ( png file)
         arg3 position = example chr17:10000-10500  it can handle 17:10000-10500
                     type positions
-        arg4 blds = build string (example "hg19")
+        arg4 blds = genomic build string (example "hg19")
         (optional) arg5 ih = image height
         (optional) arg6 iw = image width
 
@@ -300,6 +301,7 @@ You can use the navigation buttons to move around.
 You can use the quality flag to view a grayscale graphic of the quality
 values (if available).
 
+
 VII. alview.conf file
 
 Example "alview.conf" file , this one is setup for windows...
@@ -315,6 +317,29 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 #GENOMEDATADIR=/Users/finneyr/GENOMEDATA/
 #end
 ---PREVIOUS LINE IS LAST LINE OF alview.conf CONFIGURATION TEXT FILE
+
+
+IX.   FAQS - Frequently Asked Questions.
+-What is Memory Usage.
+   There is a base level, typically very small in a running program.  Windows 
+Task Manger reports 11MB memory used on startup.  Additional memory usage 
+is based on image size and size of genomic region viewed size.  Images are RGB 
+and there is a buffer for XOR selecting zoom region and a "is this space
+already occupied" buffer.  Space is needed for ATCG base content and counts of
+reference vs. nonreference count calls.
+So  memory usage is basic_amount + (Height * width) * 3 * 3 + region_size + (region_size  * 2 * 2);
+where
+
+basic_amount is fairly negible basic runtime footprint (11MB on Windows)
+Height is height of image
+Width is height of image
+3 (first 3) is for RGB and 
+3 (sedond 3) is for 1) main , 2) XORbuffer nd 3) is_spot_occupied images of the same sized image
+region_size is the number of bases (nucleotides) the user selected to view
+2 (first 2) is for the count of bases from reads that map to that location
+2 (second 2) is for the count of mismatched bases at that location
+
+
 
 #01234567890123456789012345678901234567890123456789012345678901234567890123456789
 
