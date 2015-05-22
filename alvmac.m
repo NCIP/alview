@@ -456,8 +456,9 @@ struct my_button_type buttons[] =
  { 17 ,  490 ,140,  60, 30, "<100000" } ,
  { 18 ,  550 ,140,  60, 30, ">100000" } ,
  { 19 ,  620 ,140,  80, 30, "UCSC Link" } ,
- { 20 ,  700 ,140,  80, 30, "PNG Save" } ,
- { 21 ,  780 ,140,  80, 30, "Help" } ,
+ { 20 ,  700 ,140,  60, 30, "PNG Save" } ,
+ { 21 ,  760 ,140,  60, 30, "Blat" } ,
+ { 22 ,  820 ,140,  60, 30, "Help" } ,
  { -1 ,   -1 , -1,  -1, -1, "ERRoverflow" } 
 };
 
@@ -623,7 +624,7 @@ int myid;
        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
     }
     else if (self->myid == 20)  // save png
-    { // xxx 
+    {
         struct image_type im3;
         if (img)
         {
@@ -654,8 +655,21 @@ int myid;
             }
         }
     }
-    else if (self->myid == 21)  // help
+    else if (self->myid == 21)  // blat
+    {
+       NSString *str;
+       char url[2048];
+       set_blat_url(url);
+       str = [NSString stringWithCString:url encoding:NSASCIIStringEncoding];
+       [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
+    }
+    else if (self->myid == 22)  // help
     { // xxx 
+       NSString *str;
+       char url[2048];
+       set_alviewhelp_url(url);
+       str = [NSString stringWithCString:url encoding:NSASCIIStringEncoding];
+       [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
     }
 
 #if 0
