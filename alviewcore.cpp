@@ -11368,10 +11368,8 @@ void open_url(char *url)
 #ifdef _WIN32
      windows_call_url(url); // ShellExecute(GetActiveWindow(), "open", url, NULL, NULL, SW_SHOWNORMAL);
 #endif
-#ifdef UNIX
+#if 0
      linux_call_url(url); // calls gtk_link_button_new() stuff
-#endif
-#ifdef MAC
      cocoa_call_url(url); // [[NSWorkspace sharedWorkspace] openFile:mad:"http://www.mylink.com"];
 #endif
 }
