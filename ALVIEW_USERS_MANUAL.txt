@@ -1,18 +1,19 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision May 24, 2015 
+Latest revision May 25, 2015 
 
 Contents.
 I.    Introduction.
 II.   Power User Fast Start
 III.  Installation.
 IV.   Compilation.
-V.    Operation as Command Line Utility
+V.    Operation as Command Line Program
 VI.   Operation as Web Server
 VII.  General Operation
 VIII. "alview.conf" text configuration file
-IX.   FAQs - Frequently Asked Questions.
+IX.   Utilities
+X.    FAQs - Frequently Asked Questions.
 
 I. Introduction.
 Alview is a fast computer program for viewing BAM files.  Various
@@ -283,6 +284,9 @@ just created, make sure cgi programs can access this.
 If in doubt, just set it up off the executable (cgi-bin) directory as a
 subdirectory [ the default location should get detected].
 
+
+VI.   Operation as Web Server
+
 Alview webserver uses 1 CSS and 3 javascript files. Hand install them from 
 https://github.com/NCIP/alview/blob/master/MISC/ ...
 Create at "js" directory off of your HTDOCS directory (the Apache default directory).
@@ -319,15 +323,23 @@ For instance you can create user logins and examine cookies and you on user data
 Additionally, you could restrict access  to certain IP addresses.
 
 
-VI.  Running Alview as a GUI 
+VII.  General Operation
 Enter the genomic coordinates in the position box or a HUGO gene name.
 You can drag select with a mouse a region to zoom in.
 You can use the navigation buttons to move around.
 You can use the quality flag to view a grayscale graphic of the quality
 values (if available).
 
+See http://45.56.125.191/help.html for latest help file.
+You can the specified button to call the UCSC browser focused on your
+region of interest.
 
-VII. alview.conf file
+You ~can~ view a whole chromosome.  This may take some time.
+Users will find zooming from anywhere to 8X zoomin to zoomng out to 
+view several consecutive genes is best.
+
+
+VIII. alview.conf file
 
 Example "alview.conf" file , this one is setup for windows...
 This must be a text file, not a word file or html file.
@@ -344,7 +356,30 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 ---PREVIOUS LINE IS LAST LINE OF alview.conf CONFIGURATION TEXT FILE
 
 
-IX.   FAQS - Frequently Asked Questions.
+IX.  Utilities
+Programs used to create refseq and snp annotation tracks files are in
+https://github.com/NCIP/alview/tree/master/UTILS
+To modify, edit 
+    UTILS/ccflat.c
+    UTILS/nsfp2mydb.c
+and re-compile.   Instructions are at very top of file.  
+Please note, the output is *not* necessarily the C/C++ struct record size.
+Record definition is speciied by the field byte sizes which are in the 
+read/write functions in these programs.
+nsftp2mydb.c is a very new program.
+
+These are simple
+"vi gcc run" C progams.  They create raw data, binary search-able flat files for 
+RefSeq and NSFPdb+dbSNP.
+Input files are from UCSC (reflat and dbsnp)and dbNSFP.
+dbNSFP is at https://sites.google.com/site/jpopgen/dbNSFP.  It is
+"a database developed for functional prediction and annotation of all potential 
+non-synonymous single-nucleotide variants (nsSNVs) in the human genome".
+UCSC files are the refflat for the build and a dbsnp file.  Currently its hg18.138
+hg19.dbsnpComon and hg18.reffat hg19.reflat.
+
+
+X.   FAQS - Frequently Asked Questions.
 
 -What is Memory Usage?
    There is a base level, typically very small in a running program.  Windows 
