@@ -1,7 +1,7 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision March 24, 2015 
+Latest revision May 24, 2015 
 
 Contents.
 I.    Introduction.
@@ -78,8 +78,14 @@ Make and/or install  1) samtools and 2)zlib if they are not already there.
 
 Sample Compile for command line Using NEW samtools 1.0 ( after august 2014)  on Linux
 
+Note, please make samtools, GTK2 development libraries, and gcc are installed.
+GTK2 runtime is often already installed but you need to GTK2 development libraries.
+gcc (c compiler)is often already installed on most Linux systems.  samtools only requires
+download and "make".  Know where you installed this.
+
 # set samtools to proper directory for you system.
-    gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview alviewcore.cpp  -I. \
+    cp alvmisc.c alvmisc.cpp
+    gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alviewmisc.cpp alviewcore.cpp  -I. \
     -I/h1/finneyr/samtools-1.0/ \
     -I/h1/finneyr/samtools-1.0/htslib-1.0/ \
     -I/h1/finneyr/samtools-1.0/htslib-1.0/htslib/ \
@@ -88,10 +94,10 @@ Sample Compile for command line Using NEW samtools 1.0 ( after august 2014)  on 
     /h1/finneyr/samtools-1.0//htslib-1.0/libhts.a \
     -lbam -lm -lz -lgd -lpthread -lstdc++
 
-Compile for command line Using old samtools  - compile for command line on Linux ...
+Compile for command line Using older samtools  - compile for command line on Linux ...
 
 #set samtools to proper directory for you system.
-#****** note, can't mix c and cpp effortlessly  ** ouch ***
+#****** note, can't mix c and cpp effortlessly  ** ouch *** so just copy file.c to file.cpp
     cp alvmisc.c alvmisc.cpp
     gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp \
     alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ \
@@ -99,7 +105,8 @@ Compile for command line Using old samtools  - compile for command line on Linux
 
 
 Cygwin users may need to modify the samtools make file to get samtools to 
-compile.  For most, download samtools and "make" should do the trick.
+compile.  There's information on the internet on how to do this.
+For most, download samtools and "make" should do the trick.
 
 Currently the samtools 1.1 is a bit hard to get right on Windows.  For Windows 
 the samtools version 0.1.18 is what is currently supported and works with old 
@@ -201,11 +208,27 @@ Set up the "alview.conf" file .  Edit this file with a text editor.
 
 V.  Operation as Command Line Utility.
 
-You might have to compile for standalone or download a working version. See compilation section
-if you need to compile. 
 
-Running alview command line ...
-    The command line argument are ...
+This can be used in scripts for batch processing files.   It's pretty simple to 
+operate.  Note that this an ideal utility for power users who wish to create 
+there own batch files or integrate into existing viewing tools.   PERL, Python, 
+shell, Powershell users and users with ohter programming and scripting skills can use 
+their favorite tools to call alview command line executable to customize their 
+examination of bam files.  The output of alview command line is a PNG image 
+file that can produced and dealt with as the user wises.
+
+You might have to compile for standalone or download a working version. See 
+compilation section if you need to compile.  We provide some command line 
+binaries.  You need to setup the "alview.conf" text configuration file to point 
+to the GEENOMEDATADIR and have downloaded the *large* GENOMEDATA tar and untar it.
+
+Here's a quick example on Windows:
+        alview_cmd_win.exe c:\rich\BAMS\RW1.BWA-aln.RG.MKDUP.bam temptest.png chr17:7512444-7519536 hg19
+
+The actual command name is OS specific.
+
+
+    The Alview command line argument are ...
         arg1 fn_bam = name of bam files (will use to determine bai file)
         arg2 outimg = output file name ( png file)
         arg3 position = example chr17:10000-10500  it can handle 17:10000-10500
@@ -224,12 +247,14 @@ to this collection of pictures via other tools.  You can
 use whatever tools you want to organize or examine these images.
 
 You can view the output in a slideshow, the file "slideshowtemplate.html" is a
-template file we provide for assisting in this.
+template file we provide for assisting in this.   This is on github.
+This is just an html file you can hack to point to your images and 
+custom annotation (like from a VCF file or annotated snp caller output).
 
-Edit slideshowtemplate.html like this:
+Edit the file "slideshowtemplate.html" like this:
 Set the "IMGSHERE" and "ANOSHERE" lines with image files and annotation.  This
 is a little work, but makes viewing your massive 40,000 SNP calls easy to review!
-This is probably the true power user's tool for reviewing his lab results and
+This is a true power user's tool for reviewing his lab results and
 prioritizing further work.
 
 Actually reviewing your snp calls for anomalies can save you a lot of grief.
@@ -320,7 +345,8 @@ GENOMEDATADIR=c:\rich\GENOMEDATA\
 
 
 IX.   FAQS - Frequently Asked Questions.
--What is Memory Usage.
+
+-What is Memory Usage?
    There is a base level, typically very small in a running program.  Windows 
 Task Manger reports 11MB memory used on startup.  Additional memory usage 
 is based on image size and size of genomic region viewed size.  Images are RGB 
@@ -330,7 +356,7 @@ reference vs. nonreference count calls.
 So  memory usage is basic_amount + (Height * width) * 3 * 3 + region_size + (region_size  * 2 * 2);
 where
 
-basic_amount is fairly negible basic runtime footprint (11MB on Windows)
+basic_amount is fairly neglible basic runtime footprint (11MB on Windows)
 Height is height of image
 Width is height of image
 3 (first 3) is for RGB and 
@@ -338,7 +364,6 @@ Width is height of image
 region_size is the number of bases (nucleotides) the user selected to view
 2 (first 2) is for the count of bases from reads that map to that location
 2 (second 2) is for the count of mismatched bases at that location
-
 
 
 #01234567890123456789012345678901234567890123456789012345678901234567890123456789
