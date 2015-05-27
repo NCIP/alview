@@ -1452,14 +1452,21 @@ sprintf(m,"end  setup_refflat refflat_fixed_hi=%ld , returning 0(==good)",reffla
 }
 
 
-int do_by_gene_name_from_refflat_nitty_gritty(const char gene[],char chr[],int *start,int *end)
+int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
 {
     char m[5120];
+    int i;
     struct flattype f;
+    char UPPER[2048];
+
+    strcpy(UPPER,gene);
+    for (i=0;gene[i];i++)
+        UPPER[i] = toupper(gene[i]); 
+
     int rec_cnt = 0;
 
 // -- just blitz through flat file, not using index (cuz not sorted by name) to find match on "gene" parameter
-sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,blds);  jdebug(m); 
+sprintf(m,"in do_by_gene_name_from_refflat_nitty_gritty - START , gene=[%s] blds=[%s]",gene,blds);  jdebug(m); 
 
     fix_up_support_file_paths();
     if (setup_refflat(refflat_d_fn,refflat_o_fn) < 0)  // 0 == good
@@ -1467,10 +1474,10 @@ sprintf(m,"in do_by_gene_name_from_refflat - START , gene=[%s] blds=[%s]",gene,b
         strcpy(chr,"chr1");
         *start = 1 ; 
         *end = 18915;
-sprintf(m,"ERROR: in do_by_gene_name_from_refflat() from call to setup_refflat() - setting to okay chr:loc");  jdebug(m);
+sprintf(m,"ERROR: in do_by_gene_name_from_refflat_nitty_gritty() from call to setup_refflat() - setting to okay chr:loc");  jdebug(m);
         return -1;
     }
-sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",refflat_d_fn,fp_refflat_d);  jdebug(m); 
+sprintf(m,"in do_by_gene_name_from_refflat_nitty_gritty refflat_d_fn=%s, fp_refflat_d=%p ",refflat_d_fn,fp_refflat_d);  jdebug(m); 
     if (fp_refflat_d == (FILE *)0)
     {                                                 // try and open it 
         fp_refflat_d = fopen(refflat_d_fn,"rb");
@@ -1485,12 +1492,12 @@ sprintf(m,"in do_by_gene_name_from_refflat refflat_d_fn=%s, fp_refflat_d=%p ",re
     }
  
     fseek(fp_refflat_d, 0, SEEK_SET); // rewind 
-sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",refflat_d_fn);  jdebug(m); 
+sprintf(m,"do_by_gene_name_from_refflat_nitty_gritty,  opened [%s], fseeked to start ",refflat_d_fn);  jdebug(m); 
 
     rec_cnt = 0;
     while (1)
     {
-// sprintf(m,"do_by_gene_name_from_refflat here 2");  jdebug(m); 
+// sprintf(m,"do_by_gene_name_from_refflat_nitty_gritty here 2");  jdebug(m); 
         if (fread (&f.geneName,MAX_GENENAME,1,fp_refflat_d) != 1) break;
         if (fread (&f.name,MAX_GENENAME,1,fp_refflat_d) != 1 ) break;
         if (fread (&f.chrom,MAX_GENENAME,1,fp_refflat_d) != 1 ) break;
@@ -1503,10 +1510,10 @@ sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",reffla
         if (fread (&f.exonEnds,4,1,fp_refflat_d) != 1 ) break;
         if (fread (&f.strand,4,1,fp_refflat_d) != 1 ) break;
 
-// sprintf(m,"do_by_gene_name_from_refflat CHECK :  %s %s",f.geneName,gene);  jdebug(m); 
-        if (strcmp(f.geneName,gene) == 0) 
+// sprintf(m,"do_by_gene_name_from_refflat_nitty_gritty CHECK :  %s %s",f.geneName,gene);  jdebug(m); 
+        if ( (strcmp(f.geneName,gene) == 0)  || (strcmp(f.geneName,UPPER) == 0) ) 
         {
-// sprintf(m,"matched in do_by_gene_name_from_refflat() %s %s",f.geneName,gene);  jdebug(m); 
+// sprintf(m,"matched in do_by_gene_name_from_refflat_nitty_gritty() %s %s",f.geneName,gene);  jdebug(m); 
             *start = (int)f.txStart;
             *end = (int)f.txEnd;
             strcpy(chr,f.chrom); 
@@ -1519,7 +1526,7 @@ sprintf(m,"do_by_gene_name_from_refflat,  opened [%s], fseeked to start ",reffla
         }
         rec_cnt++;
     }
-sprintf(m,"do_by_gene_name_from_refflat here 999 , rec_cnt = %d",rec_cnt);  jdebug(m); 
+sprintf(m,"do_by_gene_name_from_refflat_nitty_gritty here 999 , rec_cnt = %d",rec_cnt);  jdebug(m); 
 
 /* 
 ---- NO !!!  keep it open
@@ -1528,33 +1535,11 @@ sprintf(m,"do_by_gene_name_from_refflat here 999 , rec_cnt = %d",rec_cnt);  jdeb
 */
     strcpy(chr,"chr1");
     *start = 1; 
-    *end = 4043;
+    *end = 18915;
 
     return -1;
 }
 
-int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end)
-{
-//    char m[2048];
-    char UPPER[2048];
-    int i;
-    int status = 0;
-
-    status = do_by_gene_name_from_refflat_nitty_gritty(gene,chr,start,end); 
-
-//  sprintf(m,"in do_by_gene_name_from_refflat , after 1s, status = %d , gene=[%s]",status,gene); jdebug(m); 
-
-    if (status == 0) return 0; // got it, good.
-
-//--- try upper case ...
-    strcpy(UPPER,gene);
-    for (i=0;UPPER[i];i++)
-        UPPER[i] = toupper(UPPER[i]); 
-    status = do_by_gene_name_from_refflat_nitty_gritty(UPPER,chr,start,end); 
-
-//  sprintf(m,"in do_by_gene_name_from_refflat , after 2nd, status = %d , UPPER = [%s]",status,UPPER); jdebug(m); 
-    return status;
-}
 
 
 static int cmpfunc_refflat_by_chrstartend(const void *arg1, const void *arg2)
@@ -9407,18 +9392,16 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
 
         sprintf(long_image_filename,"images/tmpalview.%d.%d.png",rand(),getpid());
         gchr[0] = (char)0;
-
         if (strncmp(position,"chr",3) == 0) 
         {
-            parse_position(position,chr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
+            parse_position(position,gchr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
         }
         else
         {
 // sprintf(m,"before  do_by_gene_name_from_refflat");  jdebug(m); 
-            do_by_gene_name_from_refflat(position,chr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
+            do_by_gene_name_from_refflat(position,gchr,&alv_start,&alv_end); // eg.: "position=chrX:37301314-37347604"
 // sprintf(m,"after do_by_gene_name_from_refflat %d %d",alv_start,alv_end);  jdebug(m); 
         }
-        strcpy(gchr,chr); 
 
         if (alv_end <= 0) 
         {
@@ -9437,7 +9420,7 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
         gs = s;
         gdiff = e - s;
 
-        status = get_chr_lo_hi(chr,&s,&e,&ki);  // dont care about ki
+        status = get_chr_lo_hi(gchr,&s,&e,&ki);  // dont care about ki
 
         if ((strcmp(jobstring,"fasta") == 0) || (strcmp(jobstring,"fastq") == 0)) 
         {
@@ -9462,9 +9445,7 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
 
             printf("<pre>"); 
 #endif
-
-            (void)do_fasta(alv_start,alv_end,image_type,short_image_filename,chr,alv_start,alv_end) ;
-
+            (void)do_fasta(alv_start,alv_end,image_type,short_image_filename,gchr,alv_start,alv_end) ;
 #if TEXT
 #else
             printf("</pre>"); 
@@ -9491,7 +9472,7 @@ sprintf(m,"before postion, filez = %p ",(void *)filez); jdebug(m);
             printf("<pre>"); 
 /* BIG WORK HERE ... */
 jdebug("before do_sam"); 
-            (void)do_sam(alv_start,alv_end,image_type,short_image_filename,chr,alv_start,alv_end) ;
+            (void)do_sam(alv_start,alv_end,image_type,short_image_filename,gchr,alv_start,alv_end) ;
             printf("</pre>"); 
             printf("</body>");
             return 0;
@@ -9509,7 +9490,7 @@ jdebug("before do_sam");
             printf("<body style=\"margin:10px;padding:0px;\">\n"); 
 
             printf("<pre>"); 
-(void)do_gotoh(alv_start,alv_end,image_type,short_image_filename,chr,alv_start,alv_end) ;
+(void)do_gotoh(alv_start,alv_end,image_type,short_image_filename,gchr,alv_start,alv_end) ;
             printf("</pre>"); 
             printf("</body>");
             return 0;
@@ -9521,7 +9502,7 @@ jdebug("before do_sam");
 ////////////
 // THE BIG WORK GETS DONE IN imgen()
 ////////////
-            status = imgen(short_image_filename,chr,alv_start,alv_end,image_type) ;
+            status = imgen(short_image_filename,gchr,alv_start,alv_end,image_type) ;
 sprintf(m,"after imgen() in webserver web_server_main status=%d",status); jdebug(m); 
 
             if ((status) || (global_bamerr > 0) )
@@ -9576,15 +9557,15 @@ printf("<script type=\"text/javascript\" src=\"../js/alview.jquery.imgareaselect
     print_some_javascript_for_popups();
 sprintf(m,"after print_some_javascript_for_popups");  jdebug(m); 
 
-    do_form(chr,alv_start,alv_end,s,e);
+    do_form(gchr,alv_start,alv_end,s,e);
 // sprintf(m,"after do_form");  jdebug(m); 
 
-printf("Using Dataset:%d Position : %s %d %d <br>\n",tds_val,chr,alv_start,alv_end);
+printf("Using Dataset:%d Position : %s %d %d <br>\n",tds_val,gchr,alv_start,alv_end);
 
-    strcpy(tmp_chr,chr);
-    if (strcmp(chr,"chr23") == 0) strcpy(tmp_chr,"chrX"); 
-    else if (strcmp(chr,"chr24") == 0) strcpy(tmp_chr,"chrY"); 
-    else if (strcmp(chr,"chr25") == 0) strcpy(tmp_chr,"chrM"); 
+    strcpy(tmp_chr,gchr);
+    if (strcmp(gchr,"chr23") == 0) strcpy(tmp_chr,"chrX"); 
+    else if (strcmp(gchr,"chr24") == 0) strcpy(tmp_chr,"chrY"); 
+    else if (strcmp(gchr,"chr25") == 0) strcpy(tmp_chr,"chrM"); 
 
 printf("<a href=\"../cgi-bin/fetchdna?position=%s:%d-%d\" target=\"_blank\">Get DNA</a> | \n",tmp_chr,alv_start,alv_end);
 printf("Range is %s %d %d (%d base pairs)\n",tmp_chr,alv_start,alv_end,alv_end-alv_start);
@@ -9622,7 +9603,7 @@ sprintf(m,"before do_gotgenes");  jdebug(m);
 sprintf(m,"after  do_gotgenes");  jdebug(m); 
     do_gotgenes_trawler();
 
-    end_javascript(chr,alv_start,alv_end);
+    end_javascript(gchr,alv_start,alv_end);
 sprintf(m,"after  end_javascript");  jdebug(m); 
 
 printf("<hr> \n");

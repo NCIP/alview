@@ -14,6 +14,7 @@ unsigned ImageSaveAsPNG(struct image_type *im, char *fn);
 void ImageFilledRectangle(struct image_type *im,int x, int y, int x1, int y1 ,int color);
 void ImageString(struct image_type *im, int x, int y, unsigned char *s, int color);
 void ImageString5x5(struct image_type *im, int x, int y, unsigned char *s, int color);
+
 int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end);
 
 void set_ucsc_url(char *url); // uses blds chr, start , end to make linkt to ucsc browser 

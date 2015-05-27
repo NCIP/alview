@@ -64,7 +64,7 @@ program for your OS).  Untar-ing (extracting) the genomic support data
 from "AlviewGenomeData.tar" creates genome subdirectories off of the
 newly create directory named "GENOMEDATA" .  Make sure all new files have "read" 
 permissions set correctly.  You may need to use chmod on Linux, Mac or
-Cygwin or icacls.exe on Windows.  Cywgin users will want to check their work carefully.
+Cygwin or icacls.exe on Windows.  Cygwin users will want to check their work carefully.
 
 Set up text configuration file "alview.conf".  This must be correct. The 
 file "alview.conf" is editable using a text editor.  Check it carefully.
@@ -171,7 +171,8 @@ later 64 bit Linux versions. Download, untar , set permissions, edit
 IV. Compilation.
 At the Alview github page, check README.md file for the latest versions with 
 and additional instructions.  Remember, you can just install GUIs on your desktop, 
-and some command line Alviews, but must compile for webserver or some command lines versions.
+and some command line versions of Alview, but must compile for webserver or 
+some command lines versions.
  
 Install 1 samtools, 2) curses and 3)zlib if they are 
 not already there.   Samtools is a non-standard package and must
@@ -221,7 +222,8 @@ file that can produced and dealt with as the user wises.
 You might have to compile for standalone or download a working version. See 
 compilation section if you need to compile.  We provide some command line 
 binaries.  You need to setup the "alview.conf" text configuration file to point 
-to the GEENOMEDATADIR and have downloaded the *large* GENOMEDATA tar and untar it.
+to the GENOMEDATADIR and have downloaded the *large* GENOMEDATA tar and untar it.
+
 
 Here's a quick example on Windows:
         alview_cmd_win.exe c:\rich\BAMS\RW1.BWA-aln.RG.MKDUP.bam temptest.png chr17:7512444-7519536 hg19
@@ -369,7 +371,7 @@ read/write functions in these programs.
 nsftp2mydb.c is a very new program.
 
 These are simple
-"vi gcc run" C progams.  They create raw data, binary search-able flat files for 
+"vi gcc run" C programs.  They create raw data, binary search-able flat files for 
 RefSeq and NSFPdb+dbSNP.
 Input files are from UCSC (reflat and dbsnp)and dbNSFP.
 dbNSFP is at https://sites.google.com/site/jpopgen/dbNSFP.  It is

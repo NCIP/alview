@@ -29,7 +29,6 @@ int parse_position(const char argposition[],char chr[],int *start,int *end);
 void alview_load_config(void);
 void freedom_for_memory(void);
 void alview_init(void);
-// int do_by_gene_name_from_refflat(char gene[],char chr[],int *start,int *end);
 
 int start_select_x = -1;
 int end_select_x = -1;
