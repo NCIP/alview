@@ -8099,7 +8099,7 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
 // fprintf(stderr,"in darea_button_release_event (got button RELEASE\n"); fflush(stderr); 
         gdk_window_get_pointer (event->window, &x, &y, &state);
 // we only really care about y not x
-// fprintf(stderr,"RELEASE at %d %d , state=%d\n",x,y,state); fflush(stderr); 
+// fprintf(stderr,"RELEASE at x=%d y=%d , state=%d , after gdk_window_get_pointer() \n",x,y,state); fflush(stderr); 
         end_select_x = x;
         xoron = 0;
         if (start_select_x > end_select_x)
@@ -8109,11 +8109,11 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
             end_select_x = tmp; 
         }
 
-// fprintf(stderr,"in release , START %d %d , %d,%d w=%d\n",khrstart,khrend,start_select_x,end_select_x,diw); fflush(stderr);  
-        tmp = khrstart;
+// fprintf(stderr,"in RELEASE , START %d %d , %d,%d w=%d\n",khrstart,khrend,start_select_x,end_select_x,diw); fflush(stderr);  
+        tmp = khrstart; // need to remember this.  why? cuz it changes on the next line ....
         khrstart = (int)(khrstart + (double)((start_select_x * ((khrend - khrstart)) / (double)diw)));
-        khrend =   (int)(khrstart + (double)((end_select_x   * ((khrend - tmp)) / (double)diw)));             
-// fprintf(stderr,"in release , END %d %d \n",khrstart,khrend); fflush(stderr);  
+        khrend =   (int)(tmp + (double)((end_select_x   * ((khrend - tmp)) / (double)diw)));             
+// fprintf(stderr,"in RELEASE , END %d %d \n",khrstart,khrend); fflush(stderr);  
 
         if (khrstart < 1) khrstart = 1;
         if (khrend < 2) khrend = 2;
@@ -8123,8 +8123,8 @@ gboolean darea_button_release_event(GtkWidget *widget, GdkEventButton *event, gp
         img = (void *)imgen_mem(filename,khr,khrstart,khrend,dih, diw,&status);
         if (img)
         {
-        if (darea) gtk_widget_queue_draw(darea);
-            // NOOOO - keep the image  around do not free !!!!       free(img);
+            if (darea) gtk_widget_queue_draw(darea);
+                           // NOOOO - keep the image around do not free() !!!!  no---> free(img);
         }
         sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
         gtk_entry_set_text(GTK_ENTRY((GtkWidget *)TextEntryPosition),(gchar *)pos);
