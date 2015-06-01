@@ -22,7 +22,7 @@ unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, 
 void linux_call_url(char *url) 
 {
    char cmd[2048];
-   sprintf(cmd ,"firefox \"%s\"",url);
+   sprintf(cmd ,"firefox \"%s\" &",url);
    system(cmd);
 }
 
