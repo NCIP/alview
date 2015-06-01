@@ -762,7 +762,7 @@ static void setup_snp(char *blds)
     char m[1024];
 
 
-sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,SIZE_SNPTYPE,blds); jdebug(m); 
+// sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,SIZE_SNPTYPE,blds); jdebug(m); 
 // xxxxx
     if (fp_snp) return; // already opened  
   
@@ -771,6 +771,7 @@ sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,S
 #else
     fp_snp = fopen(snp_fn,"r");
 #endif
+
     error = errno;
     if (fp_snp == (FILE *)0) 
     { 
@@ -784,6 +785,7 @@ sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,S
 sprintf(m,"END setup_snp filename=[%s], SIZE_SNPTYPE=%d fpd=%p, snp_fixed_hi=%ld",snp_fn,SIZE_SNPTYPE,fp_snp,snp_fixed_hi); jdebug(m); 
     return;
 }
+
 
 
 static void close_snp(void)
@@ -1062,7 +1064,7 @@ sprintf(m,"in paint_snp_annot(), after binary_search_snp_file() z=%p khrarg=%s l
                 }
             }
         }
-        if (kickout++ > 10000) break;
+        if (kickout++ > 1000000) break;
     }
 
 // sprintf(m,"in paint_snp_annot() , readcnt = %d , kickout=%d ",readcnt,kickout); jdebug(m);

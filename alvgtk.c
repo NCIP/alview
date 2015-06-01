@@ -8055,23 +8055,22 @@ gboolean darea_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpo
 
     if (event->is_hint)
     {
-    gdk_window_get_pointer (event->window, &x, &y, &state);
-    if (state & GDK_BUTTON1_MASK)
-    {
+        gdk_window_get_pointer(event->window,&x,&y,&state);
+        if (state & GDK_BUTTON1_MASK)
+        {
 // button is down
-        end_select_x = x;
-        
 // fprintf(stderr,"HINT & MASK w=%d h=%d x=%d y=%d state=%d\n",diw,dih,x,y,state); fflush(stderr); 
-        clip_rect.height = dih;
-        if (end_select_x > start_select_x) clip_rect.x = start_select_x;
-        else clip_rect.x = end_select_x;
-        clip_rect.y = 0;
-        if ( (start_select_x - end_select_x) < 0 ) clip_rect.width = end_select_x - start_select_x;
-        else                                       clip_rect.width = start_select_x - end_select_x;
-//  fprintf(stderr,"xor %d %d %d %d , gc=%p\n",clip_rect.x,clip_rect.y,clip_rect.width,clip_rect.height,gc); fflush(stderr); 
-        setup_xorea(&clip_rect);
-        if (darea) gtk_widget_queue_draw(darea);
-    }
+            end_select_x = x;
+            clip_rect.height = dih;
+            if (end_select_x > start_select_x) clip_rect.x = start_select_x;
+            else clip_rect.x = end_select_x;
+            clip_rect.y = 0;
+            if ( (start_select_x - end_select_x) < 0 ) clip_rect.width = end_select_x - start_select_x;
+            else                                       clip_rect.width = start_select_x - end_select_x;
+fprintf(stderr,"xxx xor cr.x=%d cr.y=%d cr.w=%d cr.h=%d \n",clip_rect.x,clip_rect.y,clip_rect.width,clip_rect.height); fflush(stderr); 
+            setup_xorea(&clip_rect);
+            if (darea) gtk_widget_queue_draw(darea);
+        }
     }
     else
     {
