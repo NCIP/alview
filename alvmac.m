@@ -11,10 +11,7 @@ void get_params_and_draw(int arg);
 void calc_and_draw_new_img(void);
 void drawclip(void);
 void alview_load_config(void);
-int end_select_x = 0;
-int start_select_x = 0;
 unsigned char *imgen_mem(char fn[], char chr[],int khrstart, int khrend, int h, int w,int *ret_status) ;
-int xoron = 0;
 
 void freedom_for_memory(void);
 void alview_init(void);
@@ -23,17 +20,19 @@ int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *en
 
 // horror  !!!  - can't get it to eat unsigned in this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
 
-
 extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
 extern struct image_type *im;
 extern char GENOMEDATADIR[512];
 
+int end_select_x = 0;
+int start_select_x = 0;
+int xoron = 0;
 unsigned char *img;
 unsigned char *img2;
 int diw;     // "darea" pixbuff width 
 int dih;     // "darea" pixbuff height 
 int darea_on = 0; // flag, means RGB image is loaded in "im"
-int khrstart =0 ;
+int khrstart =0 ; // "khr" = chromosome
 int khrend = 0 ;
 char khr[1024];
 char pos[1024]; // genomic position or gene name
@@ -752,6 +751,110 @@ NSTextField* create_label(char *label,float x, float y, float w, float h)
     return lf;
 }
 
+
+NSColor *getColorFromRGB(unsigned char r, unsigned char g , unsigned char b)
+{
+    CGFloat rFloat = r/255.0;
+    CGFloat gFloat = g/255.0;
+    CGFloat bFloat = b/255.0;
+
+    return [NSColor colorWithCalibratedRed:rFloat green:gFloat blue:bFloat alpha:0.0];
+}
+
+
+NSColor *colorWithHexColorString(NSString* inColorString)
+{
+    NSColor* result = nil;
+    unsigned colorCode = 0;
+    unsigned char redByte, greenByte, blueByte;
+
+    if (nil != inColorString)
+    {
+         NSScanner* scanner = [NSScanner scannerWithString:inColorString];
+         (void) [scanner scanHexInt:&colorCode]; // ignore error
+    }
+    redByte = (unsigned char)(colorCode >> 16);
+    greenByte = (unsigned char)(colorCode >> 8);
+    blueByte = (unsigned char)(colorCode); // masks off high bits
+
+    result = [NSColor
+    colorWithCalibratedRed:(CGFloat)redByte / 0xff
+    green:(CGFloat)greenByte / 0xff
+    blue:(CGFloat)blueByte / 0xff
+    alpha:1.0];
+    return result;
+}
+
+NSColor *getColorFromRGB2(unsigned char r, unsigned char g , unsigned char b)
+{
+   char s[20];
+   sprintf(s,"%02x%02x%02x",r,g,b);
+   NSString* kolor = [NSString stringWithFormat:@"%s" , s];
+
+//fprintf(stderr,"%s\n",s); 
+   return colorWithHexColorString(kolor);
+}
+
+
+NSTextField* create_color_label(char *s,float x, float y, float w, float h,
+     unsigned char r, unsigned char g, unsigned char b)
+{
+    NSString* stringlabel = [NSString stringWithFormat:@"%s" , s];
+    NSTextField  *lf = [[NSTextField  alloc] initWithFrame:CGRectMake(x,y,w,h)];
+
+// printf("create_label %d %d %d %d\n",(int)x,(int)y,(int)w,(int)h); 
+    [lf setStringValue: stringlabel];
+    [lf setBezeled: false];
+    [lf setDrawsBackground:false];
+    [lf setSelectable:false];
+    NSColor *myColor = getColorFromRGB2(r,g,b);
+    [lf setTextColor:myColor];
+
+// [lf setRichText:YES];
+// [lf setString:str];
+//    [lf setTextColor:[NSColor redColor] range:NSMakeRange(3,9)];
+    return lf;
+
+#if 0
+//in place of NSMakeRange put your range
+
+    UITextView *titleView = [[UITextView alloc]initWithFrame:CGRectMake(x, y, w, h)];
+    NSMutableAttributedString *title = [[NSMutableAttributedString alloc]initWithString:mismatch:!"A C G T Ins De"abel];
+    UIFont *font = [UIFont fontWithName:@"Avenir-Light" size:60];
+    [title addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, title.length)];
+//assign text first, then customize properties
+    titleView.attributedText = title;
+    titleView.textAlignment = NSTextAlignmentCenter;
+    titleView.textColor = [UIColor whiteColor];
+   titleView.addAttribute(NSForegroundColorAttributeName, value: UIColor.redColor(), range: NSRange(location:0,length:2))
+
+   attrString = NSMutableAttributedString(string: "", attributes: [NSFontAttributeName:UIFont(name: "Arial", size: 18.0)!]);
+   attrString.addAttribute(NSForegroundColorAttributeName, value: UIColor.redColor(), range: NSRange(location:0,length:2))
+    NSTextField  *lf = [[NSTextField  alloc] initWithFrame:CGRectMake(x,y,w,h)];
+    NSString* stringlabel = [NSString stringWithFormat:@"%s" , label];
+    NSTextField  *lf = [[NSTextField  alloc] initWithFrame:CGRectMake(x,y,w,h)];
+// printf("create_label %d %d %d %d\n",(int)x,(int)y,(int)w,(int)h); 
+    [lf setStringValue: stringlabel];
+    [lf setBezeled: false];
+    [lf setDrawsBackground:false];
+    [lf setSelectable:false];
+#endif
+/*
+notes on color string
+attrString = NSMutableAttributedString(string: "Hello World", attributes: [NSFontAttributeName:UIFont(name: "Arial", size: 18.0)!])
+attrString.addAttribute(NSForegroundColorAttributeName, value: UIColor.redColor(), range: NSRange(location:0,length:2))
+
+NSMutableAttributedString *textacgt = [[NSMutableAttributedString alloc] 
+   initWithAttributedString: label.attributedText];
+[textacgt addAttribute:NSForegroundColorAttributeName 
+             value:[UIColor redColor] 
+             range:NSMakeRange(10, 1)];
+[label setAttributedText: textacgt];
+*/
+}
+
+
+
 @interface MyDelegate: NSObject
 -(void)filestuff:(id)sender;
 @end
@@ -859,11 +962,36 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
         [superview addSubview:butt2];
     }
 
-// label top
+// label top ---
     NSTextField *tfhead = create_label(
-               "Alview - Use Menu to Select BAM File to View - enter genome position (or gene name)",
-               10,(int)(superframe.size.height-45),800,30);
-    [superview addSubview:tfhead];
+               "Alview - Use above File Menu to Select BAM File to View - then enter genome position (or gene name)",
+               10,(int)(superframe.size.height-45),600,30);
+        [superview addSubview:tfhead];
+
+    NSTextField *atfhead1 = create_label(
+               "mismatch:",
+               630,(int)(superframe.size.height-45),100,30);
+        [superview addSubview:atfhead1];
+
+NSTextField *tfheadA = create_color_label("A",700,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_a_R,(unsigned char)Hdna_a_G,(unsigned char)Hdna_a_B);
+        [superview addSubview:tfheadA];
+NSTextField *tfheadC = create_color_label("C",715,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_c_R,(unsigned char)Hdna_c_G,(unsigned char)Hdna_c_B);
+        [superview addSubview:tfheadC];
+
+NSTextField *tfheadG = create_color_label("G",730,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_g_R,(unsigned char)Hdna_g_G,(unsigned char)Hdna_g_B);
+        [superview addSubview:tfheadG];
+NSTextField *tfheadT = create_color_label("T",745,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_t_R,(unsigned char)Hdna_t_G,(unsigned char)Hdna_t_B);
+        [superview addSubview:tfheadT];
+NSTextField *tfheadI = create_color_label("Ins",760,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_I_R,(unsigned char)Hdna_I_G,(unsigned char)Hdna_I_B);
+        [superview addSubview:tfheadI];
+NSTextField *tfheadD = create_color_label("Del",780,(int)(superframe.size.height-45),30,30,
+    (unsigned char)Hdna_D_R,Hdna_D_G,Hdna_D_B);
+        [superview addSubview:tfheadD];
 
     for (i=0;texts[i].id != -1 ; i++)
     {
@@ -892,7 +1020,9 @@ buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i]
     return 0;
 }
 
-// -- explain why this below is here ... ?
+// -- TRICK HERE ... just pull in alvmisc.c alviewcore.cpp  ...
 #include "alvmisc.c"
 #include "alviewcore.cpp"
+// ... thus endeth the trick
+
 
