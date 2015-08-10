@@ -1,26 +1,32 @@
 
+log scale (or "subsampling")
+call IGV
+command line arguments
+hg38 references
+robust sniffing with dontcare genome 
+old macs don't have top left orientation
+support vcf input
+support multifile
+base level zoom prompt
+
 Better documentation for slideshow.
 Discuss Annotation Creation.
 Document zygosity track.
 Back button.
 Filter by tag.
 
-fix linux save png
- o    Help Files
+// ok=done but needs work  n=nailed  no=no
+ ok   Help Files
  o    Add ATCG colors
- o    Discuss IGV
- o    Improve Documentation - add discusssion of HTDOCDIR in server setup
- w    Save as PNG
- wl   Export Image
+ ok   Improve Documentation - add discusssion of HTDOCDIR in server setup
+ ok   Save as PNG
  ok   Base level zoom
  ok   Add ATCG to reference - add little atcg
  ok   Find good place to park when starting new bam.
- done Memory usage Discussion in User's Manual
- nc   Need slideshow - Slidewhow mode
- nc   Make sure only valid BAMS load;
- nc   Multi-image - need now.
- nc   Slots method to lower memory usage
- no   Add linux 32 bit edition
+ no   Need slideshow - Slidewhow mode
+ no   Make sure only valid BAMS load;
+ no   Multi-image - need now.
+ no   Slots method to lower memory usage
+ no   Session scripting.
+ no   Large indel marking.
 
-Session scripting.
-Large indel marking.

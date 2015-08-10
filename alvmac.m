@@ -2,8 +2,13 @@
 #import <Cocoa/Cocoa.h>
 #include "stdio.h"
 
-#define DEFAULT_WIDTH 1000
+    // defaults for images
+#define DEFAULT_WIDTH 900
+#define DEFAULT_IMAGE_WIDTH_STRING "900"
 #define DEFAULT_HEIGHT 400
+#define DEFAULT_IMAGE_LENGTH_STRING "400"
+#define DEFAULT_WINDOW_WIDTH 960 
+#define DEFAULT_WINDOW_HEIGHT 600
 
 #include "alview.h"
 
@@ -18,9 +23,9 @@ void alview_init(void);
 int parse_position(const char argposition[],char chr[],int *start,int *end);
 int do_by_gene_name_from_refflat(const char gene[],char chr[],int *start,int *end);
 
-// horror  !!!  - can't get it to eat unsigned in this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
+// horror !!! - can't get it to eat unsigned in this prototype: lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h)
 
-extern char fn_bam[];    // size=FILENAME_MAX -the bam file name
+extern char fn_bam[];         // size=FILENAME_MAX - the bam file name
 extern struct image_type *im;
 extern char GENOMEDATADIR[512];
 
@@ -31,11 +36,11 @@ unsigned char *img;
 unsigned char *img2;
 int diw;     // "darea" pixbuff width 
 int dih;     // "darea" pixbuff height 
-int darea_on = 0; // flag, means RGB image is loaded in "im"
-int khrstart =0 ; // "khr" = chromosome
+int darea_on = 0;   // flag, means RGB image is loaded in "im"
+int khrstart = 0;   // "khr" = chromosome
 int khrend = 0 ;
 char khr[1024];
-char pos[1024]; // genomic position or gene name
+char pos[1024];     // genomic position or gene name
 
 
 // --- IMAGE view ENTRY
@@ -48,8 +53,6 @@ NSPoint startDragLocation;
 @end
 @implementation MyImageViewClass
 - (void)mouseUp:(NSEvent *)event {
-
-// debug printf("mouse up"); fflush(stdout); 
 
 NSPoint newDragLocation = [event locationInWindow];
 end_select_x = newDragLocation.x;
@@ -71,17 +74,8 @@ calc_and_draw_new_img();
 - (void)mouseDragged:(NSEvent *)event 
 {
 NSPoint newDragLocation = [event locationInWindow];
-// printf("drag location %f %f \n",newDragLocation.x, newDragLocation.y);
    end_select_x = newDragLocation.x;
    drawclip();
-
-#if 0
-NSPoint thisOrigin = [self frame].origin;
-thisOrigin.x += (-lastDragLocation.x + newDragLocation.x);
-thisOrigin.y += (-lastDragLocation.y + newDragLocation.y);
-[self setFrameOrigin:thisOrigin];
-lastDragLocation = newDragLocation;
-#endif
 }
 @end
 
@@ -125,6 +119,17 @@ NSRect superframe;
 }
 @end
 
+@interface myFlippedView : NSView {
+}
+@end 
+
+@implementation myFlippedView
+- (BOOL) isFlipped
+{
+    return YES;
+}
+@end
+
 struct my_text_type
 {
     int id; 
@@ -135,13 +140,14 @@ struct my_text_type
     MyTextClass *object;
 };
 
-struct my_text_type texts[] =
+struct my_text_type texts[] = 
 {     
- { 100  ,  10 , 65 , 70, 20,      70 , 65 , 170, 20 , "Position:" ,    "chr1:11778-15130"} ,
- { 101  , 320 , 65 , 50, 20,     362 , 65 , 50,  20 , "Width:"  ,      "900" } ,
- { 112  , 422 , 65 , 50, 20,     470 , 65 , 50,  20 , "Height:"  ,     "400" } ,
- { -1 ,   -1 , -1,  -1, -1,      -1 , -1 , -1 , -1 , "ERRoverflow"  , "(enter position or gene)"} 
+ { 100  ,  12 , 32 , 70, 20,  70 , 30 , 170, 20 , "Position:" ,   "chr1:11778-15130" } ,
+ { 101  , 320 , 32 , 50, 20, 362 , 30 , 50,  20 , "Width:"  ,     DEFAULT_IMAGE_WIDTH_STRING } ,
+ { 112  , 422 , 32 , 50, 20, 470 , 30 , 50,  20 , "Height:"  ,    DEFAULT_IMAGE_LENGTH_STRING } ,
+ { -1 ,   -1 , -1,  -1, -1,   -1 , -1 , -1 , -1 , "ERRoverflow" , "(enter position or gene)" }
 };
+
 NSImage *rbg2NSImage(unsigned char *data, int width, int height)
 {
     size_t bufferLength = width * height * 3;
@@ -177,8 +183,8 @@ void draw_mac(unsigned char *data, int width, int height,int arg)
 {
    if (!data)
    {
-printf("draw_mac data is null - arg = %d\n",arg); 
-return;
+       printf("error: draw_mac data is null - arg = %d\n",arg); 
+       return;
    }
    [theImageView setImage:image1];
    [image1 release];
@@ -187,7 +193,8 @@ return;
    [theImageView setImage:image1];
 
 // resize ... 
-    NSRect imageRect = NSMakeRect(4, superframe.size.height-150-[image1 size].height,
+    NSRect imageRect = NSMakeRect(4, 130,
+// xxx
          [image1 size].width, [image1 size].height);
    theImageView.frame = imageRect;
 #if 0
@@ -255,7 +262,6 @@ void get_params_and_draw(int arg)
 
     NSString *userinput = [texts[0].object stringValue];
     sptr = (char *)[userinput UTF8String];
-// printf("in get_params_and_draw() - sptr=[%s]\n",sptr); 
     strcpy(pos,sptr);
     NSString *userinput2 = [texts[1].object stringValue];
     sptr = (char *)[userinput2 UTF8String];
@@ -265,26 +271,20 @@ void get_params_and_draw(int arg)
     dih = atoi(sptr);
 
 // printf("in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
-#if 0
-    status = parse_position(pos,khr,&khrstart,&khrend); 
-#endif
      if (strncmp(pos,"chr",3) == 0)
      {
          parse_position(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
      }
      else
      {
-// fprintf(stderr,"in gettextentry() before do_by_gene_name_from_refflat() entry_text is [%s]\n",entry_text); fflush(stderr); 
          do_by_gene_name_from_refflat(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
-// fprintf(stderr,"in gettextentry() after do_by_gene_name_from_refflat(): %s %d %d\n",khr,khrstart,khrend); fflush(stderr); 
      }
-// printf("in get_params_and_draw() after parse_position - pos=[%s]\n",pos); 
-
-// put pos back to screen
+           // put pos back to screen
     NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
     [texts[0].object setStringValue:defval];
     do_img_and_draw(fn_bam, khr,khrstart,khrend,arg);
 }
+
 
 void calc_and_draw_new_img(void)
 {
@@ -313,7 +313,7 @@ void calc_and_draw_new_img(void)
     sprintf(pos,"%s:%d-%d",khr,khrstart,khrend);
     start_select_x = end_select_x = 1; // reset
 
-// get pos width heigh ...
+// get pos width height ...
     NSString *userinput = [texts[0].object stringValue];
     sptr = (char *)[userinput UTF8String];
     strcpy(pos,sptr);
@@ -434,30 +434,31 @@ struct my_button_type
     int id; int x; int y; int w; int h;
     char *label;
 };
+
 struct my_button_type buttons[] =
-{ // use usual x,y at northwest, fix in code
- { 1  ,  250 , 70,  60, 30, "Submit" } ,
- { 2  ,   10 ,110,  60, 30, "base" } ,
- { 3  ,   70 ,110,  60, 30, "<Page" } ,
- { 4  ,  130 ,110,  60, 30, "Page>" } ,
- { 5  ,  190 ,110,  60, 30, "lefthalf" } ,
- { 6  ,  250 ,110,  60, 30, "righthalf" } ,
- { 7  ,  310 ,110,  60, 30, "ZoomIN" } ,
- { 8  ,  370 ,110,  60, 30, "ZoomOut" } ,
- { 9  ,   10 ,140,  60, 30, "<10 " } ,
- { 10 ,   70 ,140,  60, 30, "10>" } ,
- { 11 ,  130 ,140,  60, 30, "<100" } ,
- { 12 ,  190 ,140,  60, 30, "100>" } ,
- { 13 ,  250 ,140,  60, 30, "<1000" } ,
- { 14 ,  310 ,140,  60, 30, "1000>" } ,
- { 15 ,  370 ,140,  60, 30, "<10000" } ,
- { 16 ,  430 ,140,  60, 30, ">10000" } ,
- { 17 ,  490 ,140,  60, 30, "<100000" } ,
- { 18 ,  550 ,140,  60, 30, ">100000" } ,
- { 19 ,  620 ,140,  80, 30, "UCSC Link" } ,
- { 20 ,  700 ,140,  60, 30, "PNG Save" } ,
- { 21 ,  760 ,140,  60, 30, "Blat" } ,
- { 22 ,  820 ,140,  60, 30, "Help" } ,
+{ // use usual x,y at northwest, fix in code if necessary
+ { 1  ,  250 , 27,  60, 30, "Submit" } ,
+ { 2  ,   10 , 60,  60, 30, "base" } ,
+ { 3  ,   70 , 60,  60, 30, "<Page" } ,
+ { 4  ,  130 , 60,  60, 30, "Page>" } ,
+ { 5  ,  190 , 60,  60, 30, "lefthalf" } ,
+ { 6  ,  250 , 60,  60, 30, "righthalf" } ,
+ { 7  ,  310 , 60,  60, 30, "ZoomIN" } ,
+ { 8  ,  370 , 60,  60, 30, "ZoomOut" } ,
+ { 9  ,   10 , 93,  60, 30, "<10 " } ,
+ { 10 ,   70 , 93,  60, 30, "10>" } ,
+ { 11 ,  130 , 93,  60, 30, "<100" } ,
+ { 12 ,  190 , 93,  60, 30, "100>" } ,
+ { 13 ,  250 , 93,  60, 30, "<1000" } ,
+ { 14 ,  310 , 93,  60, 30, "1000>" } ,
+ { 15 ,  370 , 93,  60, 30, "<10000" } ,
+ { 16 ,  430 , 93,  60, 30, ">10000" } ,
+ { 17 ,  490 , 93,  60, 30, "<100000" } ,
+ { 18 ,  550 , 93,  60, 30, ">100000" } ,
+ { 19 ,  620 , 93,  80, 30, "UCSC Link" } ,
+ { 20 ,  700 , 93,  60, 30, "PNG Save" } ,
+ { 21 ,  760 , 93,  60, 30, "Blat" } ,
+ { 22 ,  820 , 93,  60, 30, "Help" } ,
  { -1 ,   -1 , -1,  -1, -1, "ERRoverflow" } 
 };
 
@@ -663,23 +664,13 @@ int myid;
        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
     }
     else if (self->myid == 22)  // help
-    { // xxx 
+    {
        NSString *str;
        char url[2048];
        set_alviewhelp_url(url);
        str = [NSString stringWithCString:url encoding:NSASCIIStringEncoding];
        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:str]];
     }
-
-#if 0
- Position: Width: Height:    Splice Only On:   BaseColor:   Uniq:   Quality:
-  7571199-7572901 , mismatch A  C  G  T  Ins  Del  mainmenu ins=0 del=0 tot=71 blds=hg19
-Using Dataset:0 Position : chr17 7571199 7572901
-Get DNA | Range is chr17 7571199 7572901 (1702 base pairs)
-CGWB Link | UCSC Link | bambino | sam | sam1 | sam2 | fasta | FQ | align | blat | P | N | Pl | Nl | For ALVIEW Main Page, click here. 
-NCBI: TP53 | all |
-// printf("mac: end mousedown pos=[%s] dih = %d, diw = %d khr=[%s] s=%d e=%d\n",pos,dih,diw,khr,khrstart,khrend);
-#endif
     [super mouseDown:theEvent];
 }
 @end
@@ -891,14 +882,16 @@ NSAlert *alert = [[[NSAlert alloc] init] autorelease];
 }
 
 
-int main ()
+int main()
 {
     int i;
-    [NSAutoreleasePool new];      // supports Cocoa's reference-counted memory management system.
-    [NSApplication sharedApplication]; // manages an app's main event loop and resources use by all objects
-          // You can use the global variabele NSApp to retieve the NSApplication instance
+
+    [NSAutoreleasePool new];    // supports Cocoa's reference-counted memory management system.
+    [NSApplication sharedApplication];    // manages an app's main event loop and resources use by all objects
+          // You can use the global variable NSApp to retieve the NSApplication instance
 
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]; 
+
     alview_load_config();
     check_genomedatadir();
 
@@ -907,7 +900,7 @@ int main ()
     [menubar addItem:appMenuItem];
     [NSApp setMainMenu:menubar];
     id appMenu = [[NSMenu new] autorelease];
-    id appName = @"Alview Mac"; //id appName = [[NSProcessInfo processInfo] processName];
+    id appName = @"Alview Mac";   //id appName = [[NSProcessInfo processInfo] processName];
 
 // file menu item
     id fileTitle = [@"File " stringByAppendingString:appName];
@@ -924,83 +917,100 @@ int main ()
 
     [appMenuItem setSubmenu:appMenu];
 
-    id window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1000, 600)
+    id window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
         styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask 
         backing:NSBackingStoreBuffered defer:NO] autorelease];
-    [window cascadeTopLeftFromPoint:NSMakePoint(20,20)]; // rpf - careful dont want cascade  -right?
+    [window cascadeTopLeftFromPoint:NSMakePoint(20,20)]; // what does this do?
     [window setTitle:@"Alview for Mac"];
-    [window makeKeyAndOrderFront:nil]; // makes it the "key" window
+    [window makeKeyAndOrderFront:nil];      // makes it the "key" window
 
-    NSView* superview=[[NSView alloc] initWithFrame:NSMakeRect(0,0,1000,800)];
+//------
+    myFlippedView* superview=[[myFlippedView alloc] initWithFrame:NSMakeRect(0,0,DEFAULT_WINDOW_WIDTH,DEFAULT_WINDOW_HEIGHT)];
     NSScrollView *scrollView = [[NSScrollView alloc] initWithFrame:[[window contentView] frame]];
     [scrollView setHasHorizontalScroller:YES];
     [scrollView setHasVerticalScroller:YES];
-    [scrollView setBorderType:NSNoBorder];
+
+
+#if 0
+debug
+[scrollView  setBackgroundColor:[NSColor blueColor]];
+    // [scrollView setWantsLayer: YES];
     [scrollView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+    scrollView.translatesAutoresizingMaskIntoConstraints=YES;
+fprintf(stderr,"set color blue\n");  fflush(stderr); 
+    [scrollView.layer setBackgroundColor:[NSColor blueColor].CGColor];
+    [scrollView backGroundColor:NSLineBorder];
+    [scrollView backGroundColor:NSNoBorder];
+#endif
+
     [scrollView setDocumentView:superview];
+
     superframe = [ superview frame];
-    NSRect subframe = [ superview frame]; // just to copy it !!!t
+    NSRect subframe = [superview frame];    // just to copy dimensions
     image1  = [NSImage imageNamed:@"logo.png"];
-    NSRect imageRect = NSMakeRect(0.0,500.0,[image1 size].width, [image1 size].height);
+    NSRect imageRect = NSMakeRect(0.0,[image1 size].height,[image1 size].width, [image1 size].height);
     theImageView = [[MyImageViewClass alloc] initWithFrame:imageRect];
-[theImageView setTarget:theImageView];
+    [theImageView setTarget:theImageView];
     [theImageView setEnabled:true];
     [theImageView setBounds:imageRect];
     [theImageView setImage:image1];
     subframe.origin.x = 4;
-    subframe.origin.y = superframe.size.height - 320;
+    subframe.origin.y = 128;
+
+// xxx
     subframe.size.height = [image1 size].height;
     subframe.size.width =  [image1 size].width;
     [theImageView  setFrame:subframe];
     [superview addSubview:theImageView];
+//    [scrollView addSubview:theImageView];
 
     NSRect subframe2 = [ superview frame];
     for (i=0 ; buttons[i].id != -1 ; i++)
     {
         MyButtonClass *butt2 = create_mybutton(
-buttons[i].label, buttons[i].id,buttons[i].x,superframe.size.height - buttons[i].y,buttons[i].w,buttons[i].h);
+buttons[i].label, buttons[i].id,buttons[i].x,buttons[i].y,buttons[i].w,buttons[i].h);
         [superview addSubview:butt2];
     }
 
 // label top ---
     NSTextField *tfhead = create_label(
                "Alview - Use above File Menu to Select BAM File to View - then enter genome position (or gene name)",
-               10,(int)(superframe.size.height-45),600,30);
+               10,5,600,30);
         [superview addSubview:tfhead];
 
     NSTextField *atfhead1 = create_label(
                "mismatch:",
-               630,(int)(superframe.size.height-45),100,30);
+               630,5,100,30);
         [superview addSubview:atfhead1];
 
-NSTextField *tfheadA = create_color_label("A",700,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadA = create_color_label("A",700,5,30,30,
     (unsigned char)Hdna_a_R,(unsigned char)Hdna_a_G,(unsigned char)Hdna_a_B);
         [superview addSubview:tfheadA];
-NSTextField *tfheadC = create_color_label("C",715,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadC = create_color_label("C",715,5,30,30,
     (unsigned char)Hdna_c_R,(unsigned char)Hdna_c_G,(unsigned char)Hdna_c_B);
         [superview addSubview:tfheadC];
 
-NSTextField *tfheadG = create_color_label("G",730,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadG = create_color_label("G",730,5,30,30,
     (unsigned char)Hdna_g_R,(unsigned char)Hdna_g_G,(unsigned char)Hdna_g_B);
         [superview addSubview:tfheadG];
-NSTextField *tfheadT = create_color_label("T",745,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadT = create_color_label("T",745,5,30,30,
     (unsigned char)Hdna_t_R,(unsigned char)Hdna_t_G,(unsigned char)Hdna_t_B);
         [superview addSubview:tfheadT];
-NSTextField *tfheadI = create_color_label("Ins",760,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadI = create_color_label("Ins",760,5,30,30,
     (unsigned char)Hdna_I_R,(unsigned char)Hdna_I_G,(unsigned char)Hdna_I_B);
         [superview addSubview:tfheadI];
-NSTextField *tfheadD = create_color_label("Del",780,(int)(superframe.size.height-45),30,30,
+NSTextField *tfheadD = create_color_label("Del",780,5,30,30,
     (unsigned char)Hdna_D_R,Hdna_D_G,Hdna_D_B);
         [superview addSubview:tfheadD];
+// ... --- end label top 
 
-    for (i=0;texts[i].id != -1 ; i++)
+    for (i=0 ; texts[i].id != -1 ; i++)
     {
-        NSTextField *tf = create_label(texts[i].label,
-                     texts[i].x,superframe.size.height - texts[i].y,texts[i].w,texts[i].h);
+        NSTextField *tf = create_label(texts[i].label, texts[i].x, texts[i].y,texts[i].w,texts[i].h);
         [superview addSubview:tf];
         MyTextClass *txt1 = create_mytextview(
                      texts[i].id,texts[i].x2,
-                     superframe.size.height - texts[i].y2,
+                     texts[i].y2,
                      texts[i].w2,texts[i].h2,
                      texts[i].default_value);
         texts[i].object = txt1;
@@ -1011,12 +1021,20 @@ NSTextField *tfheadD = create_color_label("Del",780,(int)(superframe.size.height
     [scrollView release];
     [window makeKeyAndOrderFront:nil];
 
-// *** force scroll to top left (this is because of the flipped coordinate system and nsscroll brain freeze)
+#if 0
+// *** force scroll to top left (this is because of the flipped coordinate system)
     NSPoint pt = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height);
     [[scrollView documentView] scrollPoint:pt];
+#endif
+
+// xxx 
+NSPoint pointToScrollTo = NSMakePoint (0,0);  // Any point you like.
+[[scrollView contentView] scrollToPoint: pointToScrollTo];
+[scrollView reflectScrolledClipView: [scrollView contentView]];
 
     [NSApp activateIgnoringOtherApps:YES];
     [NSApp run];
+
     return 0;
 }
 

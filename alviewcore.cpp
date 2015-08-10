@@ -9171,7 +9171,7 @@ int web_server_main(int argc,char *argv[])
      status =  gethostname(hostname,500);
      if (strcmp("lpgws511.nci.nih.gov",hostname))
      {
-// checking for what machine thisis running on . "lpgws511" is a test server, so I can disable any secuirty   
+// checking for what machine this is running on. "lpgws511" is a test server, so I can disable any secuirty   
 // I hack this to see private BAM files  ***** you can do your own hacks on your server
      }
 
@@ -9181,7 +9181,7 @@ int web_server_main(int argc,char *argv[])
 
      tcga[0] = (char)0;
      spliceonly_s[0] = (char)0;
-//     altonly_s[0] = (char)0;
+//     altonly_s[0] = (char)0; old stuff used for non refseq splicing
 
     mmspot_s[0] = exp_s[0] = nso_s[0] = tds_s[0] = (char)0;
 sprintf(m," ");  jdebug(m); 
@@ -9746,10 +9746,10 @@ int command_line_main(int argc,char *argv[])
 
 
     hostname[0] = (char)0;
-    if (argc < 3) 
+    if (argc < 3)
     { 
-        fprintf(stderr,"ERROR: usage inbam outpng position build [imageheight] [ imagewidth ]\n"); 
-        fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build \n"); 
+        fprintf(stderr,"ERROR: usage: inbam outpng position build [imageheight] [imagewidth]\n"); 
+        fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build\n"); 
         exit(0); 
     }
     if (argc == 4) 
