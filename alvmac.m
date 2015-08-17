@@ -2,12 +2,18 @@
 #import <Cocoa/Cocoa.h>
 #include "stdio.h"
 
-    // defaults for images
+
+// height of fixe dashboard
+#define DASHHEIGHT 130
+
+    // defaults for sizes of images
 #define DEFAULT_WIDTH 900
 #define DEFAULT_IMAGE_WIDTH_STRING "900"
 #define DEFAULT_HEIGHT 400
-#define DEFAULT_IMAGE_LENGTH_STRING "400"
+#define DEFAULT_IMAGE_HEIGHT_STRING "400"
+
 #define DEFAULT_WINDOW_WIDTH 960 
+   // warning, height include the (top)dashboard plus the image height 
 #define DEFAULT_WINDOW_HEIGHT 600
 
 #include "alview.h"
@@ -130,6 +136,8 @@ NSRect superframe;
 }
 @end
 
+myFlippedView* global_superview;
+
 struct my_text_type
 {
     int id; 
@@ -144,7 +152,7 @@ struct my_text_type texts[] =
 {     
  { 100  ,  12 , 32 , 70, 20,  70 , 30 , 170, 20 , "Position:" ,   "chr1:11778-15130" } ,
  { 101  , 320 , 32 , 50, 20, 362 , 30 , 50,  20 , "Width:"  ,     DEFAULT_IMAGE_WIDTH_STRING } ,
- { 112  , 422 , 32 , 50, 20, 470 , 30 , 50,  20 , "Height:"  ,    DEFAULT_IMAGE_LENGTH_STRING } ,
+ { 112  , 422 , 32 , 50, 20, 470 , 30 , 50,  20 , "Height:"  ,    DEFAULT_IMAGE_HEIGHT_STRING } ,
  { -1 ,   -1 , -1,  -1, -1,   -1 , -1 , -1 , -1 , "ERRoverflow" , "(enter position or gene)" }
 };
 
@@ -169,8 +177,10 @@ NSImage *rbg2NSImage(unsigned char *data, int width, int height)
                                 NULL,       // decode
                                 YES,        // should interpolate
                                 renderingIntent);
+
     return [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(width, height)];
 }
+
 
 void sanity_khr()
 {
@@ -179,8 +189,12 @@ void sanity_khr()
     if (khrend <= khrstart) khrend = khrstart + 2;
 }
 
+
 void draw_mac(unsigned char *data, int width, int height,int arg)
 {
+   int neww = DEFAULT_WINDOW_WIDTH;
+   int newh = DEFAULT_WINDOW_HEIGHT;
+
    if (!data)
    {
        printf("error: draw_mac data is null - arg = %d\n",arg); 
@@ -193,25 +207,20 @@ void draw_mac(unsigned char *data, int width, int height,int arg)
    [theImageView setImage:image1];
 
 // resize ... 
-    NSRect imageRect = NSMakeRect(4, 130,
-// xxx
-         [image1 size].width, [image1 size].height);
-   theImageView.frame = imageRect;
-#if 0
-printf("xframe %d %d %d %d \n", 
-   (int) theImageView.frame.origin.x , (int) theImageView.frame.origin.y , 
-   (int) theImageView.frame.size.width , (int) theImageView.frame.size.height);  fflush(stdout); 
-printf("zframe %d %d %d %d \n", 
-   (int) theImageView.frame.origin.x ,   (int) theImageView.frame.origin.y , 
-   (int) theImageView.frame.size.width , (int) theImageView.frame.size.height);  fflush(stdout); 
+    NSRect imageRect = NSMakeRect(4, DASHHEIGHT, [image1 size].width, [image1 size].height);
 
-   NSRect imageRect = NSMakeRect(width,height,[image1 size].width, [image1 size].height);
-   theImageView.frame = NSMakeRect(4, superframe.size.height - 320, 
-            theImageView.image.size.width, theImageView.image.size.height);
-#endif
-// ??? Adjust the size of your scroll views view accordingly.
+    theImageView.frame = imageRect;
+// ??? Adjust the size of your scroll views view accordingly. this is not happening?!? 
+// xxx 
+   if (width > DEFAULT_WINDOW_WIDTH) neww = width;
+   if (height + DASHHEIGHT> DEFAULT_WINDOW_HEIGHT) newh = height+ DASHHEIGHT;
+// I'm framous !!!
+// printf("rpf frame = %d %d %f %f new2=%d newh=%d\n",4,DASHHEIGHT,[image1 size].width,[image1 size].height,neww,newh);
+   [global_superview setFrameSize:NSMakeSize(neww , newh)];
+    
    [theImageView setNeedsDisplay:true] ;
 }
+
 
 void do_img_and_draw(char *fn, char khr[], int s, int e, int arg)
 {
@@ -231,24 +240,19 @@ void do_img_and_draw(char *fn, char khr[], int s, int e, int arg)
          khrend = 15849;
     }
     if (img) { free(img); }
-#if 0
-printf("mac: in do_img_and_draw() before imgen_mem %s %d %d %d %d\n",khr,khrstart,khrend,dih,diw);  fflush(stdout); 
-#endif
     img = (void *)imgen_mem(fn_bam,khr,khrstart,khrend,dih, diw,&status);
-#if 0
-printf("mac: in do_img_and_draw after imgen_mem() img =%p, status=%d \n",img,status); fflush(stdout); 
-#endif
     if (img)
     {
         darea_on = 1;
         draw_mac(img,diw,dih,1);
 #if 0
+ debug stuff
 printf("lode after imgen_mem() img=%p\n",img); fflush(stdout); 
 unsigned lodepng_encode24_file(const char* filename, const unsigned char* image, unsigned w, unsigned h);
         lodepng_encode24_file("tmp.png", img, diw, dih);
-printf("after lodepng_encode24_file\n"); fflush(stdout); 
 printf("after lodepng w=%d h=%d\n",diw,dih); fflush(stdout); 
 #endif
+
         return;
     }
 printf("ERROR: imgdata is null , no lodepng\n"); fflush(stdout); 
@@ -271,16 +275,17 @@ void get_params_and_draw(int arg)
     dih = atoi(sptr);
 
 // printf("in get_params_and_draw() before parse_position - pos=[%s]\n",pos); 
-     if (strncmp(pos,"chr",3) == 0)
-     {
+    if (strncmp(pos,"chr",3) == 0)
+    {
          parse_position(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
-     }
-     else
-     {
+    }
+    else
+    {
          do_by_gene_name_from_refflat(pos,khr,&khrstart,&khrend); // eg.: "position=chrX:37301314-37347604"
-     }
+    }
+
            // put pos back to screen
-    NSString* defval = [NSString stringWithFormat:@"%s"  ,pos];
+    NSString* defval = [NSString stringWithFormat:@"%s",pos];
     [texts[0].object setStringValue:defval];
     do_img_and_draw(fn_bam, khr,khrstart,khrend,arg);
 }
@@ -917,36 +922,38 @@ int main()
 
     [appMenuItem setSubmenu:appMenu];
 
-    id window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
-        styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask 
+    id window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 
+        DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
+        styleMask:NSTitledWindowMask | NSClosableWindowMask | 
+        NSMiniaturizableWindowMask | NSResizableWindowMask 
         backing:NSBackingStoreBuffered defer:NO] autorelease];
     [window cascadeTopLeftFromPoint:NSMakePoint(20,20)]; // what does this do?
     [window setTitle:@"Alview for Mac"];
     [window makeKeyAndOrderFront:nil];      // makes it the "key" window
 
 //------
-    myFlippedView* superview=[[myFlippedView alloc] initWithFrame:NSMakeRect(0,0,DEFAULT_WINDOW_WIDTH,DEFAULT_WINDOW_HEIGHT)];
+    global_superview=[[myFlippedView alloc] initWithFrame:NSMakeRect(0,0,DEFAULT_WINDOW_WIDTH,
+             DEFAULT_WINDOW_HEIGHT)];
+
     NSScrollView *scrollView = [[NSScrollView alloc] initWithFrame:[[window contentView] frame]];
     [scrollView setHasHorizontalScroller:YES];
     [scrollView setHasVerticalScroller:YES];
 
-
 #if 0
-debug
-[scrollView  setBackgroundColor:[NSColor blueColor]];
-    // [scrollView setWantsLayer: YES];
     [scrollView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     scrollView.translatesAutoresizingMaskIntoConstraints=YES;
+[scrollView  setBackgroundColor:[NSColor blueColor]];
+    // [scrollView setWantsLayer: YES];
 fprintf(stderr,"set color blue\n");  fflush(stderr); 
     [scrollView.layer setBackgroundColor:[NSColor blueColor].CGColor];
     [scrollView backGroundColor:NSLineBorder];
     [scrollView backGroundColor:NSNoBorder];
 #endif
 
-    [scrollView setDocumentView:superview];
+    [scrollView setDocumentView:global_superview];
 
-    superframe = [ superview frame];
-    NSRect subframe = [superview frame];    // just to copy dimensions
+    superframe = [global_superview frame];
+    NSRect subframe = [global_superview frame];    // just to copy dimensions
     image1  = [NSImage imageNamed:@"logo.png"];
     NSRect imageRect = NSMakeRect(0.0,[image1 size].height,[image1 size].width, [image1 size].height);
     theImageView = [[MyImageViewClass alloc] initWithFrame:imageRect];
@@ -961,76 +968,69 @@ fprintf(stderr,"set color blue\n");  fflush(stderr);
     subframe.size.height = [image1 size].height;
     subframe.size.width =  [image1 size].width;
     [theImageView  setFrame:subframe];
-    [superview addSubview:theImageView];
-//    [scrollView addSubview:theImageView];
+    [global_superview addSubview:theImageView];
 
-    NSRect subframe2 = [ superview frame];
+    NSRect subframe2 = [ global_superview frame];
     for (i=0 ; buttons[i].id != -1 ; i++)
     {
         MyButtonClass *butt2 = create_mybutton(
 buttons[i].label, buttons[i].id,buttons[i].x,buttons[i].y,buttons[i].w,buttons[i].h);
-        [superview addSubview:butt2];
+        [global_superview addSubview:butt2];
     }
 
 // label top ---
     NSTextField *tfhead = create_label(
                "Alview - Use above File Menu to Select BAM File to View - then enter genome position (or gene name)",
                10,5,600,30);
-        [superview addSubview:tfhead];
+        [global_superview addSubview:tfhead];
 
     NSTextField *atfhead1 = create_label(
                "mismatch:",
                630,5,100,30);
-        [superview addSubview:atfhead1];
+        [global_superview addSubview:atfhead1];
 
 NSTextField *tfheadA = create_color_label("A",700,5,30,30,
     (unsigned char)Hdna_a_R,(unsigned char)Hdna_a_G,(unsigned char)Hdna_a_B);
-        [superview addSubview:tfheadA];
+        [global_superview addSubview:tfheadA];
 NSTextField *tfheadC = create_color_label("C",715,5,30,30,
     (unsigned char)Hdna_c_R,(unsigned char)Hdna_c_G,(unsigned char)Hdna_c_B);
-        [superview addSubview:tfheadC];
+        [global_superview addSubview:tfheadC];
 
 NSTextField *tfheadG = create_color_label("G",730,5,30,30,
     (unsigned char)Hdna_g_R,(unsigned char)Hdna_g_G,(unsigned char)Hdna_g_B);
-        [superview addSubview:tfheadG];
+        [global_superview addSubview:tfheadG];
 NSTextField *tfheadT = create_color_label("T",745,5,30,30,
     (unsigned char)Hdna_t_R,(unsigned char)Hdna_t_G,(unsigned char)Hdna_t_B);
-        [superview addSubview:tfheadT];
+        [global_superview addSubview:tfheadT];
 NSTextField *tfheadI = create_color_label("Ins",760,5,30,30,
     (unsigned char)Hdna_I_R,(unsigned char)Hdna_I_G,(unsigned char)Hdna_I_B);
-        [superview addSubview:tfheadI];
+        [global_superview addSubview:tfheadI];
 NSTextField *tfheadD = create_color_label("Del",780,5,30,30,
     (unsigned char)Hdna_D_R,Hdna_D_G,Hdna_D_B);
-        [superview addSubview:tfheadD];
+        [global_superview addSubview:tfheadD];
 // ... --- end label top 
 
     for (i=0 ; texts[i].id != -1 ; i++)
     {
         NSTextField *tf = create_label(texts[i].label, texts[i].x, texts[i].y,texts[i].w,texts[i].h);
-        [superview addSubview:tf];
+        [global_superview addSubview:tf];
         MyTextClass *txt1 = create_mytextview(
                      texts[i].id,texts[i].x2,
                      texts[i].y2,
                      texts[i].w2,texts[i].h2,
                      texts[i].default_value);
         texts[i].object = txt1;
-        [superview addSubview:txt1];
+        [global_superview addSubview:txt1];
     }
     [theImageView release];
     [window setContentView:scrollView];
     [scrollView release];
     [window makeKeyAndOrderFront:nil];
 
-#if 0
-// *** force scroll to top left (this is because of the flipped coordinate system)
-    NSPoint pt = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height);
-    [[scrollView documentView] scrollPoint:pt];
-#endif
-
-// xxx 
-NSPoint pointToScrollTo = NSMakePoint (0,0);  // Any point you like.
-[[scrollView contentView] scrollToPoint: pointToScrollTo];
-[scrollView reflectScrolledClipView: [scrollView contentView]];
+// thing is "flipped:" to origin, force scroll to it
+    NSPoint pointToScrollTo = NSMakePoint (0,0);
+    [[scrollView contentView] scrollToPoint: pointToScrollTo];
+    [scrollView reflectScrolledClipView: [scrollView contentView]];
 
     [NSApp activateIgnoringOtherApps:YES];
     [NSApp run];
