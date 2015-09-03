@@ -8067,7 +8067,9 @@ gboolean darea_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpo
             clip_rect.y = 0;
             if ( (start_select_x - end_select_x) < 0 ) clip_rect.width = end_select_x - start_select_x;
             else                                       clip_rect.width = start_select_x - end_select_x;
-// fprintf(stderr,"xxx xor cr.x=%d cr.y=%d cr.w=%d cr.h=%d \n",clip_rect.x,clip_rect.y,clip_rect.width,clip_rect.height); fflush(stderr); 
+
+// fprintf(stderr,"xor cr.x=%d cr.y=%d cr.w=%d cr.h=%d \n",clip_rect.x,clip_rect.y,clip_rect.width,clip_rect.height); fflush(stderr); 
+
             setup_xorea(&clip_rect);
             if (darea) gtk_widget_queue_draw(darea);
         }
@@ -8740,7 +8742,6 @@ markup = g_markup_printf_escaped (format, str);
 gtk_label_set_markup (GTK_LABEL (label), markup);
 g_free (markup);
 #endif
-// xxx 
 char *markup;
     gtk_set_atcg_info_label(atcgID_label); // formats html style, we wrote this function
 //     char *atcg_str = &atcgID_label[0];

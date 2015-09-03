@@ -762,7 +762,6 @@ static void setup_snp(char *blds)
     char m[1024];
 
 
-// sprintf(m,"in setup_snp filename=[%s], SIZE_SNPTYPE = %d , blds = [%s]",snp_fn,SIZE_SNPTYPE,blds); jdebug(m); 
 // xxxxx
     if (fp_snp) return; // already opened  
   
@@ -9643,7 +9642,7 @@ int fast_snp_call( char fnbam[], char chr[],int khrstart, int khrend)
     char m[2048];
 
 
-// debug fprintf(stderr,"in fast_snp_call  0 khrstart=%d khrend=%d chr=[%s] - bam=[%s]\n",khrstart,khrend,chr,fnbam);  fflush(stderr);  
+// debug fprintf(stderr,"xrpf in fast_snp_call start khrstart=%d khrend=%d chr=[%s] - bam=[%s]\n",khrstart,khrend,chr,fnbam);  fflush(stderr);  
 
     strcpy(chrchr,chr);
     fix_num_to_chrstyle(chr,chrchr); 
@@ -9729,7 +9728,7 @@ printf("Del: %d ", snp_call_Del_cnt );
 printf("cov: %d ", cov ); 
 printf("max: %d ", mx ); 
 printf("readcount: %d ", globalreadscount); 
-printf("percmac: %10.7f ", d ); 
+printf("percmaj: %10.7f ", d ); 
 printf("ref: %c ", snp_call_referece ); 
 printf("\n");
     return 0;
@@ -9752,14 +9751,20 @@ int command_line_main(int argc,char *argv[])
         fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build\n"); 
         exit(0); 
     }
-    if (argc == 4) 
+    if (strcmp(argv[1],"CALL") == 0)
     {
-        alview_load_config();
-        strcpy(fn_bam,argv[1]);
-        strcpy(position,argv[2]);
-        strcpy(blds,argv[3]);
-        setup_and_do_fast_snp_caller(fn_bam);
-        return 0;
+        if (argc == 5) 
+        {
+            alview_load_config();
+            strcpy(fn_bam,argv[2]);  // argv1 is "CALL"
+            strcpy(position,argv[3]);
+            strcpy(blds,argv[4]);
+            setup_and_do_fast_snp_caller(fn_bam);
+            return 0;
+        }
+        fprintf(stderr,"ERROR: usage: inbam outpng position build [imageheight] [imagewidth]\n"); 
+        fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build\n"); 
+        exit(0); 
     }
 
     strcpy(fn_bam,argv[1]);
@@ -9772,11 +9777,6 @@ int command_line_main(int argc,char *argv[])
     if (argc >= 7) iw = atoi(argv[6]); 
 
 
-#if 0 // don't use GD graphcis anymore
-// defaults 
-    strcpy(FULL_PATH_TO_TTF,"/usr/X11R6/lib/X11/fonts/TTF/luximb.ttf");
-#endif
-
     tds_val = 0;
     alview_load_config();
 
@@ -9787,14 +9787,11 @@ int command_line_main(int argc,char *argv[])
     }
     status = parse_position(position,gchr,&s,&e);
 
-fprintf(stderr,"command_line_main() chr=[%s] start=%d end=%d position=[%s] \n",gchr,s,e,position); 
-
     status = imgen(outimg,gchr,s,e,0);
     if ((status) || (global_bamerr > 0) )
     {
-        fprintf(stderr,"Error- command_line_main() probably can not generate image. imgen failed %s, status=%d , global_bamerr=%d",outimg,status,global_bamerr);
-        fprintf(stderr,"ERROR after imgen (), possible reasons: bad genomic address. try chrX:5-999 for example OR source bam does not exist.<br>\n");
-        fprintf(stderr,"status code = %d , global_bamerr code = %d \n",status,global_bamerr);
+        fprintf(stderr,"Error- command_line_main() probably can not generate image. imgen failed %s, status=%d , global_bamerr=%d\n",outimg,status,global_bamerr);
+        fprintf(stderr,"ERROR after imgen (), possible reasons: bad genomic address. try chrX:5-999 for example OR source bam does not exist.\n");
         return 0;
     }
 sprintf(m,"command_line_main done CMD_LINE alview");  jdebug(m); 
