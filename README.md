@@ -1,5 +1,5 @@
 
-August 17, 2015  
+2 September 2015  
 
 <p>The Alview WEB DEMO is here : <a href="https://cgwb.nci.nih.gov/cgi-bin/alview">https://cgwb.nci.nih.gov/cgi-bin/alview</a></p>
 <p>Installers for Mac/Windows/Linux are here : <a href="http://45.56.125.191/">http://45.56.125.191/</a></p>
@@ -13,7 +13,7 @@ Then check permissions and you can run Alview.  Set all files to readable and se
 
 Alview is a very fast bam file viewer.  GUI versions now support GTK for Linux, Win32 for Windows and Cocoa for Mac.  It's designed and implemented for speed and there are zero licensing hassles, no restrictions and no registration.   Alview also runs as a web server or as a command line tool to generate short read alignment images. This can of course be scripted in a batch file.  Power users will find this very useful for reviewing thousands of snp calls.
  
-Alview  binaries rely on reasonably standard runtime libraries.  System updates are seldom necessary.
+Alview  binaries rely on reasonably standard runtime libraries.  System updates are seldom necessary.  Some Linux user's may need to recompile, but this is very easy to do.
 
 If you wish to compile, please follow instructions in the ALVIEW_USERS_MANUAL.txt file. 
 Aside from samtools, compilation and linking uses very common libraries (zlib and OS run time libraries and gtk2 if on Linux) .
