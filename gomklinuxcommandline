@@ -1,18 +1,19 @@
 #!/bin/bash
 
-# compile for command line on Linux using samtools 1.2 ...
-SAMTOOLSHOME=/data/nextgen/finneyr/samtools-1.2/
+# compile for command line on Linux using samtools 1.3 ...
+# edit this next line for you samtools home directory 
+SAMTOOLSHOME=/home/rfinney/samtools-1.3/
              # my box SAMTOOLSHOME=/h1/finneyr/samtools-1.2/
 
 cp alvmisc.c alvmisc.cpp # just to compile it as c++
 gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp alviewcore.cpp  -I. \
     -I${SAMTOOLSHOME} \
-    -I${SAMTOOLSHOME}/htslib-1.2.1/ \
-    -I${SAMTOOLSHOME}/htslib-1.2.1/htslib/ \
+    -I${SAMTOOLSHOME}/htslib-1.3/ \
+    -I${SAMTOOLSHOME}/htslib-1.3/htslib/ \
     -L${SAMTOOLSHOME} \
     ${SAMTOOLSHOME}/libbam.a \
-    ${SAMTOOLSHOME}/htslib-1.2.1/libhts.a \
-    -lbam -lm -lz -lgd -lpthread -lstdc++
+    ${SAMTOOLSHOME}/htslib-1.3/libhts.a \
+    -lbam -lm -lz -lpthread -lstdc++
 
 #Compile for command line using older samtools  
 ##set samtools to proper directory for you system.

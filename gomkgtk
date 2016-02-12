@@ -1,15 +1,32 @@
 #/bin/bash
 
 # Requirements: Download and install GTK2 development tools, samtools and zlib
+# You may need to run this on linux: sudo apt-get install zlib1g-dev libncurses5-dev gtk2-devel 
 
 # download and make samtools, point to the place you put by editing the next line ...
-SAMTOOLS_PLACE=/data/nextgen/finneyr/samtools-0.1.18/ 
+SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.19/ 
+#SAMTOOLS_PLACE=/data/nextgen/rfinney/samtools-0.1.18/ 
 #SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.18/ 
+#SAMTOOLS_PLACE=/home/rfinney/samtools-1.3/
+#HTS_PLACE=/home/rfinney/samtools-1.3/htslib/htslib
+#define SAMTOOLS1=0
 
-gcc -DUNIX=1 -DGTK=1 -O2 -Wall -x c -o alvgtk -I${SAMTOOLS_PLACE}  alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` -L/usr/lib -L${SAMTOOLS_PLACE} -lbam -lm -lz 
+gcc -DUNIX=1 -DGTK=1 -O2 -Wall -x c -o alvgtk -I${SAMTOOLS_PLACE} -I${HTS_PLACE} alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` -L/usr/lib -L${SAMTOOLS_PLACE} -lbam -lm -lz 
+
+### using newer samtools version 1.3 ...
+### ouch!  libhts can't get linked staticly 
+##gcc -DUNIX=1 -DGTK=1 -DSAMTOOLS1=1 -O2 -Wall -x c -o alvgtk  \
+##    -I/home/rfinney/samtools-1.3/ \
+##    -I/home/rfinney/samtools-1.3/htslib-1.3/ \
+##    -I/home/rfinney/samtools-1.3/htslib-1.3/htslib/ \
+##    -L/home/rfinney/samtools-1.3/ \
+##    alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` \
+##    -L/usr/lib -L${SAMTOOLS_PLACE} -L${SAMTOOLS_PLACE}/htslib/  \
+##    -L/home/rfinney/samtools-1.3//htslib-1.3/ \
+##    -L/usr/lib/x86_64-linux-gnu/ \
+##    -lhts -lbam -lm -lz -lpthread -lstdc++
 
 #debug ...
 #gcc -DUNIX=1 -DGTK=1 -g -x c -o alvgtk -I${SAMTOOLS_PLACE}  alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` -L/usr/lib -L${SAMTOOLS_PLACE} -lbam -lm -lz 
-
 
 #end file

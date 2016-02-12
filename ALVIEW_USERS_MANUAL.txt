@@ -1,7 +1,7 @@
 
 Alview User's Manual
 -Richard Finney  NCI/NIH
-Latest revision May 25, 2015 
+Latest revision Feb 11, 2016 
 
 Contents.
 I.    Introduction.
@@ -18,7 +18,7 @@ X.    FAQs - Frequently Asked Questions.
 I. Introduction.
 Alview is a fast computer program for viewing BAM files.  Various
 versions are available at my webserver at http://45.56.125.191/ .
-Alview sourc is available via the NCI/NIH github at 
+Alview source is available via the NCI/NIH github at 
 https://github.com/NCIP/alview .
 
 This is relatively new, I'd appreciate feedback. Contact me at my email 
@@ -84,7 +84,7 @@ GTK2 runtime is often already installed but you need to GTK2 development librari
 gcc (c compiler)is often already installed on most Linux systems.  samtools only requires
 download and "make".  Know where you installed this.
 
-# set samtools to proper directory for you system.
+# set samtools to proper directory for your system.
     cp alvmisc.c alvmisc.cpp
     gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alviewmisc.cpp alviewcore.cpp  -I. \
     -I/h1/finneyr/samtools-1.0/ \
@@ -95,7 +95,7 @@ download and "make".  Know where you installed this.
     /h1/finneyr/samtools-1.0//htslib-1.0/libhts.a \
     -lbam -lm -lz -lgd -lpthread -lstdc++
 
-Compile for command line Using older samtools  - compile for command line on Linux ...
+Compile for command line using older samtools  - compile for command line on Linux ...
 
 #set samtools to proper directory for you system.
 #****** note, can't mix c and cpp effortlessly  ** ouch *** so just copy file.c to file.cpp
@@ -214,7 +214,7 @@ V.  Operation as Command Line Utility.
 This can be used in scripts for batch processing files.   It's pretty simple to 
 operate.  Note that this an ideal utility for power users who wish to create 
 there own batch files or integrate into existing viewing tools.   PERL, Python, 
-shell, Powershell users and users with ohter programming and scripting skills can use 
+shell, Powershell users and users with other programming and scripting skills can use 
 their favorite tools to call alview command line executable to customize their 
 examination of bam files.  The output of alview command line is a PNG image 
 file that can produced and dealt with as the user wises.
@@ -337,8 +337,7 @@ You can the specified button to call the UCSC browser focused on your
 region of interest.
 
 You ~can~ view a whole chromosome.  This may take some time.
-Users will find zooming from anywhere to 8X zoomin to zoomng out to 
-view several consecutive genes is best.
+Users will find zooming out too far is not very informative.
 
 
 VIII. alview.conf file
@@ -366,7 +365,7 @@ To modify, edit
     UTILS/nsfp2mydb.c
 and re-compile.   Instructions are at very top of file.  
 Please note, the output is *not* necessarily the C/C++ struct record size.
-Record definition is speciied by the field byte sizes which are in the 
+Record definition is specified by the field byte sizes which are in the 
 read/write functions in these programs.
 nsftp2mydb.c is a very new program.
 
@@ -393,7 +392,7 @@ reference vs. nonreference count calls.
 So  memory usage is basic_amount + (Height * width) * 3 * 3 + region_size + (region_size  * 2 * 2);
 where
 
-basic_amount is fairly neglible basic runtime footprint (11MB on Windows)
+basic_amount is fairly negligible basic runtime footprint (11MB on Windows)
 Height is height of image
 Width is height of image
 3 (first 3) is for RGB and 
@@ -405,3 +404,5 @@ region_size is the number of bases (nucleotides) the user selected to view
 
 #01234567890123456789012345678901234567890123456789012345678901234567890123456789
 
+zoomin
+zoomng
