@@ -2,26 +2,27 @@
 
 # compile for command line on Linux using samtools 1.3 ...
 # edit this next line for you samtools home directory 
-SAMTOOLSHOME=/home/rfinney/samtools-1.3/
-             # my box SAMTOOLSHOME=/h1/finneyr/samtools-1.2/
+#SAMTOOLSHOME=/home/rfinney/samtools-1.3/
+#SAMTOOLSHOME=/h1/finneyr/samtools-1.2/
 
-cp alvmisc.c alvmisc.cpp # just to compile it as c++
-gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp alviewcore.cpp  -I. \
-    -I${SAMTOOLSHOME} \
-    -I${SAMTOOLSHOME}/htslib-1.3/ \
-    -I${SAMTOOLSHOME}/htslib-1.3/htslib/ \
-    -L${SAMTOOLSHOME} \
-    ${SAMTOOLSHOME}/libbam.a \
-    ${SAMTOOLSHOME}/htslib-1.3/libhts.a \
-    -lbam -lm -lz -lpthread -lstdc++
+# new samtools 
+#cp alvmisc.c alvmisc.cpp # just to compile it as c++
+#gcc -Wall -DSAMTOOLS1=1 -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp alviewcore.cpp  -I. \
+#    -I${SAMTOOLSHOME} \
+#    -I${SAMTOOLSHOME}/htslib-1.3/ \
+#    -I${SAMTOOLSHOME}/htslib-1.3/htslib/ \
+#    -L${SAMTOOLSHOME} \
+#    ${SAMTOOLSHOME}/libbam.a \
+#    ${SAMTOOLSHOME}/htslib-1.3/libhts.a \
+#    -lbam -lm -lz -lpthread -lstdc++
 
 #Compile for command line using older samtools  
 ##set samtools to proper directory for you system.
 ##****** note, can't mix c and cpp effortlessly  ** ouch *** so just copy file.c to file.cpp
 #
-#    cp alvmisc.c alvmisc.cpp
-#    gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp \
-#    alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ \
-#    -L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz  -lstdc++
+cp alvmisc.c alvmisc.cpp
+gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp \
+alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ \
+-L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz  -lstdc++
 
 

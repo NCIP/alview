@@ -41,7 +41,7 @@ gcc -Wall -DUNIX=1 -DCMD_LINE=1  -o alview_cmdline_cygwin alvmisc.cpp alviewcore
 Example command line run (cygwin) :
 G/alview_cmdline_cygwin.exe  c:/rich/BAMS/RW1.BWA-aln.RG.MKDUP.bam x.png chr17:7512444-7519536 hg19
 
-Compile command line for Windows cl.exe compiler (visual C), note usage of hacked samtools library  
+Compile command line for *Windows* cl.exe compiler (visual C), *note* usage of hacked samtools library  
 cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alviewcore.cpp 
 cl -Ox /MD -c -DWIN32=1 -DCMD_LINE=1 -I sam01832/ -I zlib32/ -I . alvmisc.cpp
 link /MACHINE:x86  /OUT:alview_cmd_win.exe Alvmisc.obj alviewcore.obj sam01832/my.lib zlib32/zlib.lib
@@ -3617,9 +3617,6 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
             else               xcolor = grays[9];
             }
 #endif
-#if 0 // USE_GD
-                    gdImageFilledRectangle(im,x,y2,xx,y1,xcolor);
-#endif
                     ImageFilledRectangle(im,x,y2,xx,y1,xcolor);
 // debug fprintf(stderr,"in aldetails pxw=%f offset=%d, before ImagFillRectangle %d %d %d %d",pxwidth,offset, x,y2,xx,y1); fflush(stderr);
 
@@ -3641,16 +3638,10 @@ The character '!' represents the lowest quality while '~' is the highest. Here a
         if (fwdflag == 0)
         {
             x1 = (int)(pxwidth * (double)offset); 
-#if 0 // USE_GD
-            gdImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,yellow);
-#endif
             ImageFilledRectangle(im,x1  ,y2+1,x1+1,y1-1,yellow);
 
         }
         else
-#if 0 // USE_GD
-            gdImageFilledRectangle(im,x2-2,y2+1,x2,  y1-1,yellow);
-#endif
             ImageFilledRectangle(im,x2-2,y2+1,x2,  y1-1,yellow);
 
     }
@@ -3678,13 +3669,7 @@ void snp_call_aldetails(int diff, int offset, int len,
 //    int xcolor; // not used ??
 
 
-// debug fprintf(stderr,"in snp_call_aldetails(), snp_call_flag = %d %s offset=%d %p\n", snp_call_flag,chr,offset,dnaspace); 
-// fflush(stderr); 
-
     if (!dnaspace) return;
-#if 0
-    if (offset < 0) return;
-#endif
 
     if (spliceonly_flag == 1)
     {
@@ -3705,10 +3690,8 @@ void snp_call_aldetails(int diff, int offset, int len,
     setup_cigar_stuff(cigar);
     x1 = x2 = y1 = y2 = 0;
 
-
-// fprintf(stderr,"in snp_call_aldetails pxw=%f offset=%d",pxwidth,offset); fflush(stderr); 
-
 #ifdef QT_GUI
+// yuck
  if ((++time_out_every_once_a_while % 50000) == 0)
  {
  // might need to cal this QCoreApplication::processEvents()QCoreApplication::processEvents()
@@ -7463,15 +7446,11 @@ sprintf(m,"in find_build 2" );  jdebug(m);
    memset(&space,0,sizeof(space));
    inf = &space;
 
- // SAMTOOLS1 is for samtools version 1.2 and 1.3  (and beyond?), if zero it is for samtools 0.18 and 0.19 
 #if SAMTOOLS1
 #else
 // "type" field is not there in samtools 1.0 which is new as of September 2014
 #define TYPE_BAM 1
    inf->type |= TYPE_BAM;
-//   get this error message alviewcore.cpp:7470:7: error: ‘samfile_t {aka struct <anonymous>}’ has no member named ‘type’
-//   type field removed in later inf->type |= TYPE_BAM;
-
 // 
 #endif
    inf->x.bam = bam_open(fn_bam_arg, "r");
@@ -9738,6 +9717,13 @@ printf("\n");
     return 0;
 }
 
+void command_line_usage(void)
+{
+    fprintf(stderr,"ERROR: usage: ./prog inbam outpng position build [imageheight] [imagewidth]\n"); 
+    fprintf(stderr," ... or qualityimage usage : ./prog QUAL inbam outpng position build [imageheight] [imagewidth]\n"); 
+    fprintf(stderr," ... or (very experimental) \"snpcaller\" usage : ./prog CALL inbam position build\n"); 
+}
+
 
 int command_line_main(int argc,char *argv[])
 {
@@ -9746,21 +9732,37 @@ int command_line_main(int argc,char *argv[])
     char outimg[MAXBUFF];
     char m[MAXBUFF];
     char hostname[512];
+    int doqualityimage_flag= 0;
 
 
     hostname[0] = (char)0;
     if (argc < 3)
     { 
-        fprintf(stderr,"ERROR: usage: inbam outpng position build [imageheight] [imagewidth]\n"); 
-        fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build\n"); 
+        command_line_usage();
         exit(0); 
     }
-    if (strcmp(argv[1],"CALL") == 0)
+    if (strcmp(argv[1],"QUAL") == 0)
     {
+        if (argc  > 8) {command_line_usage(); exit(0); }
+        doqualityimage_flag= 1;
+        strcpy(fn_bam,argv[2]);
+        strcpy(outimg,argv[3]);
+        strcpy(position,argv[4]);
+        strcpy(blds,argv[5]);
+        ih = 450; //default 
+        iw = 1000; //deafult 
+        if (argc >= 6) ih = atoi(argv[6]); 
+        if (argc >= 7) iw = atoi(argv[7]); 
+        qual_flag = 1; // *** globalism 
+               // do the qual (not mismath) image 
+    } 
+    else if (strcmp(argv[1],"CALL") == 0)
+    {
+        if (argc  > 8) {command_line_usage(); exit(0); }
         if (argc == 5) 
         {
             alview_load_config();
-            strcpy(fn_bam,argv[2]);  // argv1 is "CALL"
+            strcpy(fn_bam,argv[2]);          // argv1 is "CALL"
             strcpy(position,argv[3]);
             strcpy(blds,argv[4]);
             setup_and_do_fast_snp_caller(fn_bam);
@@ -9770,15 +9772,19 @@ int command_line_main(int argc,char *argv[])
         fprintf(stderr,"or usage2 (experimental \"snp caller\"):  CALL inbam position build\n"); 
         exit(0); 
     }
-
-    strcpy(fn_bam,argv[1]);
-    strcpy(outimg,argv[2]);
-    strcpy(position,argv[3]);
-    strcpy(blds,argv[4]);
-    ih = 450; //default 
-    iw = 1000; //deafult 
-    if (argc >= 6) ih = atoi(argv[5]); 
-    if (argc >= 7) iw = atoi(argv[6]); 
+    else
+    {
+// default thing to do ..
+   // just generate snp/mismatch image
+        strcpy(fn_bam,argv[1]);
+        strcpy(outimg,argv[2]);
+        strcpy(position,argv[3]);
+        strcpy(blds,argv[4]);
+        ih = 450; //default 
+        iw = 1000; //deafult 
+        if (argc >= 6) ih = atoi(argv[5]); 
+        if (argc >= 7) iw = atoi(argv[6]); 
+    }
 
 
     tds_val = 0;
@@ -9802,6 +9808,7 @@ sprintf(m,"command_line_main done CMD_LINE alview");  jdebug(m);
     return 0;
 }
 #endif
+
 
 #if WX_GUI
 // For compilers that support precompilation, includes "wx/wx.h".
