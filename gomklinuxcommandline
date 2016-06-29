@@ -20,8 +20,9 @@
 ##set samtools to proper directory for you system.
 ##****** note, can't mix c and cpp effortlessly  ** ouch *** so just copy file.c to file.cpp
 #
+
 cp alvmisc.c alvmisc.cpp
-gcc -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp \
+gcc -O3 -Wall -DUNIX=1 -DCMD_LINE=1 -o alview_cmdline_linux alvmisc.cpp \
 alviewcore.cpp -I. -I/data/nextgen/finneyr/samtools-0.1.18/ \
 -L/data/nextgen/finneyr/samtools-0.1.18/  -lbam -lm -lz  -lstdc++
 

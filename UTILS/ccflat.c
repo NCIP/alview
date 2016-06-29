@@ -2,14 +2,14 @@
 
 /*
 vi ccflat.c ; gcc -Wall   -o ccflat ccflat.c 
-cl -Wall   -o ccflat ccflat.c 
+cl -Wall -o ccflat ccflat.c 
 
-windows ..
+windows example usage ...
 ./ccflat refFlat.april.2014.hg19.txt hg19.refflat
 ./ccflat refFlat.april.2014.hg18.txt hg18.refflat
 
-linux
-... fill this in
+linux example ...
+./ccflat refFlat.june.2016.hg38.txt hg38.refflat
 
 */
 
@@ -978,9 +978,11 @@ void usage(int argc)
 
 int main(int argc, char *argv[])
 {
+    fprintf(stderr,"Hello. this program compiles refflat file from UCSC. it takes 2 args: refflatinput output_tag, this program makes 2 output files: a binary file and and index.\n"); 
     fprintf(stderr,"example : ./ccflat ../refFlat hg19.refflat\n"); 
-    fprintf(stderr,"recsize = %d \n",sizeof(struct flattype)); 
+    fprintf(stderr,"record size (recsize) = %ld \n",sizeof(struct flattype)); 
     compile_refflat(argv[1], argv[2]); 
+    fprintf(stderr,"done. check for 2 output files.\n"); 
     return 0;
 }
 

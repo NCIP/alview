@@ -3,12 +3,12 @@
 # Requirements: Download and install GTK2 development tools, samtools and zlib
 # You may need to run this on linux: sudo apt-get install zlib1g-dev libncurses5-dev gtk2-devel 
 
-# download and make samtools, point to the place you put by editing the next line ...
-SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.19/ 
-#SAMTOOLS_PLACE=/data/nextgen/rfinney/samtools-0.1.18/ 
+# download and make samtools, point to the place you put it by editing the next line ...
+SAMTOOLS_PLACE=/data/nextgen/finneyr/samtools-0.1.18/ 
+#SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.19/ 
 #SAMTOOLS_PLACE=/home/rfinney/samtools-0.1.18/ 
 #SAMTOOLS_PLACE=/home/rfinney/samtools-1.3/
-#HTS_PLACE=/home/rfinney/samtools-1.3/htslib/htslib
+HTS_PLACE=/home/rfinney/samtools-1.3/htslib/htslib
 #define SAMTOOLS1=0
 
 gcc -DUNIX=1 -DGTK=1 -O2 -Wall -x c -o alvgtk -I${SAMTOOLS_PLACE} -I${HTS_PLACE} alvgtk.c alvmisc.c alviewcore.cpp `pkg-config --cflags --libs gtk+-2.0` -L/usr/lib -L${SAMTOOLS_PLACE} -lbam -lm -lz 

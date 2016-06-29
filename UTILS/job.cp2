@@ -1,4 +1,17 @@
-cp hg18.refflat.dao /home/rfinney/GENOMEDATA/hg18/hg18.refflat.dao
-cp hg19.refflat.dao /home/rfinney/GENOMEDATA/hg19/hg19.refflat.dao
-cp hg18.refflat.dat /home/rfinney/GENOMEDATA/hg18/hg18.refflat.dat
-cp hg19.refflat.dat /home/rfinney/GENOMEDATA/hg19/hg19.refflat.dat
+
+#DEST=/data/finneyr/SALVGTK/GENOMEDATA/
+DEST=/data/CCBR/apps/ALVIEW/GENOMEDATA/
+
+cp hg18.refflat.dao ${DEST}/hg18/hg18.refflat.dao
+cp hg18.refflat.dat ${DEST}/hg18/hg18.refflat.dat
+cp hg19.refflat.dat ${DEST}/hg19/hg19.refflat.dat
+cp hg19.refflat.dao ${DEST}/hg19/hg19.refflat.dao
+cp hg38.refflat.dat ${DEST}/hg38/hg38.refflat.dat
+cp hg38.refflat.dao ${DEST}/hg38/hg38.refflat.dao
+
+md5sum hg18.refflat.dao ${DEST}/hg18/hg18.refflat.dao
+md5sum hg18.refflat.dat ${DEST}/hg18/hg18.refflat.dat
+md5sum hg19.refflat.dat ${DEST}/hg19/hg19.refflat.dat
+md5sum hg19.refflat.dao ${DEST}/hg19/hg19.refflat.dao
+md5sum hg38.refflat.dat ${DEST}/hg38/hg38.refflat.dat
+md5sum hg38.refflat.dao ${DEST}/hg38/hg38.refflat.dao
