@@ -1,5 +1,5 @@
 
+# you need to setup samtools and point to the directory with SAMD variable on next line
 export SAMD=/Users/finneyr/samtools-0.1.18/
-# you need to setup samtools and point to the directory with SAMD variable
 
 clang -framework Cocoa -mmacosx-version-min=10.5 -x objective-c -DMAC=1 -DUNIX=1 -UGTK -DNATIVE=1 -I${SAMD} -o alvmac alvmac.m  -L${SAMD} -lbam -lm -lz 
